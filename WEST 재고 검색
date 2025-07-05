@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>WEST 재고 확인</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .search-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    input[type="text"] {
+      padding: 8px;
+      font-size: 16px;
+      width: 300px;
+      margin-right: 10px;
+    }
+    button {
+      padding: 8px 16px;
+      font-size: 16px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+      white-space: nowrap;
+    }
+    .loading {
+      text-align: center;
+      font-style: italic;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h1>MOSAIC WEST 재고 확인</h1>
+
+  <div class="search-container">
+    <input type="text" id="searchInput" placeholder="아티스트명 또는 타이틀 검색" />
+    <button onclick="filterData()">검색</button>
+  </div>
+
+  <div id="results" class="loading">데이터 불러오는 중...</div>
+
+  <script>
+    const SHEET_URL = "https://script.google.com/macros/s/AKfycbxlZuzYrg1A76VGHn1h6SeFmGcJpXhOAid15mDoW7mKphngixFSTYwwW5zfZIyNYDmdRg/exec";
+
+    const displayOrder = [
+      "Ref",
+      "Artist",
+      "Title",
+      "Pressing",
+      "Genre",
+      "Style",
+      "Subcategory",
+      "Comment",
+      "Condition Jacket",
+      "Condition Media",
+      "Condition Comment",
+      "Selling at",
+      "적립금",
+      "Staff Pick",
+      "QR code"
+    ];
+
+    const headerDisplayNames = {
+      "Ref": "상품번호<br>Ref",
+      "Artist": "아티스트<br>Artist",
+      "Title": "타이틀<br>Title",
+      "Pressing": "프레싱<br>Pressing",
+      "Genre": "장르<br>Genre",
+      "Style": "스타일<br>Style",
+      "Subcategory": " 매장 진열 위치<br>Filed Under",
+      "Comment": "코멘트<br>Comment",
+      "Condition Jacket": "자켓<br>Jacket",
+      "Condition Media": "미디어<br>Media",
+      "Condition Comment": "상태<br>Condition",
+      "Selling at": "가격<br>Price",
+      "적립금": "적립금<br>Points",
+      "Staff Pick": "추천<br>Staff Pick",
+      "QR code": "Youtube"
+    };
+
+    let allData = []; // 전체 데이터를 저장
+
+    fetch(SHEET_URL)
+      .then(res => res.json())
+      .then(data => {
+        allData = data;
+        renderTable(allData); // 전체 데이터 초기 출력
+      })
+      .catch(err => {
+        document.getElementById("results").innerHTML = `<p class='loading'>에러 발생: ${err.message}</p>`;
+      });
+
+    function renderTable(data) {
+      if (!data || data.length === 0) {
+        document.getElementById("results").innerHTML = "<p class='loading'>표시할 데이터가 없습니다.</p>";
+        return;
+      }
+
+      let html = "<table><thead><tr>";
+      displayOrder.forEach(header => {
+        const displayName = headerDisplayNames[header] || header;
+        html += `<th>${displayName}</th>`;
+      });
+      html += "</tr></thead><tbody>";
+
+      data.forEach(row => {
+        html += "<tr>";
+        displayOrder.forEach(header => {
+          let cell = row[header] ?? "";
+
+          if (header === "QR code" && cell) {
+            cell = `<a href="${cell}" target="_blank" rel="noopener noreferrer">링크</a>`;
+          }
+
+          html += `<td>${cell}</td>`;
+        });
+        html += "</tr>";
+      });
+
+      html += "</tbody></table>";
+      document.getElementById("results").innerHTML = html;
+    }
+
+    function filterData() {
+      const keyword = document.getElementById("searchInput").value.trim().toLowerCase();
+      if (!keyword) {
+        renderTable(allData); // 검색어 없으면 전체 출력
+        return;
+      }
+
+      const filtered = allData.filter(item => {
+        // 문자열 아닌 값도 문자열로 변환 후 소문자 변환
+        const artistText = (item["Artist"] !== undefined && item["Artist"] !== null) ? item["Artist"].toString().toLowerCase() : "";
+        const titleText = (item["Title"] !== undefined && item["Title"] !== null) ? item["Title"].toString().toLowerCase() : "";
+
+        return artistText.includes(keyword) || titleText.includes(keyword);
+      });
+
+      renderTable(filtered);
+    }
+  </script>
+</body>
+</html>
