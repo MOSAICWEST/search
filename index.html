@@ -2,176 +2,91 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>MOSAIC WEST 재고 확인</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WEST 재고 확인</title>
   <style>
-    /* Reset */
     * {
       box-sizing: border-box;
     }
+
     body {
-      background: #121212;
-      color: #e0e0e0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      max-width: 1200px;
-      margin: 40px auto;
-      padding: 0 20px;
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #fafafa;
     }
+
     h1 {
       text-align: center;
-      margin-bottom: 30px;
-      font-weight: 700;
-      font-size: 2.5rem;
-      color: #f0a500;
-      text-shadow: 0 0 10px #f0a500aa;
+      margin: 30px 0 20px;
+      font-size: 28px;
     }
 
     .search-container {
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
     }
-    input[type="text"] {
-      padding: 12px 16px;
-      font-size: 1rem;
+
+    .search-container input {
+      padding: 10px;
+      font-size: 16px;
+      margin: 5px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
       width: 320px;
-      max-width: 90vw;
-      border: none;
-      border-radius: 30px 0 0 30px;
-      outline: none;
-      transition: background-color 0.3s ease;
-      background-color: #222;
-      color: #eee;
-      box-shadow: inset 0 0 6px #000;
+      max-width: 90%;
     }
-    input[type="text"]::placeholder {
-      color: #888;
-    }
-    input[type="text"]:focus {
+
+    .search-container button {
+      padding: 10px 18px;
+      font-size: 16px;
       background-color: #333;
-      box-shadow: inset 0 0 10px #f0a500;
       color: #fff;
-    }
-    button {
-      padding: 12px 24px;
-      font-size: 1rem;
       border: none;
-      background-color: #f0a500;
-      color: #121212;
-      font-weight: 700;
-      border-radius: 0 30px 30px 0;
+      border-radius: 6px;
       cursor: pointer;
-      box-shadow: 0 5px 15px #f0a500aa;
-      transition: background-color 0.3s ease, transform 0.15s ease;
     }
-    button:hover,
-    button:focus {
-      background-color: #ffbf47;
-      transform: translateY(-2px);
-      outline: none;
+
+    .search-container button:hover {
+      background-color: #555;
     }
 
     #results {
-      margin-top: 20px;
-      min-height: 150px;
-    }
-    .loading {
-      font-style: italic;
-      color: #999;
-      text-align: center;
+      padding: 10px 20px;
     }
 
     table {
       width: 100%;
-      border-collapse: separate;
-      border-spacing: 0 8px;
-      font-size: 0.9rem;
-      box-shadow: 0 4px 12px #0009;
-      border-radius: 8px;
-      overflow: hidden;
-      background: #1e1e1e;
-    }
-    thead tr {
-      background: #292929;
-      color: #f0a500;
-      font-weight: 600;
-      border-bottom: 2px solid #f0a500;
-    }
-    th, td {
-      padding: 12px 15px;
-      text-align: left;
-      vertical-align: middle;
-      color: #ddd;
-      white-space: nowrap;
-    }
-    tbody tr {
-      background: #222;
-      transition: background-color 0.3s ease;
-      cursor: default;
-    }
-    tbody tr:hover {
-      background-color: #333;
-    }
-    tbody td {
-      white-space: normal;
-      word-break: break-word;
-    }
-    tbody td a {
-      color: #f0a500;
-      text-decoration: none;
-      font-weight: 600;
-    }
-    tbody td a:hover,
-    tbody td a:focus {
-      text-decoration: underline;
+      border-collapse: collapse;
+      font-size: 14px;
+      background-color: #fff;
     }
 
-    /* Responsive */
-    @media (max-width: 900px) {
-      th, td {
-        padding: 8px 10px;
-        font-size: 0.85rem;
-      }
-      input[type="text"] {
-        width: 70vw;
-      }
-      button {
-        padding: 10px 16px;
-        font-size: 0.9rem;
-      }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+      vertical-align: top;
     }
-    @media (max-width: 600px) {
-      table {
-        font-size: 0.8rem;
-      }
-      thead tr {
-        display: none; /* 숨기고 모바일용 카드형 UI도 가능하지만 일단 심플하게 */
-      }
-      tbody tr {
-        display: block;
-        margin-bottom: 16px;
-        background: #222;
-        border-radius: 8px;
-        padding: 10px 15px;
-      }
-      tbody td {
-        display: flex;
-        justify-content: space-between;
-        padding: 6px 0;
-        white-space: normal;
-      }
-      tbody td::before {
-        content: attr(data-label);
-        font-weight: 700;
-        color: #f0a500;
-        flex-basis: 45%;
-        text-align: left;
-      }
-      tbody td a {
-        word-break: break-all;
-      }
+
+    th {
+      background-color: #f7f7f7;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    tbody tr:nth-child(odd) {
+      background-color: #fcfcfc;
+    }
+
+    tbody tr:hover {
+      background-color: #eef6ff;
+    }
+
+    .loading {
+      text-align: center;
+      font-style: italic;
+      color: #666;
     }
   </style>
 </head>
@@ -179,7 +94,7 @@
   <h1>MOSAIC WEST 재고 확인</h1>
 
   <div class="search-container">
-    <input type="text" id="searchInput" placeholder="아티스트명 또는 타이틀 검색" aria-label="검색어 입력" />
+    <input type="text" id="searchInput" placeholder="아티스트명 또는 타이틀 검색" />
     <button onclick="filterData()">검색</button>
   </div>
 
@@ -189,21 +104,9 @@
     const SHEET_URL = "https://script.google.com/macros/s/AKfycbxlZuzYrg1A76VGHn1h6SeFmGcJpXhOAid15mDoW7mKphngixFSTYwwW5zfZIyNYDmdRg/exec";
 
     const displayOrder = [
-      "Ref",
-      "Artist",
-      "Title",
-      "Pressing",
-      "Genre",
-      "Style",
-      "Subcategory",
-      "Comment",
-      "Condition Jacket",
-      "Condition Media",
-      "Condition Comment",
-      "Selling at",
-      "적립금",
-      "Staff Pick",
-      "QR code"
+      "Ref", "Artist", "Title", "Pressing", "Genre", "Style", "Subcategory",
+      "Condition Jacket", "Condition Media", "Condition Comment",
+      "Selling at", "QR code"
     ];
 
     const headerDisplayNames = {
@@ -213,14 +116,11 @@
       "Pressing": "프레싱<br>Pressing",
       "Genre": "장르<br>Genre",
       "Style": "스타일<br>Style",
-      "Subcategory": " 매장 진열 위치<br>Filed Under",
-      "Comment": "코멘트<br>Comment",
+      "Subcategory": "매장 진열 위치<br>Filed Under",
       "Condition Jacket": "자켓<br>Jacket",
       "Condition Media": "미디어<br>Media",
       "Condition Comment": "상태<br>Condition",
       "Selling at": "가격<br>Price",
-      "적립금": "적립금<br>Points",
-      "Staff Pick": "추천<br>Staff Pick",
       "QR code": "Youtube"
     };
 
@@ -230,7 +130,7 @@
       .then(res => res.json())
       .then(data => {
         allData = data;
-        renderTable(allData);
+        renderTable(data);
       })
       .catch(err => {
         document.getElementById("results").innerHTML = `<p class='loading'>에러 발생: ${err.message}</p>`;
@@ -242,7 +142,6 @@
         return;
       }
 
-      // 모바일용 data-label 추가를 위해 조금 다르게 생성
       let html = "<table><thead><tr>";
       displayOrder.forEach(header => {
         const displayName = headerDisplayNames[header] || header;
@@ -254,12 +153,18 @@
         html += "<tr>";
         displayOrder.forEach(header => {
           let cell = row[header] ?? "";
+
+          // ✅ QR code 링크 처리
           if (header === "QR code" && cell) {
             cell = `<a href="${cell}" target="_blank" rel="noopener noreferrer">링크</a>`;
           }
-          // 모바일에서 레이블 보여주기 위해 data-label 추가
-          const labelText = headerDisplayNames[header]?.replace(/<br>/g, " ") || header;
-          html += `<td data-label="${labelText}">${cell}</td>`;
+
+          // ✅ 가격 콤마 처리
+          if (header === "Selling at" && !isNaN(cell)) {
+            cell = Number(cell).toLocaleString(); // 2000 -> "2,000"
+          }
+
+          html += `<td>${cell}</td>`;
         });
         html += "</tr>";
       });
@@ -270,19 +175,26 @@
 
     function filterData() {
       const keyword = document.getElementById("searchInput").value.trim().toLowerCase();
+
       if (!keyword) {
         renderTable(allData);
         return;
       }
 
       const filtered = allData.filter(item => {
-        const artistText = (item["Artist"] ?? "").toString().toLowerCase();
-        const titleText = (item["Title"] ?? "").toString().toLowerCase();
-        return artistText.includes(keyword) || titleText.includes(keyword);
+        const artist = item["Artist"]?.toString().toLowerCase() || "";
+        const title = item["Title"]?.toString().toLowerCase() || "";
+        return artist.includes(keyword) || title.includes(keyword);
       });
 
       renderTable(filtered);
     }
+
+    document.getElementById("searchInput").addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        filterData();
+      }
+    });
   </script>
 </body>
 </html>
