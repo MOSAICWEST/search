@@ -14,7 +14,7 @@ jobs:
 
       - name: Fetch Google Sheets JSON
         run: |
-          curl -L -s "https://script.google.com/macros/s/AKfycbxlZuzYrg1h6SeFmGcJpXhOAid15mDoW7mKphngixFSTYwwW5zfZIyNYDmdRg/exec" -o data.json
+          curl -L -s "https://script.google.com/macros/s/AKfycbxlZuzYrg1A76VGHn1h6SeFmGcJpXhOAid15mDoW7mKphngixFSTYwwW5zfZIyNYDmdRg/exec" -o data.json
 
       - name: Commit and push if changed
         run: |
