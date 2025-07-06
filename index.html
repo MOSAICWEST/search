@@ -93,7 +93,6 @@
       font-style: italic;
       color: #666;
     }
-
   </style>
 </head>
 <body>
@@ -107,7 +106,8 @@
   <div id="results" class="loading">데이터 불러오는 중...</div>
 
   <script>
-    const SHEET_URL = "https://script.google.com/macros/s/AKfycbxlZuzYrg1A76VGHn1h6SeFmGcJpXhOAid15mDoW7mKphngixFSTYwwW5zfZIyNYDmdRg/exec";
+    // ✅ 변경된 부분: GitHub Pages의 정적 JSON 파일 경로
+    const SHEET_URL = "./data.json";
 
     const displayOrder = [
       "Ref", "Artist", "Title", "Pressing", "Genre", "Style", "Subcategory",
@@ -132,19 +132,25 @@
 
     let allData = [];
 
+    // ✅ 캐싱된 JSON 파일 로드
     fetch(SHEET_URL)
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error("데이터를 불러올 수 없습니다.");
+        return res.json();
+      })
       .then(data => {
         allData = data;
         renderTable(data);
       })
       .catch(err => {
-        document.getElementById("results").innerHTML = `<p class='loading'>에러 발생: ${err.message}</p>`;
+        document.getElementById("results").innerHTML =
+          `<p class='loading'>에러 발생: ${err.message}</p>`;
       });
 
     function renderTable(data) {
       if (!data || data.length === 0) {
-        document.getElementById("results").innerHTML = "<p class='loading'>표시할 데이터가 없습니다.</p>";
+        document.getElementById("results").innerHTML =
+          "<p class='loading'>표시할 데이터가 없습니다.</p>";
         return;
       }
 
