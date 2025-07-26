@@ -25,10 +25,6 @@
     .search-container select,
     .search-container button {
       font-size: 16px;
-    }
-    .search-container select,
-    .search-container input,
-    .search-container button {
       padding: 10px;
       margin: 5px;
       border: 1px solid #ccc;
@@ -49,26 +45,19 @@
     .table-wrapper {
       overflow-x: auto;
       margin: 0 auto;
-      width: 98%;
-      max-width: 1400px;
+      width: 95%;
     }
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 14px;
       background-color: #fff;
-      table-layout: fixed;
-    }
-    colgroup col {
-      width: auto;
     }
     th, td {
       border: 1px solid #ddd;
       padding: 10px;
       text-align: left;
       vertical-align: top;
-      word-wrap: break-word;
-      white-space: normal;
     }
     th {
       background-color: #f7f7f7;
@@ -78,16 +67,6 @@
     }
     tbody tr:nth-child(odd) { background-color: #fcfcfc; }
     tbody tr:hover { background-color: #eef6ff; }
-    td:nth-child(11), td:nth-child(12) {
-      text-align: center;
-      white-space: nowrap;
-    }
-    td button {
-      padding: 6px 10px;
-      font-size: 13px;
-      line-height: 1.1;
-      white-space: nowrap;
-    }
     .top-button {
       position: fixed;
       bottom: 30px;
@@ -161,9 +140,128 @@
   <div id="detailModal" class="modal">
     <div class="modal-content">
       <span class="modal-close" id="modalClose">&times;</span>
-      <h3 id="modalTitle">상세정보</h3>
+      <h3>상세정보</h3>
       <div id="modalBody"></div>
     </div>
   </div>
+  <script>
+    const SHEET_URL = "./data.json";
+    const displayOrder = ["Ref", "Artist", "Title", "Label", "Pressing", "Genre", "Style", "Subcategory", "Condition Jacket", "Condition Media", "Selling at", "Details"];
+    const allDisplayNames = {
+      "Ref": "상품번호",
+      "Artist": "아티스트",
+      "Title": "타이틀",
+      "Label": "레이블",
+      "Pressing": "프레싱",
+      "Genre": "장르",
+      "Style": "스타일",
+      "Subcategory": "진열 위치",
+      "Condition Jacket": "자켓",
+      "Condition Media": "미디어",
+      "Selling at": "가격",
+      "Details": "상세보기",
+      "Youtube": "YouTube"
+    };
+
+    let allData = [];
+
+    fetch(SHEET_URL)
+      .then(res => res.json())
+      .then(data => {
+        allData = data;
+        filterAndRenderTable();
+      });
+
+    function filterAndRenderTable() {
+      const keyword = document.getElementById("searchInput").value.trim().toLowerCase();
+      const scope = document.getElementById("searchScope").value;
+      let filtered = allData.filter(item => {
+        const artist = String(item["Artist"] ?? "").toLowerCase();
+        const title = String(item["Title"] ?? "").toLowerCase();
+        const label = String(item["Label"] ?? "").toLowerCase();
+        const tracklist = String(item["Tracklist"] ?? "").toLowerCase();
+        const credits = String(item["Credits"] ?? "").toLowerCase();
+        switch (scope) {
+          case "Artist": return artist.includes(keyword);
+          case "Title": return title.includes(keyword);
+          case "Label": return label.includes(keyword);
+          case "Tracklist": return tracklist.includes(keyword);
+          case "Credits": return credits.includes(keyword);
+          default: return artist.includes(keyword) || title.includes(keyword) || label.includes(keyword) || tracklist.includes(keyword) || credits.includes(keyword);
+        }
+      });
+      renderTable(filtered);
+    }
+
+    function renderTable(data) {
+      const results = document.getElementById("results");
+      if (!data.length) {
+        results.innerHTML = "<p class='loading'>표시할 데이터가 없습니다.</p>";
+        return;
+      }
+      let html = `<div class="table-wrapper"><table><thead><tr>`;
+      displayOrder.forEach(key => html += `<th>${allDisplayNames[key] || key}</th>`);
+      html += `</tr></thead><tbody>`;
+
+      data.forEach((row, idx) => {
+        html += `<tr>`;
+        displayOrder.forEach(key => {
+          let cell = row[key] ?? "";
+          if (key === "Selling at" && !isNaN(cell)) cell = Number(cell).toLocaleString();
+          if (key === "Details") cell = `<button onclick="showDetails(${idx})">상세보기</button>`;
+          html += `<td>${cell}</td>`;
+        });
+        html += `</tr>`;
+      });
+
+      html += `</tbody></table></div>`;
+      results.innerHTML = html;
+      window.currentData = data;
+    }
+
+    window.showDetails = function(index) {
+      const item = window.currentData[index];
+      const modal = document.getElementById("detailModal");
+      const body = document.getElementById("modalBody");
+
+      const title = `${item["Artist"] || ""} - ${item["Title"] || ""}`;
+      const youtubeLink = item["Youtube"]?.trim()
+        ? `<a href="${item["Youtube"].trim()}" target="_blank">링크</a>`
+        : "없음";
+      const imageHTML = item["Image URL"]?.trim()
+        ? `<img src="${item["Image URL"].trim()}" alt="이미지" style="max-width: 100%; margin: 10px 0;" loading="lazy">`
+        : "없음";
+      const formattedTracklist = (item.Tracklist || "").split("•").map(str => str.trim()).join("<br>");
+      const formattedCredits = (item.Credits || "").split("•").map(str => str.trim()).join("<br>");
+
+      body.innerHTML = `
+        <h4 style="margin-top: 0;">${title}</h4>
+        <p><strong>이미지:</strong><br>${imageHTML}</p>
+        <p><strong>컨디션 코멘트:</strong><br>${item["Condition Comment"] || "없음"}</p>
+        <p><strong>YouTube:</strong><br>${youtubeLink}</p>
+        <p><strong>Tracklist:</strong><br>${formattedTracklist || "없음"}</p>
+        <p><strong>Credits:</strong><br>${formattedCredits || "없음"}</p>
+      `;
+      modal.style.display = "block";
+    };
+
+    document.getElementById("modalClose").onclick = () =>
+      document.getElementById("detailModal").style.display = "none";
+
+    window.onclick = e => {
+      if (e.target == document.getElementById("detailModal"))
+        document.getElementById("detailModal").style.display = "none";
+    };
+
+    document.getElementById("searchInput").addEventListener("keydown", e => {
+      if (e.key === "Enter") filterAndRenderTable();
+    });
+
+    document.getElementById("searchBtn").addEventListener("click", filterAndRenderTable);
+
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  </script>
 </body>
 </html>
