@@ -64,6 +64,7 @@
       position: sticky;
       top: 0;
       z-index: 10;
+      white-space: nowrap; /* ✅ 줄바꿈 방지 */
       white-space: nowrap;
       min-width: 80px;
     }
@@ -137,56 +138,48 @@
     <select id="searchScope">
       <option value="all">전체검색</option>
       <option value="Artist">아티스트</option>
-      <option value="Title">타이틀</option>
-      <option value="Label">레이블</option>
-      <option value="Credits">크레딧</option>
-      <option value="Tracklist">수록곡</option>
-    </select>
-    <input type="text" id="searchInput" placeholder="검색어 입력" />
-    <button id="searchBtn">검색</button>
-  </div>
-
-  <div id="results" class="loading">데이터 불러오는 중...</div>
-  <button onclick="scrollToTop()" class="top-button">TOP</button>
-
-  <div id="detailModal" class="modal">
-    <div class="modal-content">
-      <span class="modal-close" id="modalClose">&times;</span>
-      <h3>상세정보</h3>
-      <div id="modalBody"></div>
+@@ -147,123 +155,151 @@
     </div>
   </div>
-
   <script>
     const SHEET_URL = "./data.json";
+    const SHEET_URL = "./data.json"; // 실제 웹앱 URL 또는 로컬 JSON 파일
     const displayOrder = ["Ref", "Artist", "Title", "Label", "Pressing", "Genre", "Style", "Subcategory", "Condition Jacket", "Condition Media", "Selling at", "Details"];
     const allDisplayNames = {
+      "Ref": "상품번호",
+      "Artist": "아티스트",
+      "Title": "타이틀",
+      "Label": "레이블",
+      "Pressing": "프레싱",
+      "Genre": "장르",
+      "Style": "스타일",
+      "Subcategory": "진열 위치",
+      "Condition Jacket": "자켓",
+      "Condition Media": "미디어",
+      "Selling at": "가격",
+      "Details": "상세",
+      "Youtube": "YouTube"
       "Ref": "상품번호", "Artist": "아티스트", "Title": "타이틀",
       "Label": "레이블", "Pressing": "프레싱", "Genre": "장르", "Style": "스타일",
       "Subcategory": "진열 위치", "Condition Jacket": "자켓", "Condition Media": "미디어",
-      "Selling at": "가격", "Details": "상세"
+      "Selling at": "가격", "Details": "상세", "Youtube": "YouTube"
     };
 
     let allData = [];
 
     fetch(SHEET_URL)
-      .then(res => {
-        if (!res.ok) throw new Error("데이터를 불러올 수 없습니다.");
-        return res.json();
-      })
+      .then(res => res.json())
       .then(data => {
-        if (!Array.isArray(data)) throw new Error("잘못된 데이터 형식입니다.");
         allData = data;
+        allData = [...(data.WEST || []), ...(data.EAST || [])];
         populateGenreFilter(allData);
         filterAndRenderTable();
-      })
-      .catch(err => {
-        document.getElementById("results").innerHTML = `<p class="loading" style="color: red;">❌ 데이터 로딩 실패: ${err.message}</p>`;
       });
 
     function populateGenreFilter(data) {
       const genreSelect = document.getElementById("genreFilter");
       const genreSet = new Set();
+
       data.forEach(item => {
         const genre = item["Genre"];
         if (genre) genreSet.add(genre.trim());
@@ -207,15 +200,15 @@
       const selectedStore = document.getElementById("storeFilter").value;
       const selectedGenre = document.getElementById("genreFilter").value;
 
-      const filtered = allData.filter(item => {
+      let filtered = allData.filter(item => {
         if (selectedStore !== "all" && item.OriginSheet !== selectedStore) return false;
         if (selectedGenre !== "all" && (item["Genre"] ?? "") !== selectedGenre) return false;
 
-        const artist = (item["Artist"] ?? "").toLowerCase();
-        const title = (item["Title"] ?? "").toLowerCase();
-        const label = (item["Label"] ?? "").toLowerCase();
-        const tracklist = (item["Tracklist"] ?? "").toLowerCase();
-        const credits = (item["Credits"] ?? "").toLowerCase();
+        const artist = String(item["Artist"] ?? "").toLowerCase();
+        const title = String(item["Title"] ?? "").toLowerCase();
+        const label = String(item["Label"] ?? "").toLowerCase();
+        const tracklist = String(item["Tracklist"] ?? "").toLowerCase();
+        const credits = String(item["Credits"] ?? "").toLowerCase();
 
         switch (scope) {
           case "Artist": return artist.includes(keyword);
@@ -223,6 +216,7 @@
           case "Label": return label.includes(keyword);
           case "Tracklist": return tracklist.includes(keyword);
           case "Credits": return credits.includes(keyword);
+          default: return artist.includes(keyword) || title.includes(keyword) || label.includes(keyword) || tracklist.includes(keyword) || credits.includes(keyword);
           default:
             return (
               artist.includes(keyword) ||
@@ -243,7 +237,6 @@
         results.innerHTML = "<p class='loading'>표시할 데이터가 없습니다.</p>";
         return;
       }
-
       let html = `<div class="table-wrapper"><table><thead><tr>`;
       displayOrder.forEach(key => html += `<th>${allDisplayNames[key] || key}</th>`);
       html += `</tr></thead><tbody>`;
@@ -253,6 +246,7 @@
         displayOrder.forEach(key => {
           let cell = row[key] ?? "";
           if (key === "Selling at" && !isNaN(cell)) cell = Number(cell).toLocaleString();
+          if (key === "Details") cell = `<button onclick="showDetails(${idx})">상세</button>`; // ✅ 버튼 텍스트 변경됨
           if (key === "Details") cell = `<button onclick="showDetails(${idx})">상세</button>`;
           html += `<td>${cell}</td>`;
         });
