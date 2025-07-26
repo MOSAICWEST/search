@@ -306,11 +306,11 @@
         const scope = document.getElementById("searchScope").value;
 
         let filtered = allData.filter(item => {
-          const artist = (item["Artist"] ?? "").toLowerCase();
-          const title = (item["Title"] ?? "").toLowerCase();
-          const label = (item["Label"] ?? "").toLowerCase();
-          const tracklist = (item["Tracklist"] ?? "").toLowerCase();
-          const credits = (item["Credits"] ?? "").toLowerCase();
+          const artist = String(item["Artist"] ?? "").toLowerCase();
+          const title = String(item["Title"] ?? "").toLowerCase();
+          const label = String(item["Label"] ?? "").toLowerCase();
+          const tracklist = String(item["Tracklist"] ?? "").toLowerCase();
+          const credits = String(item["Credits"] ?? "").toLowerCase();
 
           let matchKeyword = false;
           switch (scope) {
