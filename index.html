@@ -147,6 +147,43 @@
       background-color: #555;
     }
 
+    /* 모달 스타일 */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 100;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.4);
+      padding-top: 60px;
+    }
+
+    .modal-content {
+      background-color: #fff;
+      margin: 5% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      max-width: 600px;
+      border-radius: 8px;
+      line-height: 1.5;
+    }
+
+    .modal-close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .modal-close:hover {
+      color: #000;
+    }
+
     @media screen and (max-width: 600px) {
       h1 {
         font-size: 22px;
@@ -194,6 +231,15 @@
 
   <button onclick="scrollToTop()" class="top-button">TOP</button>
 
+  <!-- 모달 -->
+  <div id="detailModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" id="modalClose">&times;</span>
+      <h3>상세정보</h3>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const SHEET_URL = "./data.json";
@@ -201,14 +247,15 @@
       const displayOrder = [
         "Ref", "Artist", "Title", "Label", "Pressing", "Genre", "Style", "Subcategory",
         "Condition Jacket", "Condition Media", "Condition Comment",
-        "Selling at", "QR code"
+        "Selling at", "Details" // '상세정보' 버튼
       ];
 
       const headerDisplayNames = {
         "Genre": "장르",
         "Condition Jacket": "자켓",
         "Condition Media": "미디어",
-        "Selling at": "가격 정렬"
+        "Selling at": "가격 정렬",
+        "Details": "상세정보"
       };
 
       const allDisplayNames = {
@@ -224,16 +271,11 @@
         "Condition Media": "미디어",
         "Condition Comment": "상태",
         "Selling at": "가격",
-        "QR code": "Youtube"
+        "Details": "상세정보"
       };
 
       let allData = [];
-      const filters = {
-        genre: "",
-        jacket: "",
-        media: "",
-        priceSort: ""
-      };
+      const filters = { genre: "", jacket: "", media: "", priceSort: "" };
 
       fetch(SHEET_URL)
         .then(res => res.json())
@@ -314,25 +356,14 @@
 
           let matchKeyword = false;
           switch (scope) {
-            case "Artist":
-              matchKeyword = artist.includes(keyword);
-              break;
-            case "Title":
-              matchKeyword = title.includes(keyword);
-              break;
-            case "Label":
-              matchKeyword = label.includes(keyword);
-              break;
-            case "Tracklist":
-              matchKeyword = tracklist.includes(keyword);
-              break;
-            case "Credits":
-              matchKeyword = credits.includes(keyword);
-              break;
+            case "Artist": matchKeyword = artist.includes(keyword); break;
+            case "Title": matchKeyword = title.includes(keyword); break;
+            case "Label": matchKeyword = label.includes(keyword); break;
+            case "Tracklist": matchKeyword = tracklist.includes(keyword); break;
+            case "Credits": matchKeyword = credits.includes(keyword); break;
             case "all":
             default:
-              matchKeyword =
-                artist.includes(keyword) ||
+              matchKeyword = artist.includes(keyword) ||
                 title.includes(keyword) ||
                 label.includes(keyword) ||
                 tracklist.includes(keyword) ||
@@ -357,7 +388,6 @@
 
       function renderTable(data) {
         const results = document.getElementById("results");
-
         if (!data.length) {
           results.innerHTML = "<p class='loading'>표시할 데이터가 없습니다.</p>";
           return;
@@ -369,15 +399,15 @@
         });
         html += `</tr></thead><tbody>`;
 
-        data.forEach(row => {
+        data.forEach((row, idx) => {
           html += `<tr>`;
           displayOrder.forEach(key => {
             let cell = row[key] ?? "";
-            if (key === "QR code" && cell) {
-              cell = `<a href="${cell}" target="_blank" rel="noopener noreferrer">링크</a>`;
-            }
             if (key === "Selling at" && !isNaN(cell)) {
               cell = Number(cell).toLocaleString();
+            }
+            if (key === "Details") {
+              cell = `<button onclick="showDetails(${idx})">상세정보</button>`;
             }
             html += `<td>${cell}</td>`;
           });
@@ -386,12 +416,38 @@
 
         html += `</tbody></table></div>`;
         results.innerHTML = html;
+
+        // 상세정보 함수에 데이터 전달을 위해 전역에 저장
+        window.tableData = data;
       }
 
-      document.getElementById("searchInput").addEventListener("keydown", e => {
-        if (e.key === "Enter") {
-          filterAndRenderTable();
+      window.showDetails = function(index) {
+        const item = window.tableData[index];
+        const modalBody = document.getElementById("modalBody");
+        const tracklist = item["Tracklist"] || "수록곡 정보 없음";
+        const credits = item["Credits"] || "크레딧 정보 없음";
+        const youtube = item["QR code"] ? `<a href="${item["QR code"]}" target="_blank">유튜브 링크</a>` : "유튜브 링크 없음";
+
+        modalBody.innerHTML = `
+          <p><strong>수록곡:</strong><br>${tracklist.replace(/ • /g, " • ")}</p>
+          <p><strong>크레딧:</strong><br>${credits}</p>
+          <p><strong>Youtube:</strong><br>${youtube}</p>
+        `;
+        document.getElementById("detailModal").style.display = "block";
+      };
+
+      document.getElementById("modalClose").onclick = function() {
+        document.getElementById("detailModal").style.display = "none";
+      };
+
+      window.onclick = function(event) {
+        if (event.target == document.getElementById("detailModal")) {
+          document.getElementById("detailModal").style.display = "none";
         }
+      };
+
+      document.getElementById("searchInput").addEventListener("keydown", e => {
+        if (e.key === "Enter") filterAndRenderTable();
       });
 
       document.getElementById("searchBtn").addEventListener("click", () => {
