@@ -127,20 +127,26 @@
       const modal = document.getElementById("detailModal");
       const body = document.getElementById("modalBody");
 
+      const title = `${item["Artist"] || ""} - ${item["Title"] || ""}`;
+
       const youtubeLink = item["Youtube"] && item["Youtube"].trim() !== ""
         ? `<a href="${item["Youtube"].trim()}" target="_blank">링크</a>`
         : "없음";
 
       const imageHTML = item["Image URL"] && item["Image URL"].trim() !== ""
-        ? `<img src="${item["Image URL"].trim()}" alt="이미지" style="max-width: 100%; margin-top: 10px;" loading="lazy">`
+        ? `<img src="${item["Image URL"].trim()}" alt="이미지" style="max-width: 100%; margin: 10px 0;" loading="lazy">`
         : "없음";
 
+      const formattedTracklist = (item.Tracklist || "").split("•").map(str => str.trim()).join("<br>");
+      const formattedCredits = (item.Credits || "").split("•").map(str => str.trim()).join("<br>");
+
       body.innerHTML = `
-        <p><strong>상태:</strong><br>${item["Condition Comment"] || "없음"}</p>
-        <p><strong>Tracklist:</strong><br>${item.Tracklist || "없음"}</p>
-        <p><strong>Credits:</strong><br>${item.Credits || "없음"}</p>
-        <p><strong>YouTube:</strong><br>${youtubeLink}</p>
+        <h4 style="margin-top: 0;">${title}</h4>
         <p><strong>이미지:</strong><br>${imageHTML}</p>
+        <p><strong>컨디션 코멘트:</strong><br>${item["Condition Comment"] || "없음"}</p>
+        <p><strong>YouTube:</strong><br>${youtubeLink}</p>
+        <p><strong>Tracklist:</strong><br>${formattedTracklist || "없음"}</p>
+        <p><strong>Credits:</strong><br>${formattedCredits || "없음"}</p>
       `;
       modal.style.display = "block";
     };
