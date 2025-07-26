@@ -131,11 +131,16 @@
         ? `<a href="${item["Youtube"].trim()}" target="_blank">링크</a>`
         : "없음";
 
+      const imageHTML = item["Image URL"] && item["Image URL"].trim() !== ""
+        ? `<img src="${item["Image URL"].trim()}" alt="이미지" style="max-width: 100%; margin-top: 10px;" loading="lazy">`
+        : "없음";
+
       body.innerHTML = `
         <p><strong>상태:</strong><br>${item["Condition Comment"] || "없음"}</p>
         <p><strong>Tracklist:</strong><br>${item.Tracklist || "없음"}</p>
         <p><strong>Credits:</strong><br>${item.Credits || "없음"}</p>
         <p><strong>YouTube:</strong><br>${youtubeLink}</p>
+        <p><strong>이미지:</strong><br>${imageHTML}</p>
       `;
       modal.style.display = "block";
     };
