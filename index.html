@@ -72,7 +72,7 @@
       "Condition Media": "미디어",
       "Selling at": "가격",
       "Details": "상세보기",
-      "YouTube": "YouTube"
+      "Youtube": "YouTube"
     };
     let allData = [];
     fetch(SHEET_URL).then(res => res.json()).then(data => {
@@ -126,11 +126,16 @@
       const item = window.currentData[index];
       const modal = document.getElementById("detailModal");
       const body = document.getElementById("modalBody");
+
+      const youtubeLink = item["Youtube"] && item["Youtube"].trim() !== ""
+        ? `<a href="${item["Youtube"].trim()}" target="_blank">링크</a>`
+        : "없음";
+
       body.innerHTML = `
         <p><strong>상태:</strong><br>${item["Condition Comment"] || "없음"}</p>
         <p><strong>Tracklist:</strong><br>${item.Tracklist || "없음"}</p>
         <p><strong>Credits:</strong><br>${item.Credits || "없음"}</p>
-        <p><strong>YouTube:</strong><br>${item["YouTube"] ? `<a href="${item["YouTube"]}" target="_blank">링크</a>` : "없음"}</p>
+        <p><strong>YouTube:</strong><br>${youtubeLink}</p>
       `;
       modal.style.display = "block";
     };
