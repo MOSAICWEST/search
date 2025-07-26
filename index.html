@@ -65,7 +65,7 @@
       top: 0;
       z-index: 10;
       white-space: nowrap; /* ✅ 줄바꿈 방지 */
-      min-width: 80px;      /* ✅ 선택적으로 열 너비 확보 */
+      min-width: 80px;
     }
     tbody tr:nth-child(odd) { background-color: #fcfcfc; }
     tbody tr:hover { background-color: #eef6ff; }
@@ -161,7 +161,7 @@
       "Condition Jacket": "자켓",
       "Condition Media": "미디어",
       "Selling at": "가격",
-      "Details": "상세보기",
+      "Details": "상세",
       "Youtube": "YouTube"
     };
 
@@ -210,7 +210,7 @@
         displayOrder.forEach(key => {
           let cell = row[key] ?? "";
           if (key === "Selling at" && !isNaN(cell)) cell = Number(cell).toLocaleString();
-          if (key === "Details") cell = `<button onclick="showDetails(${idx})">상세보기</button>`;
+          if (key === "Details") cell = `<button onclick="showDetails(${idx})">상세</button>`; // ✅ 버튼 텍스트 변경됨
           html += `<td>${cell}</td>`;
         });
         html += `</tr>`;
