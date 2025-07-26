@@ -64,6 +64,8 @@
       position: sticky;
       top: 0;
       z-index: 10;
+      white-space: nowrap; /* ✅ 줄바꿈 방지 */
+      min-width: 80px;      /* ✅ 선택적으로 열 너비 확보 */
     }
     tbody tr:nth-child(odd) { background-color: #fcfcfc; }
     tbody tr:hover { background-color: #eef6ff; }
