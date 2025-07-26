@@ -154,9 +154,13 @@
       <div id="modalBody"></div>
     </div>
   </div>
+
   <script>
-    const SHEET_URL = "./data.json"; // 실제 웹앱 URL 또는 로컬 JSON 파일
-    const displayOrder = ["Ref", "Artist", "Title", "Label", "Pressing", "Genre", "Style", "Subcategory", "Condition Jacket", "Condition Media", "Selling at", "Details"];
+    const SHEET_URL = "./data.json"; // 또는 실제 웹앱 URL
+    const displayOrder = [
+      "Ref", "Artist", "Title", "Label", "Pressing", "Genre", "Style",
+      "Subcategory", "Condition Jacket", "Condition Media", "Selling at", "Details"
+    ];
     const allDisplayNames = {
       "Ref": "상품번호", "Artist": "아티스트", "Title": "타이틀",
       "Label": "레이블", "Pressing": "프레싱", "Genre": "장르", "Style": "스타일",
@@ -169,7 +173,7 @@
     fetch(SHEET_URL)
       .then(res => res.json())
       .then(data => {
-        allData = [...(data.WEST || []), ...(data.EAST || [])];
+        allData = data;
         populateGenreFilter(allData);
         filterAndRenderTable();
       });
@@ -198,15 +202,15 @@
       const selectedStore = document.getElementById("storeFilter").value;
       const selectedGenre = document.getElementById("genreFilter").value;
 
-      let filtered = allData.filter(item => {
+      const filtered = allData.filter(item => {
         if (selectedStore !== "all" && item.OriginSheet !== selectedStore) return false;
         if (selectedGenre !== "all" && (item["Genre"] ?? "") !== selectedGenre) return false;
 
-        const artist = String(item["Artist"] ?? "").toLowerCase();
-        const title = String(item["Title"] ?? "").toLowerCase();
-        const label = String(item["Label"] ?? "").toLowerCase();
-        const tracklist = String(item["Tracklist"] ?? "").toLowerCase();
-        const credits = String(item["Credits"] ?? "").toLowerCase();
+        const artist = (item["Artist"] ?? "").toLowerCase();
+        const title = (item["Title"] ?? "").toLowerCase();
+        const label = (item["Label"] ?? "").toLowerCase();
+        const tracklist = (item["Tracklist"] ?? "").toLowerCase();
+        const credits = (item["Credits"] ?? "").toLowerCase();
 
         switch (scope) {
           case "Artist": return artist.includes(keyword);
@@ -234,6 +238,7 @@
         results.innerHTML = "<p class='loading'>표시할 데이터가 없습니다.</p>";
         return;
       }
+
       let html = `<div class="table-wrapper"><table><thead><tr>`;
       displayOrder.forEach(key => html += `<th>${allDisplayNames[key] || key}</th>`);
       html += `</tr></thead><tbody>`;
