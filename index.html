@@ -64,7 +64,7 @@
       position: sticky;
       top: 0;
       z-index: 10;
-      white-space: nowrap; /* ✅ 줄바꿈 방지 */
+      white-space: nowrap;
       min-width: 80px;
     }
     tbody tr:nth-child(odd) { background-color: #fcfcfc; }
@@ -126,6 +126,14 @@
 <body>
   <h1>MOSAIC 재고 검색</h1>
   <div class="search-container">
+    <select id="storeFilter">
+      <option value="all">매장 전체</option>
+      <option value="WEST">WEST</option>
+      <option value="EAST">EAST</option>
+    </select>
+    <select id="genreFilter">
+      <option value="all">장르 전체</option>
+    </select>
     <select id="searchScope">
       <option value="all">전체검색</option>
       <option value="Artist">아티스트</option>
@@ -147,22 +155,13 @@
     </div>
   </div>
   <script>
-    const SHEET_URL = "./data.json";
+    const SHEET_URL = "./data.json"; // 실제 웹앱 URL 또는 로컬 JSON 파일
     const displayOrder = ["Ref", "Artist", "Title", "Label", "Pressing", "Genre", "Style", "Subcategory", "Condition Jacket", "Condition Media", "Selling at", "Details"];
     const allDisplayNames = {
-      "Ref": "상품번호",
-      "Artist": "아티스트",
-      "Title": "타이틀",
-      "Label": "레이블",
-      "Pressing": "프레싱",
-      "Genre": "장르",
-      "Style": "스타일",
-      "Subcategory": "진열 위치",
-      "Condition Jacket": "자켓",
-      "Condition Media": "미디어",
-      "Selling at": "가격",
-      "Details": "상세",
-      "Youtube": "YouTube"
+      "Ref": "상품번호", "Artist": "아티스트", "Title": "타이틀",
+      "Label": "레이블", "Pressing": "프레싱", "Genre": "장르", "Style": "스타일",
+      "Subcategory": "진열 위치", "Condition Jacket": "자켓", "Condition Media": "미디어",
+      "Selling at": "가격", "Details": "상세", "Youtube": "YouTube"
     };
 
     let allData = [];
@@ -170,28 +169,62 @@
     fetch(SHEET_URL)
       .then(res => res.json())
       .then(data => {
-        allData = data;
+        allData = [...(data.WEST || []), ...(data.EAST || [])];
+        populateGenreFilter(allData);
         filterAndRenderTable();
       });
+
+    function populateGenreFilter(data) {
+      const genreSelect = document.getElementById("genreFilter");
+      const genreSet = new Set();
+
+      data.forEach(item => {
+        const genre = item["Genre"];
+        if (genre) genreSet.add(genre.trim());
+      });
+
+      genreSelect.innerHTML = `<option value="all">장르 전체</option>`;
+      [...genreSet].sort().forEach(genre => {
+        const option = document.createElement("option");
+        option.value = genre;
+        option.textContent = genre;
+        genreSelect.appendChild(option);
+      });
+    }
 
     function filterAndRenderTable() {
       const keyword = document.getElementById("searchInput").value.trim().toLowerCase();
       const scope = document.getElementById("searchScope").value;
+      const selectedStore = document.getElementById("storeFilter").value;
+      const selectedGenre = document.getElementById("genreFilter").value;
+
       let filtered = allData.filter(item => {
+        if (selectedStore !== "all" && item.OriginSheet !== selectedStore) return false;
+        if (selectedGenre !== "all" && (item["Genre"] ?? "") !== selectedGenre) return false;
+
         const artist = String(item["Artist"] ?? "").toLowerCase();
         const title = String(item["Title"] ?? "").toLowerCase();
         const label = String(item["Label"] ?? "").toLowerCase();
         const tracklist = String(item["Tracklist"] ?? "").toLowerCase();
         const credits = String(item["Credits"] ?? "").toLowerCase();
+
         switch (scope) {
           case "Artist": return artist.includes(keyword);
           case "Title": return title.includes(keyword);
           case "Label": return label.includes(keyword);
           case "Tracklist": return tracklist.includes(keyword);
           case "Credits": return credits.includes(keyword);
-          default: return artist.includes(keyword) || title.includes(keyword) || label.includes(keyword) || tracklist.includes(keyword) || credits.includes(keyword);
+          default:
+            return (
+              artist.includes(keyword) ||
+              title.includes(keyword) ||
+              label.includes(keyword) ||
+              tracklist.includes(keyword) ||
+              credits.includes(keyword)
+            );
         }
       });
+
       renderTable(filtered);
     }
 
@@ -210,7 +243,7 @@
         displayOrder.forEach(key => {
           let cell = row[key] ?? "";
           if (key === "Selling at" && !isNaN(cell)) cell = Number(cell).toLocaleString();
-          if (key === "Details") cell = `<button onclick="showDetails(${idx})">상세</button>`; // ✅ 버튼 텍스트 변경됨
+          if (key === "Details") cell = `<button onclick="showDetails(${idx})">상세</button>`;
           html += `<td>${cell}</td>`;
         });
         html += `</tr>`;
@@ -260,6 +293,9 @@
     });
 
     document.getElementById("searchBtn").addEventListener("click", filterAndRenderTable);
+    document.getElementById("storeFilter").addEventListener("change", filterAndRenderTable);
+    document.getElementById("genreFilter").addEventListener("change", filterAndRenderTable);
+    document.getElementById("searchScope").addEventListener("change", filterAndRenderTable);
 
     function scrollToTop() {
       window.scrollTo({ top: 0, behavior: "smooth" });
