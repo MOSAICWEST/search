@@ -486,7 +486,15 @@ function renderTable(data) {
         content += `<p><strong>이미지:</strong><br><img src="${item["Image URL"].trim()}" alt="이미지" style="max-width: 100%; margin: 10px 0;" loading="lazy"></p>`;
       }
 
-      content += `<p><strong>컨디션 코멘트:</strong><br>${item["Condition Comment"] || "없음"}</p>`;
+      const jacket = item["Condition Jacket"] || "";
+const media = item["Condition Media"] || "";
+const comment = item["Condition Comment"] || "";
+
+content += `<p>자켓 : ${jacket} /  미디어 : ${media}</p>`;
+if (comment) {
+  content += `<p>${comment}</p>`;
+}
+
 
       if (item["Youtube"]?.trim()) {
         const url = item["Youtube"].trim();
