@@ -516,17 +516,56 @@ if (comment) {
         }
       }
 
-      if (item.Credits?.trim()) {
-        const credits = item.Credits.split("•").map(s => s.trim()).filter(Boolean);
-        if (credits.length) {
-          content += `<p><strong>Credits:</strong><br>${credits.join("<br>")}</p>`;
-        }
-      }
+if (item.Credits?.trim()) {
+  const credits = item.Credits.split("•").map(s => s.trim()).filter(Boolean);
+  if (credits.length) {
+    content += `<p><strong>Credits:</strong><br>${credits.join("<br>")}</p>`;
+  }
+}
 
-      body.innerHTML = content;
-      modal.style.display = "flex";
-    };
+content += `<div style="text-align: right; margin-top: 20px;">
+  <button onclick="addToCart(${index})" style="
+    background-color: #0071e3;
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+  ">🛒 장바구니 담기</button>
+</div>`;
 
+body.innerHTML = content;
+modal.style.display = "flex";
+
+function addToCart(index) {
+  const item = window.currentData[index];
+  const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+
+  const exists = cart.some(c => c.ref === item.Ref);
+  if (exists) {
+    alert("이미 장바구니에 담긴 상품입니다.");
+    return;
+  }
+
+  const price = Number(item["Selling at"] || 0);
+  const newItem = {
+    ref: item.Ref || "",
+    artist: item.Artist || "",
+    title: item.Title || "",
+    jacket: item["Condition Jacket"] || "",
+    media: item["Condition Media"] || "",
+    pressing: item.Pressing || "",
+    price: price,
+    store: item.OriginSheet || ""
+  };
+
+  cart.push(newItem);
+  localStorage.setItem("cart", JSON.stringify(cart));
+  alert("장바구니에 추가되었습니다.");
+}
+
+    
     document.getElementById("modalClose").onclick = () =>
       document.getElementById("detailModal").style.display = "none";
 
@@ -612,6 +651,113 @@ function goToPage(page) {
   renderTable(window.currentData);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+  // 장바구니 모달 열기
+document.getElementById("viewCartBtn").onclick = () => {
+  const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+  const cartBody = document.getElementById("cartBody");
+
+  if (cart.length === 0) {
+    cartBody.innerHTML = `<p>장바구니가 비어 있습니다.</p>`;
+  } else {
+    let total = 0;
+    const itemsHtml = cart.map((item, idx) => {
+      total += item.price;
+      return `<div style="margin-bottom: 12px;">
+        <strong>${idx + 1}. [${item.ref}] ${item.artist} – ${item.title}</strong><br>
+        <span style="font-size: 14px;">
+          ${item.jacket} / ${item.media} / ${item.pressing}<br>
+          매장: ${item.store}<br>
+          가격: ₩${item.price.toLocaleString()}
+        </span>
+      </div>`;
+    }).join('');
+
+    cartBody.innerHTML = `
+      ${itemsHtml}
+      <hr>
+      <p><strong>총 ${cart.length}개 (합계: ₩${total.toLocaleString()})</strong></p>
+      <button onclick="copyCartToClipboard()" style="margin-right: 10px;">📋 텍스트 복사</button>
+      <button onclick="window.open('https://pf.kakao.com/_xxx/chat', '_blank')">💬 카카오톡 문의(아직 미구현)</button>
+      <button onclick="clearCart()" style="float:right; background:#ccc; color:#000;">❌ 전체 비우기</button>
+    `;
+  }
+
+  document.getElementById("cartModal").style.display = "flex";
+};
+
+// 모달 닫기
+document.getElementById("cartModalClose").onclick = () => {
+  document.getElementById("cartModal").style.display = "none";
+};
+window.addEventListener("click", e => {
+  if (e.target === document.getElementById("cartModal")) {
+    document.getElementById("cartModal").style.display = "none";
+  }
+});
+
+// 장바구니 초기화
+function clearCart() {
+  if (confirm("장바구니를 모두 비우시겠습니까?")) {
+    localStorage.removeItem("cart");
+    document.getElementById("cartModal").style.display = "none";
+    alert("장바구니가 비워졌습니다.");
+  }
+}
+    function copyCartToClipboard() {
+  const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+  if (cart.length === 0) return;
+
+  let total = 0;
+  const lines = cart.map((item, i) => {
+    total += item.price;
+    return `${i + 1}. [${item.ref}] ${item.artist} – ${item.title}
+${item.jacket} / ${item.media} / ${item.pressing}
+매장: ${item.store}
+가격: ₩${item.price.toLocaleString()}`;
+  });
+
+  const message = `📦 MOSAIC 장바구니 주문 요청
+
+${lines.join('\n\n')}
+
+* 오프라인 매장에서 판매중인 상품이므로 실재고 확인 후 입금 안내를 드립니다.
+* 상품 위치가 다른 경우 물품을 합쳐야 하므로 발송, 픽업 준비에 7일 이상 소요될 수 있습니다.
+* 택배시 ₩4,000 추가금이 발생합니다. (CJ/로젠택배)
+
+👉 총 ${cart.length}개 (합계: ₩${total.toLocaleString()}) 
+👉 문의자: 직접 입력
+👉 연락처: 직접 입력
+👉 배송지(선택사항): 직접 입력`;
+
+  navigator.clipboard.writeText(message).then(() => {
+    alert("장바구니 정보가 복사되었습니다. 카카오톡 채널로 이동해 붙여넣어 주세요!");
+  });
+}
+
   </script>
+<!-- 🛒 장바구니 보기 버튼 -->
+<button id="viewCartBtn" style="
+  position: fixed;
+  bottom: 80px;
+  right: 30px;
+  z-index: 100;
+  padding: 10px 16px;
+  font-size: 14px;
+  background-color: #0071e3;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+">🛒 장바구니</button>
+
+<!-- 장바구니 모달 -->
+<div id="cartModal" class="modal">
+  <div class="modal-content" style="max-width: 700px;">
+    <span id="cartModalClose" class="modal-close">&times;</span>
+    <div id="cartBody"></div>
+  </div>
+</div>
+  
 </body>
 </html>
