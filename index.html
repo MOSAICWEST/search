@@ -258,18 +258,25 @@
 
     let allData = [];
 
-    fetch(SHEET_URL)
+const results = document.getElementById("results");
+results.innerHTML = `<div style="text-align:center; margin:40px 0; color:#555; font-size:16px;">
+  데이터 불러오는 중입니다...
+</div>`;
+
+fetch(SHEET_URL)
   .then(res => res.json())
   .then(data => {
     allData = data;
-    document.getElementById("loading").style.display = "none"; // ✅ 로딩 문구 숨기기
     populateGenreFilter(data);
-    filterAndRenderTable();
+    filterAndRenderTable(); // 이 함수가 results.innerHTML을 표나 카드로 바꿔줌
   })
   .catch(err => {
-    document.getElementById("loading").innerText = "데이터를 불러오지 못했습니다.";
+    results.innerHTML = `<div style="text-align:center; margin:40px 0; color:#c00;">
+      데이터를 불러오지 못했습니다.
+    </div>`;
     console.error("데이터 로드 오류:", err);
   });
+
 
 
     function populateGenreFilter(data) {
