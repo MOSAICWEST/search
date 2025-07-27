@@ -538,34 +538,6 @@ content += `<div style="text-align: right; margin-top: 20px;">
 body.innerHTML = content;
 modal.style.display = "flex";
 
-      function addToCart(index) {
-  const item = window.currentData[index];
-  const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-
-  const exists = cart.some(c => c.ref === item.Ref);
-  if (exists) {
-    alert("이미 장바구니에 담긴 상품입니다.");
-    return;
-  }
-
-  const price = Number(item["Selling at"] || 0);
-  const newItem = {
-    ref: item.Ref || "",
-    artist: item.Artist || "",
-    title: item.Title || "",
-    jacket: item["Condition Jacket"] || "",
-    media: item["Condition Media"] || "",
-    pressing: item.Pressing || "",
-    price: price,
-    store: item.OriginSheet || ""
-  };
-
-  cart.push(newItem);
-  localStorage.setItem("cart", JSON.stringify(cart));
-  alert("장바구니에 추가되었습니다.");
-}
-
-
     document.getElementById("modalClose").onclick = () =>
       document.getElementById("detailModal").style.display = "none";
 
@@ -735,8 +707,34 @@ ${lines.join('\n\n')}
   navigator.clipboard.writeText(message).then(() => {
     alert("장바구니 정보가 복사되었습니다. 카카오톡 채널로 이동해 붙여넣어 주세요!");
   });
-}
+ function addToCart(index) {
+  const item = window.currentData[index];
+  const cart = JSON.parse(localStorage.getItem("cart") || "[]");
 
+  const exists = cart.some(c => c.ref === item.Ref);
+  if (exists) {
+    alert("이미 장바구니에 담긴 상품입니다.");
+    return;
+  }
+
+  const price = Number(item["Selling at"] || 0);
+  const newItem = {
+    ref: item.Ref || "",
+    artist: item.Artist || "",
+    title: item.Title || "",
+    jacket: item["Condition Jacket"] || "",
+    media: item["Condition Media"] || "",
+    pressing: item.Pressing || "",
+    price: price,
+    store: item.OriginSheet || ""
+  };
+
+  cart.push(newItem);
+  localStorage.setItem("cart", JSON.stringify(cart));
+  alert("장바구니에 추가되었습니다.");
+}
+     
+}
   </script>
 <!-- 🛒 장바구니 보기 버튼 -->
 <button id="viewCartBtn" style="
