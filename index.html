@@ -58,6 +58,14 @@
       width: 95%;
       animation: fadeIn 0.4s ease-in;
     }
+    #loading {
+  font-size: 16px;
+  text-align: center;
+  color: #555;
+  margin: 40px 0 10px;
+  animation: fadeIn 0.6s ease-in;
+}
+
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
@@ -217,6 +225,10 @@
 </head>
 <body>
   <h1>MOSAIC 재고 검색</h1>
+  <!-- 로딩 메시지 -->
+  <div id="loading" style="text-align:center; margin: 40px 0; font-size: 16px;">
+    데이터 불러오는 중입니다...
+  </div>
   <div class="search-wrapper">
     <div class="filters">
       <select id="storeFilter">
@@ -258,12 +270,18 @@
     let allData = [];
 
     fetch(SHEET_URL)
-      .then(res => res.json())
-      .then(data => {
-        allData = data;
-        populateGenreFilter(data);
-        filterAndRenderTable();
-      });
+  .then(res => res.json())
+  .then(data => {
+    allData = data;
+    document.getElementById("loading").style.display = "none"; // ✅ 로딩 문구 숨기기
+    populateGenreFilter(data);
+    filterAndRenderTable();
+  })
+  .catch(err => {
+    document.getElementById("loading").innerText = "데이터를 불러오지 못했습니다.";
+    console.error("데이터 로드 오류:", err);
+  });
+
 
     function populateGenreFilter(data) {
       const genreSelect = document.getElementById("genreFilter");
