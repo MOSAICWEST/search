@@ -337,44 +337,51 @@ fetch(SHEET_URL)
       const results = document.getElementById("results");
       window.currentData = data;
 
-      if (window.innerWidth <= 600) {
-        let html = `<div class="card-list">`;
-        data.forEach((item, idx) => {
-          const imageURL = item["Image URL"]?.trim();
-          const imageBlock = imageURL
-            ? `<div class="card-image" onclick="showDetails(${idx})"><img src="${imageURL}" alt="앨범 이미지"></div>`
-            : `<div class="card-image" onclick="showDetails(${idx})"><span style="color:#aaa;font-size:12px;">NO IMAGE</span></div>`;
-          html += `
-            <div class="card-item">
-              ${imageBlock}
-              <div class="card-content">
-                <div><strong>${item.Artist || ""}</strong> - ${item.Title || ""}</div>
-                <div>${item.Pressing || ""}</div>
-                <div>${item["Condition Jacket"] || ""} / ${item["Condition Media"] || ""}</div>
-                <div><strong>₩${Number(item["Selling at"] || 0).toLocaleString()}</strong></div>
-              </div>
-            </div>`;
-        });
-        html += `</div>`;
-        results.innerHTML = html;
-      } else {
-        let html = `<div class="table-wrapper"><table><thead><tr>`;
-        displayOrder.forEach(key => html += `<th>${allDisplayNames[key] || key}</th>`);
-        html += `</tr></thead><tbody>`;
-        data.forEach((row, idx) => {
-          html += `<tr>`;
-          displayOrder.forEach(key => {
-            let cell = row[key] ?? "";
-            if (key === "Selling at" && !isNaN(cell)) cell = Number(cell).toLocaleString();
-            if (key === "Details") cell = `<button onclick="showDetails(${idx})">상세</button>`;
-            html += `<td>${cell}</td>`;
-          });
-          html += `</tr>`;
-        });
-        html += `</tbody></table></div>`;
-        results.innerHTML = html;
-      }
-    }
+  if (data.length === 0) {
+  results.innerHTML = `<div style="text-align:center; margin:40px 0; font-size:16px; color:#777;">
+    검색 결과가 없습니다.
+  </div>`;
+  return;
+}
+
+if (window.innerWidth <= 600) {
+  let html = `<div class="card-list">`;
+  data.forEach((item, idx) => {
+    const imageURL = item["Image URL"]?.trim();
+    const imageBlock = imageURL
+      ? `<div class="card-image" onclick="showDetails(${idx})"><img src="${imageURL}" alt="앨범 이미지"></div>`
+      : `<div class="card-image" onclick="showDetails(${idx})"><span style="color:#aaa;font-size:12px;">NO IMAGE</span></div>`;
+    html += `
+      <div class="card-item">
+        ${imageBlock}
+        <div class="card-content">
+          <div><strong>${item.Artist || ""}</strong> - ${item.Title || ""}</div>
+          <div>${item.Pressing || ""}</div>
+          <div>${item["Condition Jacket"] || ""} / ${item["Condition Media"] || ""}</div>
+          <div><strong>₩${Number(item["Selling at"] || 0).toLocaleString()}</strong></div>
+        </div>
+      </div>`;
+  });
+  html += `</div>`;
+  results.innerHTML = html;
+} else {
+  let html = `<div class="table-wrapper"><table><thead><tr>`;
+  displayOrder.forEach(key => html += `<th>${allDisplayNames[key] || key}</th>`);
+  html += `</tr></thead><tbody>`;
+  data.forEach((row, idx) => {
+    html += `<tr>`;
+    displayOrder.forEach(key => {
+      let cell = row[key] ?? "";
+      if (key === "Selling at" && !isNaN(cell)) cell = Number(cell).toLocaleString();
+      if (key === "Details") cell = `<button onclick="showDetails(${idx})">상세</button>`;
+      html += `<td>${cell}</td>`;
+    });
+    html += `</tr>`;
+  });
+  html += `</tbody></table></div>`;
+  results.innerHTML = html;
+}
+
 
     window.showDetails = function(index) {
       const item = window.currentData[index];
