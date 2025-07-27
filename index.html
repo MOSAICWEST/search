@@ -418,7 +418,10 @@
     };
 
 document.getElementById("searchInput").addEventListener("keydown", e => {
-  if (e.key === "Enter") filterAndRenderTable();
+  if (e.key === "Enter") {
+    e.target.blur();
+    filterAndRenderTable();
+  }
 });
 
 document.getElementById("searchBtn").addEventListener("click", () => {
