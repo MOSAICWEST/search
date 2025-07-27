@@ -4,64 +4,63 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MOSAIC 재고 검색</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; }
     body {
-      font-family: system-ui, sans-serif;
+      font-family: 'Inter', sans-serif;
       margin: 0;
       padding: 0;
       background-color: #fafafa;
+      color: #1f1f1f;
     }
     h1 {
       text-align: center;
-      margin: 30px 0 20px;
+      margin: 30px 0 10px;
       font-size: 28px;
+      font-weight: 600;
     }
-    .search-container {
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      align-items: flex-start;
-      padding: 0 5%;
-      margin-bottom: 20px;
-    }
-    .left-filters {
+    .search-wrapper {
       display: flex;
       flex-direction: column;
-      gap: 10px;
-    }
-    .center-search {
-      display: flex;
       align-items: center;
+      gap: 10px;
+      padding: 0 5% 30px;
+    }
+    .filters {
+      display: flex;
       gap: 10px;
       flex-wrap: wrap;
       justify-content: center;
     }
-    .center-search input {
-      width: 300px;
-      max-width: 80vw;
-      padding: 10px;
-    }
-    .search-container select,
-    .search-container input,
-    .search-container button {
+    select, input[type="text"], button {
       font-size: 16px;
       padding: 10px;
       border: 1px solid #ccc;
-      border-radius: 6px;
+      border-radius: 8px;
+      transition: all 0.2s ease;
     }
-    .search-container button {
+    input[type="text"]:focus, select:focus {
+      border-color: #0071e3;
+      box-shadow: 0 0 0 3px rgba(0,113,227,0.2);
+    }
+    button {
       background-color: #333;
       color: #fff;
       cursor: pointer;
     }
-    .search-container button:hover {
+    button:hover {
       background-color: #555;
     }
     .table-wrapper {
       overflow-x: auto;
-      margin: 0 auto;
+      margin: 0 auto 60px;
       width: 95%;
+      animation: fadeIn 0.4s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     table {
       width: 100%;
@@ -81,7 +80,6 @@
       top: 0;
       z-index: 10;
       white-space: nowrap;
-      min-width: 80px;
     }
     tbody tr:nth-child(odd) { background-color: #fcfcfc; }
     tbody tr:hover { background-color: #eef6ff; }
@@ -107,59 +105,126 @@
       top: 0;
       width: 100%;
       height: 100%;
-      overflow: auto;
-      background-color: rgba(0,0,0,0.5);
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
     }
-    .modal-content {
-      background-color: #fff;
-      margin: 10% auto;
-      padding: 20px;
-      border: 1px solid #888;
-      width: 90%;
-      max-width: 600px;
-      border-radius: 6px;
+.modal-content {
+  background: #fff;
+  padding: 24px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 10px;
+  position: relative;
+  animation: slideUp 0.3s ease forwards;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+#modalBody h4 {
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+#modalBody p {
+  font-size: 14px;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+#modalBody ul {
+  padding-left: 18px;
+  margin: 0 0 12px 0;
+}
+#modalBody li {
+  font-size: 14px;
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+#modalBody strong {
+  color: #222;
+}
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     .modal-close {
-      color: #aaa;
-      float: right;
+      position: absolute;
+      top: 12px;
+      right: 16px;
       font-size: 24px;
-      font-weight: bold;
       cursor: pointer;
+      color: #666;
+      transition: color 0.3s;
     }
     .modal-close:hover { color: #000; }
-    @media screen and (max-width: 600px) {
-      h1 { font-size: 22px; }
-      .search-container {
+    .video-wrapper {
+      position: relative;
+      padding-top: 56.25%;
+      height: 0;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .video-wrapper iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    @media (max-width: 600px) {
+      table { display: none; }
+      .card-list {
+        display: flex;
         flex-direction: column;
+        gap: 16px;
+        padding: 0 5%;
+      }
+      .card-item {
+        display: flex;
+        background: #fff;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      }
+      .card-item .card-image {
+        width: 100px;
+        height: 100px;
+        background-color: #eee;
+        display: flex;
         align-items: center;
+        justify-content: center;
+        cursor: pointer;
       }
-      .left-filters {
-        flex-direction: row;
-        gap: 5px;
-        margin-bottom: 10px;
+      .card-item .card-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
       }
-      .center-search {
+      .card-content {
+        padding: 12px;
+        flex: 1;
+        display: flex;
         flex-direction: column;
-        gap: 5px;
+        justify-content: center;
       }
-      table { font-size: 12px; }
+      .card-content div {
+        margin-bottom: 4px;
+        font-size: 14px;
+      }
     }
   </style>
 </head>
 <body>
   <h1>MOSAIC 재고 검색</h1>
-  <div class="search-container">
-    <div class="left-filters">
+  <div class="search-wrapper">
+    <div class="filters">
       <select id="storeFilter">
         <option value="all">매장 전체</option>
         <option value="WEST">WEST</option>
         <option value="EAST">EAST</option>
       </select>
-      <select id="genreFilter">
-        <option value="all">장르 전체</option>
-      </select>
-    </div>
-    <div class="center-search">
+      <select id="genreFilter"><option value="all">장르 전체</option></select>
       <select id="searchScope">
         <option value="all">전체검색</option>
         <option value="Artist">아티스트</option>
@@ -172,20 +237,17 @@
       <button id="searchBtn">검색</button>
     </div>
   </div>
-
   <div id="results"></div>
-
-  <!-- 모달 -->
   <div id="detailModal" class="modal">
     <div class="modal-content">
       <span id="modalClose" class="modal-close">&times;</span>
       <div id="modalBody"></div>
     </div>
   </div>
-
+  <button class="top-button" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">TOP</button>
   <script>
-    const SHEET_URL = "./data.json";
-    const displayOrder = ["Ref", "Artist", "Title", "Label", "Pressing", "Genre", "Style", "Subcategory", "Condition Jacket", "Condition Media", "Selling at", "Details"];
+    const SHEET_URL = "https://script.google.com/macros/s/AKfycbxlZuzYrg1A76VGHn1h6SeFmGcJpXhOAid15mDoW7mKphngixFSTYwwW5zfZIyNYDmdRg/exec";
+    const displayOrder = ["Artist", "Title", "Label", "Pressing", "Genre", "Style", "Subcategory", "Condition Jacket", "Condition Media", "Selling at", "Details"];
     const allDisplayNames = {
       "Ref": "상품번호", "Artist": "아티스트", "Title": "타이틀",
       "Label": "레이블", "Pressing": "프레싱", "Genre": "장르", "Style": "스타일",
@@ -199,7 +261,7 @@
       .then(res => res.json())
       .then(data => {
         allData = data;
-        populateGenreFilter(allData);
+        populateGenreFilter(data);
         filterAndRenderTable();
       });
 
@@ -226,8 +288,10 @@
       const selectedGenre = document.getElementById("genreFilter").value;
 
       const filtered = allData.filter(item => {
-        if (selectedStore !== "all" && item.OriginSheet !== selectedStore) return false;
-        if (selectedGenre !== "all" && (item["Genre"] ?? "") !== selectedGenre) return false;
+        const store = String(item.OriginSheet ?? "").trim();
+        const genre = String(item["Genre"] ?? "").trim();
+        if (selectedStore !== "all" && store !== selectedStore) return false;
+        if (selectedGenre !== "all" && genre !== selectedGenre) return false;
 
         const artist = String(item["Artist"] ?? "").toLowerCase();
         const title = String(item["Title"] ?? "").toLowerCase();
@@ -257,29 +321,45 @@
 
     function renderTable(data) {
       const results = document.getElementById("results");
-      if (!data.length) {
-        results.innerHTML = "<p class='loading'>표시할 데이터가 없습니다.</p>";
-        return;
-      }
-
-      let html = `<div class="table-wrapper"><table><thead><tr>`;
-      displayOrder.forEach(key => html += `<th>${allDisplayNames[key] || key}</th>`);
-      html += `</tr></thead><tbody>`;
-
-      data.forEach((row, idx) => {
-        html += `<tr>`;
-        displayOrder.forEach(key => {
-          let cell = row[key] ?? "";
-          if (key === "Selling at" && !isNaN(cell)) cell = Number(cell).toLocaleString();
-          if (key === "Details") cell = `<button onclick="showDetails(${idx})">상세</button>`;
-          html += `<td>${cell}</td>`;
-        });
-        html += `</tr>`;
-      });
-
-      html += `</tbody></table></div>`;
-      results.innerHTML = html;
       window.currentData = data;
+
+      if (window.innerWidth <= 600) {
+        let html = `<div class="card-list">`;
+        data.forEach((item, idx) => {
+          const imageURL = item["Image URL"]?.trim();
+          const imageBlock = imageURL
+            ? `<div class="card-image" onclick="showDetails(${idx})"><img src="${imageURL}" alt="앨범 이미지"></div>`
+            : `<div class="card-image" onclick="showDetails(${idx})"><span style="color:#aaa;font-size:12px;">NO IMAGE</span></div>`;
+          html += `
+            <div class="card-item">
+              ${imageBlock}
+              <div class="card-content">
+                <div><strong>${item.Artist || ""}</strong> - ${item.Title || ""}</div>
+                <div>${item.Pressing || ""}</div>
+                <div>${item["Condition Jacket"] || ""} / ${item["Condition Media"] || ""}</div>
+                <div><strong>₩${Number(item["Selling at"] || 0).toLocaleString()}</strong></div>
+              </div>
+            </div>`;
+        });
+        html += `</div>`;
+        results.innerHTML = html;
+      } else {
+        let html = `<div class="table-wrapper"><table><thead><tr>`;
+        displayOrder.forEach(key => html += `<th>${allDisplayNames[key] || key}</th>`);
+        html += `</tr></thead><tbody>`;
+        data.forEach((row, idx) => {
+          html += `<tr>`;
+          displayOrder.forEach(key => {
+            let cell = row[key] ?? "";
+            if (key === "Selling at" && !isNaN(cell)) cell = Number(cell).toLocaleString();
+            if (key === "Details") cell = `<button onclick="showDetails(${idx})">상세</button>`;
+            html += `<td>${cell}</td>`;
+          });
+          html += `</tr>`;
+        });
+        html += `</tbody></table></div>`;
+        results.innerHTML = html;
+      }
     }
 
     window.showDetails = function(index) {
@@ -288,42 +368,88 @@
       const body = document.getElementById("modalBody");
 
       const title = `${item["Artist"] || ""} - ${item["Title"] || ""}`;
-      const youtubeLink = item["Youtube"]?.trim()
-        ? `<a href="${item["Youtube"].trim()}" target="_blank">링크</a>`
-        : "없음";
-      const imageHTML = item["Image URL"]?.trim()
-        ? `<img src="${item["Image URL"].trim()}" alt="이미지" style="max-width: 100%; margin: 10px 0;" loading="lazy">`
-        : "없음";
-      const formattedTracklist = (item.Tracklist || "").split("•").map(str => str.trim()).join("<br>");
-      const formattedCredits = (item.Credits || "").split("•").map(str => str.trim()).join("<br>");
+      const ref = item["Ref"] || "";
 
-      body.innerHTML = `
-        <h4 style="margin-top: 0;">${title}</h4>
-        <p><strong>이미지:</strong><br>${imageHTML}</p>
-        <p><strong>컨디션 코멘트:</strong><br>${item["Condition Comment"] || "없음"}</p>
-        <p><strong>YouTube:</strong><br>${youtubeLink}</p>
-        <p><strong>Tracklist:</strong><br>${formattedTracklist || "없음"}</p>
-        <p><strong>Credits:</strong><br>${formattedCredits || "없음"}</p>
-      `;
-      modal.style.display = "block";
+      let content = `<h4 style="margin-top: 0;">${title}</h4><p style="margin-top: -8px;">${ref}</p>`;
+
+      if (item["Image URL"]?.trim()) {
+        content += `<p><strong>이미지:</strong><br><img src="${item["Image URL"].trim()}" alt="이미지" style="max-width: 100%; margin: 10px 0;" loading="lazy"></p>`;
+      }
+
+      content += `<p><strong>컨디션 코멘트:</strong><br>${item["Condition Comment"] || "없음"}</p>`;
+
+      if (item["Youtube"]?.trim()) {
+        const url = item["Youtube"].trim();
+        let embedUrl = "";
+        if (url.includes("youtube.com/watch?v=")) {
+          embedUrl = `https://www.youtube.com/embed/${url.split("v=")[1].split("&")[0]}`;
+        } else if (url.includes("youtu.be/")) {
+          embedUrl = `https://www.youtube.com/embed/${url.split("youtu.be/")[1].split("?")[0]}`;
+        }
+        if (embedUrl) {
+          content += `<p><strong>YouTube:</strong><br><div class="video-wrapper"><iframe src="${embedUrl}" frameborder="0" allowfullscreen></iframe></div></p>`;
+        }
+      }
+
+      if (item.Tracklist?.trim()) {
+        const list = item.Tracklist.split("•").map(s => s.trim()).filter(Boolean);
+        if (list.length) {
+          content += `<p><strong>Tracklist:</strong><ul>${list.map(track => `<li>${track}</li>`).join('')}</ul></p>`;
+        }
+      }
+
+      if (item.Credits?.trim()) {
+        const credits = item.Credits.split("•").map(s => s.trim()).filter(Boolean);
+        if (credits.length) {
+          content += `<p><strong>Credits:</strong><br>${credits.join("<br>")}</p>`;
+        }
+      }
+
+      body.innerHTML = content;
+      modal.style.display = "flex";
     };
 
     document.getElementById("modalClose").onclick = () =>
       document.getElementById("detailModal").style.display = "none";
 
     window.onclick = e => {
-      if (e.target == document.getElementById("detailModal"))
+      if (e.target === document.getElementById("detailModal"))
         document.getElementById("detailModal").style.display = "none";
     };
 
-    document.getElementById("searchInput").addEventListener("keydown", e => {
-      if (e.key === "Enter") filterAndRenderTable();
-    });
+document.getElementById("searchInput").addEventListener("keydown", e => {
+  if (e.key === "Enter") filterAndRenderTable();
+});
 
-    document.getElementById("searchBtn").addEventListener("click", filterAndRenderTable);
-    document.getElementById("storeFilter").addEventListener("change", filterAndRenderTable);
-    document.getElementById("genreFilter").addEventListener("change", filterAndRenderTable);
-    document.getElementById("searchScope").addEventListener("change", filterAndRenderTable);
+document.getElementById("searchBtn").addEventListener("click", () => {
+  document.getElementById("searchInput").blur();
+  filterAndRenderTable();
+});
+
+document.getElementById("storeFilter").addEventListener("change", filterAndRenderTable);
+document.getElementById("genreFilter").addEventListener("change", filterAndRenderTable);
+document.getElementById("searchScope").addEventListener("change", filterAndRenderTable);
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === "Escape") {
+    document.getElementById("detailModal").style.display = "none";
+  }
+});
+
+    function debounce(func, delay = 300) {
+      let timeout;
+      return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), delay);
+      };
+    }
+   window.addEventListener("resize", debounce(() => {
+  if (window.currentData?.length > 0) {
+    renderTable(window.currentData);
+  } else {
+    filterAndRenderTable();
+  }
+}, 300));
   </script>
 </body>
 </html>
