@@ -213,6 +213,12 @@
         margin-bottom: 4px;
         font-size: 14px;
       }
+      button:disabled {
+  background-color: #ccc;
+  color: #666;
+  cursor: default;
+}
+
     }
   </style>
 </head>
@@ -493,6 +499,7 @@ document.addEventListener('keydown', (e) => {
     filterAndRenderTable();
   }
 }, 300));
+    
     function renderPagination(totalItems) {
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const pagination = document.getElementById("pagination");
@@ -503,22 +510,18 @@ document.addEventListener('keydown', (e) => {
     return;
   }
 
-  if (currentPage > 1) {
-    html += `<button onclick="goToPage(${currentPage - 1})">« 이전</button>`;
-  }
+  // « 이전 버튼 (disabled 처리 포함)
+  html += `<button onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>« 이전</button>`;
 
   for (let i = 1; i <= totalPages; i++) {
     if (
-      i === 1 ||
-      i === totalPages ||
-      Math.abs(i - currentPage) <= 2
+      i === 1 || i === totalPages || Math.abs(i - currentPage) <= 2
     ) {
       if (i === currentPage) {
-  html += `<button style="background:#333; color:#fff; font-weight:bold;">${i}</button>`;
-} else {
-  html += `<button onclick="goToPage(${i})">${i}</button>`;
-}
-
+        html += `<button style="background:#333; color:#fff; font-weight:bold;" disabled>${i}</button>`;
+      } else {
+        html += `<button onclick="goToPage(${i})">${i}</button>`;
+      }
     } else if (
       i === 2 && currentPage - 3 > 1 ||
       i === totalPages - 1 && currentPage + 3 < totalPages
@@ -527,17 +530,16 @@ document.addEventListener('keydown', (e) => {
     }
   }
 
-  if (currentPage < totalPages) {
-    html += `<button onclick="goToPage(${currentPage + 1})">다음 »</button>`;
-  }
+  // 다음 » 버튼 (disabled 처리 포함)
+  html += `<button onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>다음 »</button>`;
 
   pagination.innerHTML = html;
 }
-
 function goToPage(page) {
   currentPage = page;
   renderTable(window.currentData);
-}
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
   </script>
 </body>
 </html>
