@@ -538,7 +538,7 @@ content += `<div style="text-align: right; margin-top: 20px;">
 body.innerHTML = content;
 modal.style.display = "flex";
 
-function addToCart(index) {
+      function addToCart(index) {
   const item = window.currentData[index];
   const cart = JSON.parse(localStorage.getItem("cart") || "[]");
 
@@ -565,7 +565,7 @@ function addToCart(index) {
   alert("장바구니에 추가되었습니다.");
 }
 
-    
+
     document.getElementById("modalClose").onclick = () =>
       document.getElementById("detailModal").style.display = "none";
 
@@ -652,48 +652,51 @@ function goToPage(page) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
   // 장바구니 모달 열기
-document.getElementById("viewCartBtn").onclick = () => {
-  const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-  const cartBody = document.getElementById("cartBody");
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("viewCartBtn").onclick = () => {
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    const cartBody = document.getElementById("cartBody");
 
-  if (cart.length === 0) {
-    cartBody.innerHTML = `<p>장바구니가 비어 있습니다.</p>`;
-  } else {
-    let total = 0;
-    const itemsHtml = cart.map((item, idx) => {
-      total += item.price;
-      return `<div style="margin-bottom: 12px;">
-        <strong>${idx + 1}. [${item.ref}] ${item.artist} – ${item.title}</strong><br>
-        <span style="font-size: 14px;">
-          ${item.jacket} / ${item.media} / ${item.pressing}<br>
-          매장: ${item.store}<br>
-          가격: ₩${item.price.toLocaleString()}
-        </span>
-      </div>`;
-    }).join('');
+    if (cart.length === 0) {
+      cartBody.innerHTML = `<p>장바구니가 비어 있습니다.</p>`;
+    } else {
+      let total = 0;
+      const itemsHtml = cart.map((item, idx) => {
+        total += item.price;
+        return `<div style="margin-bottom: 12px;">
+          <strong>${idx + 1}. [${item.ref}] ${item.artist} – ${item.title}</strong><br>
+          <span style="font-size: 14px;">
+            ${item.jacket} / ${item.media} / ${item.pressing}<br>
+            매장: ${item.store}<br>
+            가격: ₩${item.price.toLocaleString()}
+          </span>
+        </div>`;
+      }).join('');
 
-    cartBody.innerHTML = `
-      ${itemsHtml}
-      <hr>
-      <p><strong>총 ${cart.length}개 (합계: ₩${total.toLocaleString()})</strong></p>
-      <button onclick="copyCartToClipboard()" style="margin-right: 10px;">📋 텍스트 복사</button>
-      <button onclick="window.open('https://pf.kakao.com/_xxx/chat', '_blank')">💬 카카오톡 문의(아직 미구현)</button>
-      <button onclick="clearCart()" style="float:right; background:#ccc; color:#000;">❌ 전체 비우기</button>
-    `;
-  }
+      cartBody.innerHTML = `
+        ${itemsHtml}
+        <hr>
+        <p><strong>총 ${cart.length}개 (합계: ₩${total.toLocaleString()})</strong></p>
+        <button onclick="copyCartToClipboard()" style="margin-right: 10px;">📋 텍스트 복사</button>
+        <button onclick="window.open('https://pf.kakao.com/_xxx/chat', '_blank')">💬 카카오톡 문의(아직 미구현)</button>
+        <button onclick="clearCart()" style="float:right; background:#ccc; color:#000;">❌ 전체 비우기</button>
+      `;
+    }
 
-  document.getElementById("cartModal").style.display = "flex";
-};
+    document.getElementById("cartModal").style.display = "flex";
+  };
 
-// 모달 닫기
-document.getElementById("cartModalClose").onclick = () => {
-  document.getElementById("cartModal").style.display = "none";
-};
-window.addEventListener("click", e => {
-  if (e.target === document.getElementById("cartModal")) {
+  // 모달 닫기 이벤트도 여기에 포함
+  document.getElementById("cartModalClose").onclick = () => {
     document.getElementById("cartModal").style.display = "none";
-  }
+  };
+  window.addEventListener("click", e => {
+    if (e.target === document.getElementById("cartModal")) {
+      document.getElementById("cartModal").style.display = "none";
+    }
+  });
 });
+
 
 // 장바구니 초기화
 function clearCart() {
