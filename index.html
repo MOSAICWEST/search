@@ -318,380 +318,346 @@
   </div>
   <button class="top-button" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">TOP</button>
   <script>
-    const SHEET_URL = "./data.json";
-    const displayOrder = ["Artist", "Title", "Label", "Pressing", "Genre", "Style", "Subcategory", "Condition Jacket", "Condition Media", "Selling at", "Details"];
-    const allDisplayNames = {
-      "Ref": "상품번호", "Artist": "아티스트", "Title": "타이틀",
-      "Label": "레이블", "Pressing": "프레싱", "Genre": "장르", "Style": "스타일",
-      "Subcategory": "진열 위치", "Condition Jacket": "자켓", "Condition Media": "미디어",
-      "Selling at": "가격", "Details": "상세", "Youtube": "YouTube"
-    };
+  const SHEET_URL = "./data.json";
+  const displayOrder = ["Artist", "Title", "Label", "Pressing", "Genre", "Style", "Subcategory", "Condition Jacket", "Condition Media", "Selling at", "Details"];
+  const allDisplayNames = {
+    "Ref": "상품번호", "Artist": "아티스트", "Title": "타이틀",
+    "Label": "레이블", "Pressing": "프레싱", "Genre": "장르", "Style": "스타일",
+    "Subcategory": "진열 위치", "Condition Jacket": "자켓", "Condition Media": "미디어",
+    "Selling at": "가격", "Details": "상세", "Youtube": "YouTube"
+  };
 
-    let allData = [];
-    let currentPage = 1;
-const itemsPerPage = 30;
+  let allData = [];
+  let currentPage = 1;
+  const itemsPerPage = 30;
 
-const results = document.getElementById("results");
-results.innerHTML = `<div style="text-align:center; margin:40px 0; color:#555; font-size:16px;">
-  데이터 불러오는 중입니다...
-</div>`;
-
-document.getElementById("searchBtn").disabled = true;
-
-fetch(SHEET_URL)
-  .then(res => res.json())
-  .then(data => {
-    allData = data;
-    populateGenreFilter(data);
-    filterAndRenderTable();
-  })
-  .catch(err => {
-    results.innerHTML = `<div style="text-align:center; margin:40px 0; color:#c00;">
-      데이터를 불러오지 못했습니다.
-    </div>`;
-    console.error("데이터 로드 오류:", err);
-  })
-  .finally(() => {
-    document.getElementById("searchBtn").disabled = false;
-  });
-
-
-
-
-    function populateGenreFilter(data) {
-      const genreSelect = document.getElementById("genreFilter");
-      const genreSet = new Set();
-      data.forEach(item => {
-        const genre = item["Genre"];
-        if (genre) genreSet.add(genre.trim());
-      });
-      genreSelect.innerHTML = `<option value="all">장르 전체</option>`;
-      [...genreSet].sort().forEach(genre => {
-        const option = document.createElement("option");
-        option.value = genre;
-        option.textContent = genre;
-        genreSelect.appendChild(option);
-      });
-    }
-
-    function filterAndRenderTable() {
-      const keyword = document.getElementById("searchInput").value.trim().toLowerCase();
-      const scope = document.getElementById("searchScope").value;
-      const selectedStore = document.getElementById("storeFilter").value;
-      const selectedGenre = document.getElementById("genreFilter").value;
-
-      const filtered = allData.filter(item => {
-        const store = String(item.OriginSheet ?? "").trim();
-        const genre = String(item["Genre"] ?? "").trim();
-        if (selectedStore !== "all" && store !== selectedStore) return false;
-        if (selectedGenre !== "all" && genre !== selectedGenre) return false;
-
-        const artist = String(item["Artist"] ?? "").toLowerCase();
-        const title = String(item["Title"] ?? "").toLowerCase();
-        const label = String(item["Label"] ?? "").toLowerCase();
-        const tracklist = String(item["Tracklist"] ?? "").toLowerCase();
-        const credits = String(item["Credits"] ?? "").toLowerCase();
-
-        switch (scope) {
-          case "Artist": return artist.includes(keyword);
-          case "Title": return title.includes(keyword);
-          case "Label": return label.includes(keyword);
-          case "Tracklist": return tracklist.includes(keyword);
-          case "Credits": return credits.includes(keyword);
-          default:
-            return (
-              artist.includes(keyword) ||
-              title.includes(keyword) ||
-              label.includes(keyword) ||
-              tracklist.includes(keyword) ||
-              credits.includes(keyword)
-            );
-        }
-      });
-      
-currentPage = 1;
-      renderTable(filtered);
-    }
-
-function renderTable(data) {
   const results = document.getElementById("results");
-  const pagination = document.getElementById("pagination");
+  results.innerHTML = `<div style="text-align:center; margin:40px 0; color:#555; font-size:16px;">
+    데이터 불러오는 중입니다...
+  </div>`;
 
-  if (data.length === 0) {
-    results.innerHTML = `<div style="text-align:center; margin:40px 0; font-size:16px; color:#777;">
-      검색 결과가 없습니다.
-    </div>`;
-    pagination.innerHTML = "";
-    return;
+  document.getElementById("searchBtn").disabled = true;
+
+  fetch(SHEET_URL)
+    .then(res => res.json())
+    .then(data => {
+      allData = data;
+      populateGenreFilter(data);
+      filterAndRenderTable();
+    })
+    .catch(err => {
+      results.innerHTML = `<div style="text-align:center; margin:40px 0; color:#c00;">
+        데이터를 불러오지 못했습니다.
+      </div>`;
+      console.error("데이터 로드 오류:", err);
+    })
+    .finally(() => {
+      document.getElementById("searchBtn").disabled = false;
+    });
+
+  function populateGenreFilter(data) {
+    const genreSelect = document.getElementById("genreFilter");
+    const genreSet = new Set();
+    data.forEach(item => {
+      const genre = item["Genre"];
+      if (genre) genreSet.add(genre.trim());
+    });
+    genreSelect.innerHTML = `<option value="all">장르 전체</option>`;
+    [...genreSet].sort().forEach(genre => {
+      const option = document.createElement("option");
+      option.value = genre;
+      option.textContent = genre;
+      genreSelect.appendChild(option);
+    });
   }
 
-  const start = (currentPage - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  const pageData = data.slice(start, end);
-  window.currentData = data;
+  function filterAndRenderTable() {
+    const keyword = document.getElementById("searchInput").value.trim().toLowerCase();
+    const scope = document.getElementById("searchScope").value;
+    const selectedStore = document.getElementById("storeFilter").value;
+    const selectedGenre = document.getElementById("genreFilter").value;
 
-  let html = "";
+    const filtered = allData.filter(item => {
+      const store = String(item.OriginSheet ?? "").trim();
+      const genre = String(item["Genre"] ?? "").trim();
+      if (selectedStore !== "all" && store !== selectedStore) return false;
+      if (selectedGenre !== "all" && genre !== selectedGenre) return false;
 
-  if (window.innerWidth <= 600) {
-    html = `<div class="card-list">`;
-    pageData.forEach((item, idx) => {
-      const imageURL = item["Image URL"]?.trim();
-      const imageBlock = imageURL
-        ? `<div class="card-image" onclick="showDetails(${start + idx})"><img src="${imageURL}" alt="앨범 이미지"></div>`
-        : `<div class="card-image" onclick="showDetails(${start + idx})"><span style="color:#aaa;font-size:12px;">NO IMAGE</span></div>`;
-      html += `
-        <div class="card-item">
-          ${imageBlock}
-          <div class="card-content">
-            <div><strong>${item.Artist || ""}</strong> - ${item.Title || ""}</div>
-            <div>${item.Pressing || ""}</div>
-            <div>${item["Condition Jacket"] || ""} / ${item["Condition Media"] || ""}</div>
-            <div><strong>₩${Number(item["Selling at"] || 0).toLocaleString()}</strong></div>
-          </div>
-        </div>`;
+      const artist = String(item["Artist"] ?? "").toLowerCase();
+      const title = String(item["Title"] ?? "").toLowerCase();
+      const label = String(item["Label"] ?? "").toLowerCase();
+      const tracklist = String(item["Tracklist"] ?? "").toLowerCase();
+      const credits = String(item["Credits"] ?? "").toLowerCase();
+
+      switch (scope) {
+        case "Artist": return artist.includes(keyword);
+        case "Title": return title.includes(keyword);
+        case "Label": return label.includes(keyword);
+        case "Tracklist": return tracklist.includes(keyword);
+        case "Credits": return credits.includes(keyword);
+        default:
+          return artist.includes(keyword) || title.includes(keyword) || label.includes(keyword) || tracklist.includes(keyword) || credits.includes(keyword);
+      }
     });
-    html += `</div>`;
-  } else {
-    html = `<div class="table-wrapper"><table><thead><tr>`;
-    displayOrder.forEach(key => html += `<th>${allDisplayNames[key] || key}</th>`);
-    html += `</tr></thead><tbody>`;
-    pageData.forEach((row, idx) => {
-      html += `<tr>`;
-      displayOrder.forEach(key => {
-        let cell = row[key] ?? "";
-        if (key === "Selling at" && !isNaN(cell)) cell = Number(cell).toLocaleString();
-        if (key === "Details") cell = `<button onclick="showDetails(${start + idx})">상세</button>`;
-        html += `<td>${cell}</td>`;
+
+    currentPage = 1;
+    renderTable(filtered);
+  }
+
+  function renderTable(data) {
+    const results = document.getElementById("results");
+    const pagination = document.getElementById("pagination");
+
+    if (data.length === 0) {
+      results.innerHTML = `<div style="text-align:center; margin:40px 0; font-size:16px; color:#777;">
+        검색 결과가 없습니다.
+      </div>`;
+      pagination.innerHTML = "";
+      return;
+    }
+
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const pageData = data.slice(start, end);
+    window.currentData = data;
+
+    let html = "";
+
+    if (window.innerWidth <= 600) {
+      html = `<div class="card-list">`;
+      pageData.forEach((item, idx) => {
+        const imageURL = item["Image URL"]?.trim();
+        const imageBlock = imageURL
+          ? `<div class="card-image" onclick="showDetails(${start + idx})"><img src="${imageURL}" alt="앨범 이미지"></div>`
+          : `<div class="card-image" onclick="showDetails(${start + idx})"><span style="color:#aaa;font-size:12px;">NO IMAGE</span></div>`;
+        html += `
+          <div class="card-item">
+            ${imageBlock}
+            <div class="card-content">
+              <div><strong>${item.Artist || ""}</strong> - ${item.Title || ""}</div>
+              <div>${item.Pressing || ""}</div>
+              <div>${item["Condition Jacket"] || ""} / ${item["Condition Media"] || ""}</div>
+              <div><strong>₩${Number(item["Selling at"] || 0).toLocaleString()}</strong></div>
+            </div>
+          </div>`;
       });
-      html += `</tr>`;
-    });
-    html += `</tbody></table></div>`;
-  }
-
-  results.innerHTML = html;
-  renderPagination(data.length);
-}
-
-    window.showDetails = function(index) {
-      const item = window.currentData[index];
-      const modal = document.getElementById("detailModal");
-      const body = document.getElementById("modalBody");
-
-      const title = `${item["Artist"] || ""} - ${item["Title"] || ""}`;
-      const ref = item["Ref"] || "";
-
-      let content = `<h4 style="margin-top: 0;">${title}</h4><p style="margin-top: -8px;">${ref}</p>`;
-
-      if (item["Image URL"]?.trim()) {
-        content += `<p><strong>이미지:</strong><br><img src="${item["Image URL"].trim()}" alt="이미지" style="max-width: 100%; margin: 10px 0;" loading="lazy"></p>`;
-      }
-
-const jacket = item["Condition Jacket"] || "";
-const media = item["Condition Media"] || "";
-const comment = item["Condition Comment"] || "";
-
-content += `<p><strong>Jacket:</strong> ${jacket} /  <strong>Media:</strong> ${media}</p>`;
-if (comment) {
-  content += `<p>${comment}</p>`;
-}
-
-
-      if (item["Youtube"]?.trim()) {
-        const url = item["Youtube"].trim();
-        let embedUrl = "";
-        if (url.includes("youtube.com/watch?v=")) {
-          embedUrl = `https://www.youtube.com/embed/${url.split("v=")[1].split("&")[0]}`;
-        } else if (url.includes("youtu.be/")) {
-          embedUrl = `https://www.youtube.com/embed/${url.split("youtu.be/")[1].split("?")[0]}`;
-        }
-        if (embedUrl) {
-          content += `<p><strong>YouTube:</strong><br><div class="video-wrapper"><iframe src="${embedUrl}" frameborder="0" allowfullscreen></iframe></div></p>`;
-        }
-      }
-
-      if (item.Tracklist?.trim()) {
-        const list = item.Tracklist.split("•").map(s => s.trim()).filter(Boolean);
-        if (list.length) {
-          content += `<p><strong>Tracklist:</strong><ul>${list.map(track => `<li>${track}</li>`).join('')}</ul></p>`;
-        }
-      }
-
-if (item.Credits?.trim()) {
-  const credits = item.Credits.split("•").map(s => s.trim()).filter(Boolean);
-  if (credits.length) {
-    content += `<p><strong>Credits:</strong><br>${credits.join("<br>")}</p>`;
-  }
-}
-
-content += `<div style="text-align: right; margin-top: 20px;">
-  <button onclick="addToCart(${index})" style="
-    background-color: #0071e3;
-    color: white;
-    border: none;
-    padding: 10px 14px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-  ">🛒 장바구니 담기</button>
-</div>`;
-
-body.innerHTML = content;
-modal.style.display = "flex";
-
-    document.getElementById("modalClose").onclick = () =>
-      document.getElementById("detailModal").style.display = "none";
-
-    window.onclick = e => {
-      if (e.target === document.getElementById("detailModal"))
-        document.getElementById("detailModal").style.display = "none";
-    };
-
-document.getElementById("searchInput").addEventListener("keydown", e => {
-  if (e.key === "Enter") {
-    e.target.blur();
-    filterAndRenderTable();
-  }
-});
-
-document.getElementById("searchBtn").addEventListener("click", () => {
-  document.getElementById("searchInput").blur();
-  filterAndRenderTable();
-});
-
-document.getElementById("storeFilter").addEventListener("change", filterAndRenderTable);
-document.getElementById("genreFilter").addEventListener("change", filterAndRenderTable);
-document.getElementById("searchScope").addEventListener("change", filterAndRenderTable);
-
-document.addEventListener('keydown', (e) => {
-  if (e.key === "Escape") {
-    document.getElementById("detailModal").style.display = "none";
-  }
-});
-
-    function debounce(func, delay = 300) {
-      let timeout;
-      return function (...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), delay);
-      };
-    }
-   window.addEventListener("resize", debounce(() => {
-  if (window.currentData?.length > 0) {
-    renderTable(window.currentData);
-  } else {
-    filterAndRenderTable();
-  }
-}, 300));
-    
-    function renderPagination(totalItems) {
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const pagination = document.getElementById("pagination");
-  let html = "";
-
-  if (totalPages <= 1) {
-    pagination.innerHTML = "";
-    return;
-  }
-
-  // « 이전 버튼 (disabled 처리 포함)
-  html += `<button onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>« 이전</button>`;
-
-  for (let i = 1; i <= totalPages; i++) {
-    if (
-      i === 1 || i === totalPages || Math.abs(i - currentPage) <= 2
-    ) {
-      if (i === currentPage) {
-        html += `<button disabled>${i}</button>`;
-      } else {
-        html += `<button onclick="goToPage(${i})">${i}</button>`;
-      }
-    } else if (
-      i === 2 && currentPage - 3 > 1 ||
-      i === totalPages - 1 && currentPage + 3 < totalPages
-    ) {
-      html += `<span style="margin:0 4px;">...</span>`;
-    }
-  }
-
-  // 다음 » 버튼 (disabled 처리 포함)
-  html += `<button onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>다음 »</button>`;
-
-  pagination.innerHTML = html;
-}
-function goToPage(page) {
-  currentPage = page;
-  renderTable(window.currentData);
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-  // 장바구니 모달 열기
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("viewCartBtn").onclick = () => {
-    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    const cartBody = document.getElementById("cartBody");
-
-    if (cart.length === 0) {
-      cartBody.innerHTML = `<p>장바구니가 비어 있습니다.</p>`;
+      html += `</div>`;
     } else {
-      let total = 0;
-      const itemsHtml = cart.map((item, idx) => {
-        total += item.price;
-        return `<div style="margin-bottom: 12px;">
-          <strong>${idx + 1}. [${item.ref}] ${item.artist} – ${item.title}</strong><br>
-          <span style="font-size: 14px;">
-            ${item.jacket} / ${item.media} / ${item.pressing}<br>
-            매장: ${item.store}<br>
-            가격: ₩${item.price.toLocaleString()}
-          </span>
-        </div>`;
-      }).join('');
-
-      cartBody.innerHTML = `
-        ${itemsHtml}
-        <hr>
-        <p><strong>총 ${cart.length}개 (합계: ₩${total.toLocaleString()})</strong></p>
-        <button onclick="copyCartToClipboard()" style="margin-right: 10px;">📋 텍스트 복사</button>
-        <button onclick="window.open('https://pf.kakao.com/_xxx/chat', '_blank')">💬 카카오톡 문의(아직 미구현)</button>
-        <button onclick="clearCart()" style="float:right; background:#ccc; color:#000;">❌ 전체 비우기</button>
-      `;
+      html = `<div class="table-wrapper"><table><thead><tr>`;
+      displayOrder.forEach(key => html += `<th>${allDisplayNames[key] || key}</th>`);
+      html += `</tr></thead><tbody>`;
+      pageData.forEach((row, idx) => {
+        html += `<tr>`;
+        displayOrder.forEach(key => {
+          let cell = row[key] ?? "";
+          if (key === "Selling at" && !isNaN(cell)) cell = Number(cell).toLocaleString();
+          if (key === "Details") cell = `<button onclick="showDetails(${start + idx})">상세</button>`;
+          html += `<td>${cell}</td>`;
+        });
+        html += `</tr>`;
+      });
+      html += `</tbody></table></div>`;
     }
 
-    document.getElementById("cartModal").style.display = "flex";
+    results.innerHTML = html;
+    renderPagination(data.length);
+  }
+
+  window.showDetails = function(index) {
+    const item = window.currentData[index];
+    const modal = document.getElementById("detailModal");
+    const body = document.getElementById("modalBody");
+
+    const title = `${item["Artist"] || ""} - ${item["Title"] || ""}`;
+    const ref = item["Ref"] || "";
+
+    let content = `<h4 style="margin-top: 0;">${title}</h4><p style="margin-top: -8px;">${ref}</p>`;
+
+    if (item["Image URL"]?.trim()) {
+      content += `<p><strong>이미지:</strong><br><img src="${item["Image URL"].trim()}" alt="이미지" style="max-width: 100%; margin: 10px 0;" loading="lazy"></p>`;
+    }
+
+    const jacket = item["Condition Jacket"] || "";
+    const media = item["Condition Media"] || "";
+    const comment = item["Condition Comment"] || "";
+
+    content += `<p><strong>Jacket:</strong> ${jacket} /  <strong>Media:</strong> ${media}</p>`;
+    if (comment) content += `<p>${comment}</p>`;
+
+    if (item.Youtube?.trim()) {
+      const url = item.Youtube.trim();
+      let embedUrl = "";
+      if (url.includes("youtube.com/watch?v=")) {
+        embedUrl = `https://www.youtube.com/embed/${url.split("v=")[1].split("&")[0]}`;
+      } else if (url.includes("youtu.be/")) {
+        embedUrl = `https://www.youtube.com/embed/${url.split("youtu.be/")[1].split("?")[0]}`;
+      }
+      if (embedUrl) {
+        content += `<p><strong>YouTube:</strong><br><div class="video-wrapper"><iframe src="${embedUrl}" frameborder="0" allowfullscreen></iframe></div></p>`;
+      }
+    }
+
+    if (item.Tracklist?.trim()) {
+      const list = item.Tracklist.split("•").map(s => s.trim()).filter(Boolean);
+      if (list.length) {
+        content += `<p><strong>Tracklist:</strong><ul>${list.map(track => `<li>${track}</li>`).join('')}</ul></p>`;
+      }
+    }
+
+    if (item.Credits?.trim()) {
+      const credits = item.Credits.split("•").map(s => s.trim()).filter(Boolean);
+      if (credits.length) {
+        content += `<p><strong>Credits:</strong><br>${credits.join("<br>")}</p>`;
+      }
+    }
+
+    content += `<div style="text-align: right; margin-top: 20px;">
+      <button onclick="addToCart(${index})" style="background-color: #0071e3; color: white; border: none; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-size: 14px;">🛒 장바구니 담기</button>
+    </div>`;
+
+    body.innerHTML = content;
+    modal.style.display = "flex";
+  }
+
+  document.getElementById("modalClose").onclick = () => {
+    document.getElementById("detailModal").style.display = "none";
+  };
+  window.onclick = e => {
+    if (e.target === document.getElementById("detailModal"))
+      document.getElementById("detailModal").style.display = "none";
   };
 
-  // 모달 닫기 이벤트도 여기에 포함
-  document.getElementById("cartModalClose").onclick = () => {
-    document.getElementById("cartModal").style.display = "none";
-  };
-  window.addEventListener("click", e => {
-    if (e.target === document.getElementById("cartModal")) {
-      document.getElementById("cartModal").style.display = "none";
+  document.getElementById("searchInput").addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      e.target.blur();
+      filterAndRenderTable();
     }
   });
-});
+  document.getElementById("searchBtn").addEventListener("click", () => {
+    document.getElementById("searchInput").blur();
+    filterAndRenderTable();
+  });
+  document.getElementById("storeFilter").addEventListener("change", filterAndRenderTable);
+  document.getElementById("genreFilter").addEventListener("change", filterAndRenderTable);
+  document.getElementById("searchScope").addEventListener("change", filterAndRenderTable);
 
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") {
+      document.getElementById("detailModal").style.display = "none";
+    }
+  });
 
-// 장바구니 초기화
-function clearCart() {
-  if (confirm("장바구니를 모두 비우시겠습니까?")) {
-    localStorage.removeItem("cart");
-    document.getElementById("cartModal").style.display = "none";
-    alert("장바구니가 비워졌습니다.");
+  function debounce(func, delay = 300) {
+    let timeout;
+    return function (...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), delay);
+    };
   }
-}
-    function copyCartToClipboard() {
-  const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-  if (cart.length === 0) return;
 
-  let total = 0;
-  const lines = cart.map((item, i) => {
-    total += item.price;
-    return `${i + 1}. [${item.ref}] ${item.artist} – ${item.title}
+  window.addEventListener("resize", debounce(() => {
+    if (window.currentData?.length > 0) {
+      renderTable(window.currentData);
+    } else {
+      filterAndRenderTable();
+    }
+  }, 300));
+
+  function renderPagination(totalItems) {
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const pagination = document.getElementById("pagination");
+    let html = "";
+
+    if (totalPages <= 1) {
+      pagination.innerHTML = "";
+      return;
+    }
+
+    html += `<button onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>« 이전</button>`;
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 2) {
+        html += `<button onclick="goToPage(${i})" ${i === currentPage ? 'disabled' : ''}>${i}</button>`;
+      } else if (i === 2 && currentPage - 3 > 1 || i === totalPages - 1 && currentPage + 3 < totalPages) {
+        html += `<span style="margin:0 4px;">...</span>`;
+      }
+    }
+    html += `<button onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>다음 »</button>`;
+    pagination.innerHTML = html;
+  }
+
+  function goToPage(page) {
+    currentPage = page;
+    renderTable(window.currentData);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // 장바구니 관련 기능
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("viewCartBtn").onclick = () => {
+      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      const cartBody = document.getElementById("cartBody");
+
+      if (cart.length === 0) {
+        cartBody.innerHTML = `<p>장바구니가 비어 있습니다.</p>`;
+      } else {
+        let total = 0;
+        const itemsHtml = cart.map((item, idx) => {
+          total += item.price;
+          return `<div style="margin-bottom: 12px;">
+            <strong>${idx + 1}. [${item.ref}] ${item.artist} – ${item.title}</strong><br>
+            <span style="font-size: 14px;">
+              ${item.jacket} / ${item.media} / ${item.pressing}<br>
+              매장: ${item.store}<br>
+              가격: ₩${item.price.toLocaleString()}
+            </span>
+          </div>`;
+        }).join('');
+
+        cartBody.innerHTML = `
+          ${itemsHtml}
+          <hr>
+          <p><strong>총 ${cart.length}개 (합계: ₩${total.toLocaleString()})</strong></p>
+          <button onclick="copyCartToClipboard()" style="margin-right: 10px;">📋 텍스트 복사</button>
+          <button onclick="window.open('https://pf.kakao.com/_xxx/chat', '_blank')">💬 카카오톡 문의</button>
+          <button onclick="clearCart()" style="float:right; background:#ccc; color:#000;">❌ 전체 비우기</button>
+        `;
+      }
+
+      document.getElementById("cartModal").style.display = "flex";
+    };
+
+    document.getElementById("cartModalClose").onclick = () => {
+      document.getElementById("cartModal").style.display = "none";
+    };
+    window.addEventListener("click", e => {
+      if (e.target === document.getElementById("cartModal")) {
+        document.getElementById("cartModal").style.display = "none";
+      }
+    });
+  });
+
+  function clearCart() {
+    if (confirm("장바구니를 모두 비우시겠습니까?")) {
+      localStorage.removeItem("cart");
+      document.getElementById("cartModal").style.display = "none";
+      alert("장바구니가 비워졌습니다.");
+    }
+  }
+
+  function copyCartToClipboard() {
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    if (cart.length === 0) return;
+
+    let total = 0;
+    const lines = cart.map((item, i) => {
+      total += item.price;
+      return `${i + 1}. [${item.ref}] ${item.artist} – ${item.title}
 ${item.jacket} / ${item.media} / ${item.pressing}
 매장: ${item.store}
 가격: ₩${item.price.toLocaleString()}`;
-  });
+    });
 
-  const message = `📦 MOSAIC 장바구니 주문 요청
+    const message = `📦 MOSAIC 장바구니 주문 요청
 
 ${lines.join('\n\n')}
 
@@ -704,38 +670,38 @@ ${lines.join('\n\n')}
 👉 연락처: 직접 입력
 👉 배송지(선택사항): 직접 입력`;
 
-  navigator.clipboard.writeText(message).then(() => {
-    alert("장바구니 정보가 복사되었습니다. 카카오톡 채널로 이동해 붙여넣어 주세요!");
-  });
- function addToCart(index) {
-  const item = window.currentData[index];
-  const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-
-  const exists = cart.some(c => c.ref === item.Ref);
-  if (exists) {
-    alert("이미 장바구니에 담긴 상품입니다.");
-    return;
+    navigator.clipboard.writeText(message).then(() => {
+      alert("장바구니 정보가 복사되었습니다. 카카오톡 채널로 이동해 붙여넣어 주세요!");
+    });
   }
 
-  const price = Number(item["Selling at"] || 0);
-  const newItem = {
-    ref: item.Ref || "",
-    artist: item.Artist || "",
-    title: item.Title || "",
-    jacket: item["Condition Jacket"] || "",
-    media: item["Condition Media"] || "",
-    pressing: item.Pressing || "",
-    price: price,
-    store: item.OriginSheet || ""
-  };
+  function addToCart(index) {
+    const item = window.currentData[index];
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
 
-  cart.push(newItem);
-  localStorage.setItem("cart", JSON.stringify(cart));
-  alert("장바구니에 추가되었습니다.");
-}
-     
-}
-  </script>
+    const exists = cart.some(c => c.ref === item.Ref);
+    if (exists) {
+      alert("이미 장바구니에 담긴 상품입니다.");
+      return;
+    }
+
+    const price = Number(item["Selling at"] || 0);
+    const newItem = {
+      ref: item.Ref || "",
+      artist: item.Artist || "",
+      title: item.Title || "",
+      jacket: item["Condition Jacket"] || "",
+      media: item["Condition Media"] || "",
+      pressing: item.Pressing || "",
+      price: price,
+      store: item.OriginSheet || ""
+    };
+
+    cart.push(newItem);
+    localStorage.setItem("cart", JSON.stringify(cart));
+    alert("장바구니에 추가되었습니다.");
+  }
+</script>
 <!-- 🛒 장바구니 보기 버튼 -->
 <button id="viewCartBtn" style="
   position: fixed;
