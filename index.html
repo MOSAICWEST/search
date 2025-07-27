@@ -239,6 +239,7 @@
     </div>
   </div>
   <div id="results"></div>
+  <div id="pagination" style="text-align:center; margin-bottom: 40px;"></div>
   <div id="detailModal" class="modal">
     <div class="modal-content">
       <span id="modalClose" class="modal-close">&times;</span>
@@ -257,25 +258,33 @@
     };
 
     let allData = [];
+    let currentPage = 1;
+const itemsPerPage = 30;
 
 const results = document.getElementById("results");
 results.innerHTML = `<div style="text-align:center; margin:40px 0; color:#555; font-size:16px;">
   데이터 불러오는 중입니다...
 </div>`;
 
+document.getElementById("searchBtn").disabled = true;
+
 fetch(SHEET_URL)
   .then(res => res.json())
   .then(data => {
     allData = data;
     populateGenreFilter(data);
-    filterAndRenderTable(); // 이 함수가 results.innerHTML을 표나 카드로 바꿔줌
+    filterAndRenderTable();
   })
   .catch(err => {
     results.innerHTML = `<div style="text-align:center; margin:40px 0; color:#c00;">
       데이터를 불러오지 못했습니다.
     </div>`;
     console.error("데이터 로드 오류:", err);
+  })
+  .finally(() => {
+    document.getElementById("searchBtn").disabled = false;
   });
+
 
 
 
@@ -329,59 +338,69 @@ fetch(SHEET_URL)
             );
         }
       });
-
+      
+currentPage = 1;
       renderTable(filtered);
     }
 
-    function renderTable(data) {
-      const results = document.getElementById("results");
-      window.currentData = data;
+function renderTable(data) {
+  const results = document.getElementById("results");
+  const pagination = document.getElementById("pagination");
 
   if (data.length === 0) {
-  results.innerHTML = `<div style="text-align:center; margin:40px 0; font-size:16px; color:#777;">
-    검색 결과가 없습니다.
-  </div>`;
-  return;
-}
+    results.innerHTML = `<div style="text-align:center; margin:40px 0; font-size:16px; color:#777;">
+      검색 결과가 없습니다.
+    </div>`;
+    pagination.innerHTML = "";
+    return;
+  }
 
-if (window.innerWidth <= 600) {
-  let html = `<div class="card-list">`;
-  data.forEach((item, idx) => {
-    const imageURL = item["Image URL"]?.trim();
-    const imageBlock = imageURL
-      ? `<div class="card-image" onclick="showDetails(${idx})"><img src="${imageURL}" alt="앨범 이미지"></div>`
-      : `<div class="card-image" onclick="showDetails(${idx})"><span style="color:#aaa;font-size:12px;">NO IMAGE</span></div>`;
-    html += `
-      <div class="card-item">
-        ${imageBlock}
-        <div class="card-content">
-          <div><strong>${item.Artist || ""}</strong> - ${item.Title || ""}</div>
-          <div>${item.Pressing || ""}</div>
-          <div>${item["Condition Jacket"] || ""} / ${item["Condition Media"] || ""}</div>
-          <div><strong>₩${Number(item["Selling at"] || 0).toLocaleString()}</strong></div>
-        </div>
-      </div>`;
-  });
-  html += `</div>`;
-  results.innerHTML = html;
-} else {
-  let html = `<div class="table-wrapper"><table><thead><tr>`;
-  displayOrder.forEach(key => html += `<th>${allDisplayNames[key] || key}</th>`);
-  html += `</tr></thead><tbody>`;
-  data.forEach((row, idx) => {
-    html += `<tr>`;
-    displayOrder.forEach(key => {
-      let cell = row[key] ?? "";
-      if (key === "Selling at" && !isNaN(cell)) cell = Number(cell).toLocaleString();
-      if (key === "Details") cell = `<button onclick="showDetails(${idx})">상세</button>`;
-      html += `<td>${cell}</td>`;
+  const start = (currentPage - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  const pageData = data.slice(start, end);
+  window.currentData = data;
+
+  let html = "";
+
+  if (window.innerWidth <= 600) {
+    html = `<div class="card-list">`;
+    pageData.forEach((item, idx) => {
+      const imageURL = item["Image URL"]?.trim();
+      const imageBlock = imageURL
+        ? `<div class="card-image" onclick="showDetails(${start + idx})"><img src="${imageURL}" alt="앨범 이미지"></div>`
+        : `<div class="card-image" onclick="showDetails(${start + idx})"><span style="color:#aaa;font-size:12px;">NO IMAGE</span></div>`;
+      html += `
+        <div class="card-item">
+          ${imageBlock}
+          <div class="card-content">
+            <div><strong>${item.Artist || ""}</strong> - ${item.Title || ""}</div>
+            <div>${item.Pressing || ""}</div>
+            <div>${item["Condition Jacket"] || ""} / ${item["Condition Media"] || ""}</div>
+            <div><strong>₩${Number(item["Selling at"] || 0).toLocaleString()}</strong></div>
+          </div>
+        </div>`;
     });
-    html += `</tr>`;
-  });
-  html += `</tbody></table></div>`;
-  results.innerHTML = html;
-}
+    html += `</div>`;
+  } else {
+    html = `<div class="table-wrapper"><table><thead><tr>`;
+    displayOrder.forEach(key => html += `<th>${allDisplayNames[key] || key}</th>`);
+    html += `</tr></thead><tbody>`;
+    pageData.forEach((row, idx) => {
+      html += `<tr>`;
+      displayOrder.forEach(key => {
+        let cell = row[key] ?? "";
+        if (key === "Selling at" && !isNaN(cell)) cell = Number(cell).toLocaleString();
+        if (key === "Details") cell = `<button onclick="showDetails(${start + idx})">상세</button>`;
+        html += `<td>${cell}</td>`;
+      });
+      html += `</tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
 
+  results.innerHTML = html;
+  renderPagination(data.length);
+}
 
     window.showDetails = function(index) {
       const item = window.currentData[index];
@@ -474,6 +493,51 @@ document.addEventListener('keydown', (e) => {
     filterAndRenderTable();
   }
 }, 300));
+    function renderPagination(totalItems) {
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const pagination = document.getElementById("pagination");
+  let html = "";
+
+  if (totalPages <= 1) {
+    pagination.innerHTML = "";
+    return;
+  }
+
+  if (currentPage > 1) {
+    html += `<button onclick="goToPage(${currentPage - 1})">« 이전</button>`;
+  }
+
+  for (let i = 1; i <= totalPages; i++) {
+    if (
+      i === 1 ||
+      i === totalPages ||
+      Math.abs(i - currentPage) <= 2
+    ) {
+      if (i === currentPage) {
+  html += `<button style="background:#333; color:#fff; font-weight:bold;">${i}</button>`;
+} else {
+  html += `<button onclick="goToPage(${i})">${i}</button>`;
+}
+
+    } else if (
+      i === 2 && currentPage - 3 > 1 ||
+      i === totalPages - 1 && currentPage + 3 < totalPages
+    ) {
+      html += `<span style="margin:0 4px;">...</span>`;
+    }
+  }
+
+  if (currentPage < totalPages) {
+    html += `<button onclick="goToPage(${currentPage + 1})">다음 »</button>`;
+  }
+
+  pagination.innerHTML = html;
+}
+
+function goToPage(page) {
+  currentPage = page;
+  renderTable(window.currentData);
+}
   </script>
 </body>
 </html>
