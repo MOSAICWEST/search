@@ -6,6 +6,7 @@
   <title>MOSAIC 재고 검색</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    /* 공통 스타일 */
     * { box-sizing: border-box; }
     body {
       font-family: 'Inter', sans-serif;
@@ -19,19 +20,6 @@
       margin: 30px 0 10px;
       font-size: 28px;
       font-weight: 600;
-    }
-    .search-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      padding: 0 5% 30px;
-    }
-    .filters {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: center;
     }
     select, input[type="text"], button {
       font-size: 16px;
@@ -49,16 +37,35 @@
       color: #fff;
       cursor: pointer;
     }
-    button:hover {
-      background-color: #555;
+    button:hover { background-color: #555; }
+    button:disabled {
+      background-color: #ccc;
+      color: #666;
+      cursor: default;
     }
+
+    /* 검색 및 필터 영역 */
+    .search-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 0 5% 30px;
+    }
+    .filters {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* 테이블 영역 */
     .table-wrapper {
       overflow-x: auto;
       margin: 0 auto 60px;
       width: 95%;
       animation: fadeIn 0.4s ease-in;
     }
-    
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
@@ -84,6 +91,8 @@
     }
     tbody tr:nth-child(odd) { background-color: #fcfcfc; }
     tbody tr:hover { background-color: #eef6ff; }
+
+    /* TOP 버튼 */
     .top-button {
       position: fixed;
       bottom: 30px;
@@ -94,10 +103,11 @@
       border: none;
       padding: 10px 14px;
       border-radius: 6px;
-      cursor: pointer;
       font-size: 14px;
     }
     .top-button:hover { background-color: #555; }
+
+    /* 모달 영역 */
     .modal {
       display: none;
       position: fixed;
@@ -110,41 +120,18 @@
       justify-content: center;
       align-items: center;
     }
-.modal-content {
-  background: #fff;
-  padding: 24px;
-  width: 90%;
-  max-width: 600px;
-  max-height: 90vh;
-  overflow-y: auto;
-  border-radius: 10px;
-  position: relative;
-  animation: slideUp 0.3s ease forwards;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-}
-
-#modalBody h4 {
-  font-size: 18px;
-  margin-bottom: 4px;
-}
-#modalBody p {
-  font-size: 14px;
-  margin-bottom: 12px;
-  line-height: 1.5;
-}
-#modalBody ul {
-  padding-left: 18px;
-  margin: 0 0 12px 0;
-}
-#modalBody li {
-  font-size: 14px;
-  line-height: 1.4;
-  margin-bottom: 4px;
-}
-#modalBody strong {
-  color: #222;
-}
-
+    .modal-content {
+      background: #fff;
+      padding: 24px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      border-radius: 10px;
+      position: relative;
+      animation: slideUp 0.3s ease forwards;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
     @keyframes slideUp {
       from { opacity: 0; transform: translateY(40px); }
       to { opacity: 1; transform: translateY(0); }
@@ -159,6 +146,22 @@
       transition: color 0.3s;
     }
     .modal-close:hover { color: #000; }
+
+    /* 모달 내부 텍스트 */
+    #modalBody h4 { font-size: 18px; margin-bottom: 4px; }
+    #modalBody p { font-size: 14px; margin-bottom: 12px; line-height: 1.5; }
+    #modalBody ul {
+      padding-left: 18px;
+      margin: 0 0 12px 0;
+    }
+    #modalBody li {
+      font-size: 14px;
+      line-height: 1.4;
+      margin-bottom: 4px;
+    }
+    #modalBody strong { color: #222; }
+
+    /* 비디오 영역 */
     .video-wrapper {
       position: relative;
       padding-top: 56.25%;
@@ -173,6 +176,8 @@
       width: 100%;
       height: 100%;
     }
+
+    /* 모바일 카드 뷰 */
     @media (max-width: 600px) {
       table { display: none; }
       .card-list {
@@ -213,77 +218,40 @@
         margin-bottom: 4px;
         font-size: 14px;
       }
-      #pagination button {
-  background-color: #f2f2f2;
-  border: 1px solid #ccc;
-  color: #333;
-  margin: 0 3px;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-#pagination button:hover:not(:disabled) {
-  background-color: #e0e0e0;
-}
-#pagination button:disabled {
-  background-color: #fff;
-  border: 1px solid #ccc;
-  color: #111;
-  font-weight: bold;
-  cursor: default;
-}
-#pagination span {
-  display: inline-block;
-  margin: 0 6px;
-  color: #888;
-  font-size: 14px;
-}
-      button:disabled {
-  background-color: #ccc;
-  color: #666;
-  cursor: default;
-}
-      #pagination button {
-  padding: 6px 10px;
-  font-size: 13px;
-}
-
     }
-    @media (min-width: 601px) {
-  #pagination button {
-    background-color: #f2f2f2;
-    border: 1px solid #ccc;
-    color: #333;
-    margin: 0 4px;
-    padding: 8px 14px;
-    border-radius: 8px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-  }
 
-  #pagination button:hover:not(:disabled) {
-    background-color: #e0e0e0;
-  }
-
-  #pagination button:disabled {
-    background-color: #fff;
-    border: 1px solid #ccc;
-    color: #111;
-    font-weight: bold;
-    cursor: default;
-  }
-
-  #pagination span {
-    display: inline-block;
-    margin: 0 6px;
-    color: #aaa;
-    font-size: 14px;
-  }
-}
-
+    /* 페이지네이션 */
+    #pagination {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    #pagination button {
+      background-color: #f2f2f2;
+      border: 1px solid #ccc;
+      color: #333;
+      margin: 0 4px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    #pagination button:hover:not(:disabled) {
+      background-color: #e0e0e0;
+    }
+    #pagination button:disabled {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      color: #111;
+      font-weight: bold;
+      cursor: default;
+    }
+    #pagination span {
+      display: inline-block;
+      margin: 0 6px;
+      color: #888;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
@@ -318,7 +286,7 @@
   </div>
   <button class="top-button" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">TOP</button>
   <script>
-  const SHEET_URL = "./data.json";
+  const SHEET_URL = "https://script.google.com/macros/s/AKfycbwJy_lLXavS5XR3q4sCUmWhRU5-9ilfcHaN5TG8Lldd6zRdY3beE9rJ9zCa6pPu6YwdQw/exec";
   const displayOrder = ["Artist", "Title", "Label", "Pressing", "Genre", "Style", "Subcategory", "Condition Jacket", "Condition Media", "Selling at", "Details"];
   const allDisplayNames = {
     "Ref": "상품번호", "Artist": "아티스트", "Title": "타이틀",
@@ -601,26 +569,36 @@
         cartBody.innerHTML = `<p>장바구니가 비어 있습니다.</p>`;
       } else {
         let total = 0;
-        const itemsHtml = cart.map((item, idx) => {
-          total += item.price;
-          return `<div style="margin-bottom: 12px;">
-            <strong>${idx + 1}. [${item.ref}] ${item.artist} – ${item.title}</strong><br>
-            <span style="font-size: 14px;">
-              ${item.jacket} / ${item.media} / ${item.pressing}<br>
-              매장: ${item.store}<br>
-              가격: ₩${item.price.toLocaleString()}
-            </span>
-          </div>`;
-        }).join('');
+   const itemsHtml = cart.map((item, idx) => {
+  total += item.price;
+  return `<div style="margin-bottom: 12px;">
+    <input type="checkbox" class="cart-item-checkbox" data-index="${idx}" style="margin-right: 6px;">
+    <strong>${idx + 1}. [${item.ref}] ${item.artist} – ${item.title}</strong><br>
+    <span style="font-size: 14px;">
+      ${item.jacket} / ${item.media} / ${item.pressing}<br>
+      매장: ${item.store}<br>
+      가격: ₩${item.price.toLocaleString()}
+    </span>
+  </div>`;
+}).join('');
 
-        cartBody.innerHTML = `
-          ${itemsHtml}
-          <hr>
-          <p><strong>총 ${cart.length}개 (합계: ₩${total.toLocaleString()})</strong></p>
-          <button onclick="copyCartToClipboard()" style="margin-right: 10px;">📋 텍스트 복사</button>
-          <button onclick="window.open('https://pf.kakao.com/_xxx/chat', '_blank')">💬 카카오톡 문의</button>
-          <button onclick="clearCart()" style="float:right; background:#ccc; color:#000;">❌ 전체 비우기</button>
-        `;
+
+cartBody.innerHTML = `
+  ${itemsHtml}
+  <hr>
+  <p><strong>총 ${cart.length}개 (합계: ₩${total.toLocaleString()})</strong></p>
+<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 16px;">
+  <div>
+    <button onclick="copyCartToClipboard()" style="margin-right: 10px;">📋 텍스트 복사</button>
+    <button onclick="window.open('https://pf.kakao.com/_xxx/chat', '_blank')">💬 카카오톡 문의</button>
+  </div>
+  <div>
+    <button id="deleteSelectedBtn" onclick="deleteSelectedCartItems()" style="background:#ccc; color:#000; margin-right: 10px;" disabled>🗑 선택 항목 삭제</button>
+    <button onclick="clearCart()" style="background:#ccc; color:#000;">❌ 전체 비우기</button>
+  </div>
+</div>
+`;
+monitorCartCheckboxes();
       }
 
       document.getElementById("cartModal").style.display = "flex";
@@ -701,6 +679,47 @@ ${lines.join('\n\n')}
     localStorage.setItem("cart", JSON.stringify(cart));
     alert("장바구니에 추가되었습니다.");
   }
+function deleteSelectedCartItems() {
+  const checkboxes = document.querySelectorAll(".cart-item-checkbox:checked");
+  if (checkboxes.length === 0) {
+    alert("삭제할 항목을 선택해주세요.");
+    return;
+  }
+
+  const confirmed = confirm("선택한 항목을 장바구니에서 삭제할까요?");
+  if (!confirmed) return;
+
+  const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+
+  // 선택되지 않은 항목만 남김
+  const updatedCart = cart.filter((_, idx) => {
+    return !Array.from(checkboxes).some(cb => Number(cb.dataset.index) === idx);
+  });
+
+localStorage.setItem("cart", JSON.stringify(updatedCart));
+alert("선택한 항목이 삭제되었습니다.");
+document.getElementById("viewCartBtn").click(); // 장바구니 다시 로드
+
+}
+
+function monitorCartCheckboxes() {
+  const checkboxes = document.querySelectorAll(".cart-item-checkbox");
+  const deleteBtn = document.getElementById("deleteSelectedBtn");
+
+  if (!deleteBtn) return;
+
+  const updateDeleteButtonState = () => {
+    const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+    deleteBtn.disabled = !anyChecked;
+  };
+
+  checkboxes.forEach(cb => {
+    cb.addEventListener("change", updateDeleteButtonState);
+  });
+
+  updateDeleteButtonState(); // 최초 상태도 반영
+}
+
 </script>
 <!-- 🛒 장바구니 보기 버튼 -->
 <button id="viewCartBtn" style="
