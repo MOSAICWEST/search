@@ -396,13 +396,8 @@
       pageData.forEach((item, idx) => {
         const imageURL = item["Image URL"]?.trim();
         const imageBlock = imageURL
-  ? `<div class="card-image" onclick="showDetails(${start + idx})">
-       <img data-src="${imageURL}" alt="앨범 이미지" class="lazy-image" />
-     </div>`
-  : `<div class="card-image" onclick="showDetails(${start + idx})">
-       <span style="color:#aaa;font-size:12px;">NO IMAGE</span>
-     </div>`;
-
+  ? `<div class="card-image" onclick="showDetails(${start + idx})"><img src="${imageURL}" alt="앨범 이미지" loading="lazy"></div>`
+  : `<div class="card-image" onclick="showDetails(${start + idx})"><span style="color:#aaa;font-size:12px;">NO IMAGE</span></div>`;
         html += `
           <div class="card-item">
             ${imageBlock}
@@ -434,27 +429,7 @@
 
     results.innerHTML = html;
     renderPagination(data.length);
-    observeLazyImages();
-
   }
-
-    function observeLazyImages() {
-  const observer = new IntersectionObserver((entries, obs) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const img = entry.target;
-        img.src = img.dataset.src;
-        img.classList.remove("lazy-image");
-        obs.unobserve(img);
-      }
-    });
-  }, {
-    rootMargin: "100px", // 여유롭게 로드 시작
-    threshold: 0.1
-  });
-
-  document.querySelectorAll("img.lazy-image").forEach(img => observer.observe(img));
-}
 
   window.showDetails = function(index) {
     const item = window.currentData[index];
