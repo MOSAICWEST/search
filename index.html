@@ -396,7 +396,16 @@
       pageData.forEach((item, idx) => {
         const imageURL = item["Image URL"]?.trim();
         const imageBlock = imageURL
-          ? `<div class="card-image" onclick="showDetails(${start + idx})"><img src="${imageURL}" alt="앨범 이미지"> loading="lazy"</div>`
+  ? `<div class="card-image" onclick="showDetails(${start + idx})">
+       <img
+         src="${imageURL}"
+         alt="앨범 이미지"
+         loading="lazy"
+       >
+     </div>`
+  : `<div class="card-image" onclick="showDetails(${start + idx})">
+       <span style="color:#aaa;font-size:12px;">NO IMAGE</span>
+     </div>`;
           : `<div class="card-image" onclick="showDetails(${start + idx})"><span style="color:#aaa;font-size:12px;">NO IMAGE</span></div>`;
         html += `
           <div class="card-item">
@@ -441,9 +450,18 @@
 
     let content = `<h4 style="margin-top: 0;">${title}</h4><p style="margin-top: -8px;">${ref}</p>`;
 
-    if (item["Image URL"]?.trim()) {
-      content += `<p><strong>이미지:</strong><br><img src="${item["Image URL"].trim()}" alt="이미지" style="max-width: 100%; margin: 10px 0;" loading="lazy"></p>`;
-    }
+   if (item["Image URL"]?.trim()) {
+  content += `
+    <p><strong>이미지:</strong><br>
+      <img
+        src="${item["Image URL"].trim()}"
+        alt="이미지"
+        style="max-width: 100%; margin: 10px 0;"
+        loading="lazy"
+      >
+    </p>
+  `;
+}
 
     const jacket = item["Condition Jacket"] || "";
     const media = item["Condition Media"] || "";
