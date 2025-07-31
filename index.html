@@ -114,13 +114,15 @@
 
 /* FAB 메뉴 스타일 (모바일 전용) */
 @media (max-width: 600px) {
+  /* 기존 버튼 숨김 (TOP / 장바구니) */
   .top-button,
   #viewCartBtn {
-    display: none !important; /* 기존 버튼 숨김 */
+    display: none !important;
   }
 
+  /* FAB 메뉴 컨테이너 */
   .fab-menu {
-    display: flex; /* 모바일에서만 보여짐 */
+    display: flex;
     position: fixed;
     right: 20px;
     bottom: 60px;
@@ -129,33 +131,44 @@
     align-items: flex-end;
   }
 
+  /* FAB 메인 버튼 (＋) */
   .fab-main {
-  width: 40px;
-  height: 40px;
-  font-size: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background-color: #0071e3;
-  color: white;
-  border: none;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  cursor: pointer;
-  padding: 0;
-}
+    width: 40px;
+    height: 40px;
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: #0071e3;
+    color: white;
+    border: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.3s ease;
+  }
 
+  /* FAB 액션 버튼들 (초기에는 숨김 + 애니메이션 준비) */
   .fab-actions {
-    display: none;
     flex-direction: column;
     gap: 10px;
     margin-bottom: 10px;
-  }
-
-  .fab-menu.open .fab-actions {
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
     display: flex;
   }
 
+  /* FAB 메뉴가 열렸을 때 애니메이션 */
+  .fab-menu.open .fab-actions {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  /* FAB 액션 버튼 개별 스타일 */
   .fab-action {
     padding: 10px 16px;
     background-color: #333;
@@ -163,14 +176,16 @@
     border: none;
     border-radius: 6px;
     font-size: 14px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     cursor: pointer;
+    transition: background-color 0.2s ease;
   }
 
   .fab-action:hover {
     background-color: #555;
   }
 }
+
 
 
     /* 모달 영역 */
