@@ -300,9 +300,9 @@
   const itemsPerPage = 30;
 
   const results = document.getElementById("results");
-  results.innerHTML = `<div style="text-align:center; margin:40px 0; color:#555; font-size:16px;">
+  results.innerHTML = <div style="text-align:center; margin:40px 0; color:#555; font-size:16px;">
     데이터 불러오는 중입니다...
-  </div>`;
+  </div>;
 
   document.getElementById("searchBtn").disabled = true;
 
@@ -314,9 +314,9 @@
       filterAndRenderTable();
     })
     .catch(err => {
-      results.innerHTML = `<div style="text-align:center; margin:40px 0; color:#c00;">
+      results.innerHTML = <div style="text-align:center; margin:40px 0; color:#c00;">
         데이터를 불러오지 못했습니다.
-      </div>`;
+      </div>;
       console.error("데이터 로드 오류:", err);
     })
     .finally(() => {
@@ -330,7 +330,7 @@
       const genre = item["Genre"];
       if (genre) genreSet.add(genre.trim());
     });
-    genreSelect.innerHTML = `<option value="all">장르 전체</option>`;
+    genreSelect.innerHTML = <option value="all">장르 전체</option>;
     [...genreSet].sort().forEach(genre => {
       const option = document.createElement("option");
       option.value = genre;
@@ -377,9 +377,9 @@
     const pagination = document.getElementById("pagination");
 
     if (data.length === 0) {
-      results.innerHTML = `<div style="text-align:center; margin:40px 0; font-size:16px; color:#777;">
+      results.innerHTML = <div style="text-align:center; margin:40px 0; font-size:16px; color:#777;">
         검색 결과가 없습니다.
-      </div>`;
+      </div>;
       pagination.innerHTML = "";
       return;
     }
@@ -392,22 +392,13 @@
     let html = "";
 
     if (window.innerWidth <= 600) {
-      html = `<div class="card-list">`;
+      html = <div class="card-list">;
       pageData.forEach((item, idx) => {
         const imageURL = item["Image URL"]?.trim();
         const imageBlock = imageURL
-  ? `<div class="card-image" onclick="showDetails(${start + idx})">
-       <img
-         src="${imageURL}"
-         alt="앨범 이미지"
-         loading="lazy"
-       >
-     </div>`
-  : `<div class="card-image" onclick="showDetails(${start + idx})">
-       <span style="color:#aaa;font-size:12px;">NO IMAGE</span>
-     </div>`;
-          : `<div class="card-image" onclick="showDetails(${start + idx})"><span style="color:#aaa;font-size:12px;">NO IMAGE</span></div>`;
-        html += `
+          ? <div class="card-image" onclick="showDetails(${start + idx})"><img src="${imageURL}" alt="앨범 이미지"></div>
+          : <div class="card-image" onclick="showDetails(${start + idx})"><span style="color:#aaa;font-size:12px;">NO IMAGE</span></div>;
+        html += 
           <div class="card-item">
             ${imageBlock}
             <div class="card-content">
@@ -416,24 +407,24 @@
               <div>${item["Condition Jacket"] || ""} / ${item["Condition Media"] || ""}</div>
               <div><strong>₩${Number(item["Selling at"] || 0).toLocaleString()}</strong></div>
             </div>
-          </div>`;
+          </div>;
       });
-      html += `</div>`;
+      html += </div>;
     } else {
-      html = `<div class="table-wrapper"><table><thead><tr>`;
-      displayOrder.forEach(key => html += `<th>${allDisplayNames[key] || key}</th>`);
-      html += `</tr></thead><tbody>`;
+      html = <div class="table-wrapper"><table><thead><tr>;
+      displayOrder.forEach(key => html += <th>${allDisplayNames[key] || key}</th>);
+      html += </tr></thead><tbody>;
       pageData.forEach((row, idx) => {
-        html += `<tr>`;
+        html += <tr>;
         displayOrder.forEach(key => {
           let cell = row[key] ?? "";
           if (key === "Selling at" && !isNaN(cell)) cell = Number(cell).toLocaleString();
-          if (key === "Details") cell = `<button onclick="showDetails(${start + idx})">상세</button>`;
-          html += `<td>${cell}</td>`;
+          if (key === "Details") cell = <button onclick="showDetails(${start + idx})">상세</button>;
+          html += <td>${cell}</td>;
         });
-        html += `</tr>`;
+        html += </tr>;
       });
-      html += `</tbody></table></div>`;
+      html += </tbody></table></div>;
     }
 
     results.innerHTML = html;
@@ -445,61 +436,52 @@
     const modal = document.getElementById("detailModal");
     const body = document.getElementById("modalBody");
 
-    const title = `${item["Artist"] || ""} - ${item["Title"] || ""}`;
+    const title = ${item["Artist"] || ""} - ${item["Title"] || ""};
     const ref = item["Ref"] || "";
 
-    let content = `<h4 style="margin-top: 0;">${title}</h4><p style="margin-top: -8px;">${ref}</p>`;
+    let content = <h4 style="margin-top: 0;">${title}</h4><p style="margin-top: -8px;">${ref}</p>;
 
-   if (item["Image URL"]?.trim()) {
-  content += `
-    <p><strong>이미지:</strong><br>
-      <img
-        src="${item["Image URL"].trim()}"
-        alt="이미지"
-        style="max-width: 100%; margin: 10px 0;"
-        loading="lazy"
-      >
-    </p>
-  `;
-}
+    if (item["Image URL"]?.trim()) {
+      content += <p><strong>이미지:</strong><br><img src="${item["Image URL"].trim()}" alt="이미지" style="max-width: 100%; margin: 10px 0;" loading="lazy"></p>;
+    }
 
     const jacket = item["Condition Jacket"] || "";
     const media = item["Condition Media"] || "";
     const comment = item["Condition Comment"] || "";
 
-    content += `<p><strong>Jacket:</strong> ${jacket} /  <strong>Media:</strong> ${media}</p>`;
-    if (comment) content += `<p>${comment}</p>`;
+    content += <p><strong>Jacket:</strong> ${jacket} /  <strong>Media:</strong> ${media}</p>;
+    if (comment) content += <p>${comment}</p>;
 
     if (item.Youtube?.trim()) {
       const url = item.Youtube.trim();
       let embedUrl = "";
       if (url.includes("youtube.com/watch?v=")) {
-        embedUrl = `https://www.youtube.com/embed/${url.split("v=")[1].split("&")[0]}`;
+        embedUrl = https://www.youtube.com/embed/${url.split("v=")[1].split("&")[0]};
       } else if (url.includes("youtu.be/")) {
-        embedUrl = `https://www.youtube.com/embed/${url.split("youtu.be/")[1].split("?")[0]}`;
+        embedUrl = https://www.youtube.com/embed/${url.split("youtu.be/")[1].split("?")[0]};
       }
       if (embedUrl) {
-        content += `<p><strong>YouTube:</strong><br><div class="video-wrapper"><iframe src="${embedUrl}" frameborder="0" allowfullscreen></iframe></div></p>`;
+        content += <p><strong>YouTube:</strong><br><div class="video-wrapper"><iframe src="${embedUrl}" frameborder="0" allowfullscreen></iframe></div></p>;
       }
     }
 
     if (item.Tracklist?.trim()) {
       const list = item.Tracklist.split("•").map(s => s.trim()).filter(Boolean);
       if (list.length) {
-        content += `<p><strong>Tracklist:</strong><ul>${list.map(track => `<li>${track}</li>`).join('')}</ul></p>`;
+        content += <p><strong>Tracklist:</strong><ul>${list.map(track => <li>${track}</li>).join('')}</ul></p>;
       }
     }
 
     if (item.Credits?.trim()) {
       const credits = item.Credits.split("•").map(s => s.trim()).filter(Boolean);
       if (credits.length) {
-        content += `<p><strong>Credits:</strong><br>${credits.join("<br>")}</p>`;
+        content += <p><strong>Credits:</strong><br>${credits.join("<br>")}</p>;
       }
     }
 
-    content += `<div style="text-align: right; margin-top: 20px;">
+    content += <div style="text-align: right; margin-top: 20px;">
       <button onclick="addToCart(${index})" style="background-color: #0071e3; color: white; border: none; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-size: 14px;">🛒 장바구니 담기</button>
-    </div>`;
+    </div>;
 
     body.innerHTML = content;
     modal.style.display = "flex";
@@ -559,15 +541,15 @@
       return;
     }
 
-    html += `<button onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>« 이전</button>`;
+    html += <button onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>« 이전</button>;
     for (let i = 1; i <= totalPages; i++) {
       if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 2) {
-        html += `<button onclick="goToPage(${i})" ${i === currentPage ? 'disabled' : ''}>${i}</button>`;
+        html += <button onclick="goToPage(${i})" ${i === currentPage ? 'disabled' : ''}>${i}</button>;
       } else if (i === 2 && currentPage - 3 > 1 || i === totalPages - 1 && currentPage + 3 < totalPages) {
-        html += `<span style="margin:0 4px;">...</span>`;
+        html += <span style="margin:0 4px;">...</span>;
       }
     }
-    html += `<button onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>다음 »</button>`;
+    html += <button onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>다음 »</button>;
     pagination.innerHTML = html;
   }
 
@@ -584,12 +566,12 @@
       const cartBody = document.getElementById("cartBody");
 
       if (cart.length === 0) {
-        cartBody.innerHTML = `<p>장바구니가 비어 있습니다.</p>`;
+        cartBody.innerHTML = <p>장바구니가 비어 있습니다.</p>;
       } else {
         let total = 0;
    const itemsHtml = cart.map((item, idx) => {
   total += item.price;
-  return `<div style="margin-bottom: 12px;">
+  return <div style="margin-bottom: 12px;">
     <input type="checkbox" class="cart-item-checkbox" data-index="${idx}" style="margin-right: 6px;">
     <strong>${idx + 1}. [${item.ref}] ${item.artist} – ${item.title}</strong><br>
     <span style="font-size: 14px;">
@@ -597,11 +579,11 @@
       매장: ${item.store}<br>
       가격: ₩${item.price.toLocaleString()}
     </span>
-  </div>`;
+  </div>;
 }).join('');
 
 
-cartBody.innerHTML = `
+cartBody.innerHTML = 
   ${itemsHtml}
   <hr>
   <p><strong>총 ${cart.length}개 (합계: ₩${total.toLocaleString()})</strong></p>
@@ -615,7 +597,7 @@ cartBody.innerHTML = `
     <button onclick="clearCart()" style="background:#ccc; color:#000;">❌ 전체 비우기</button>
   </div>
 </div>
-`;
+;
 monitorCartCheckboxes();
       }
 
@@ -647,13 +629,13 @@ monitorCartCheckboxes();
     let total = 0;
     const lines = cart.map((item, i) => {
       total += item.price;
-      return `${i + 1}. [${item.ref}] ${item.artist} – ${item.title}
+      return ${i + 1}. [${item.ref}] ${item.artist} – ${item.title}
 ${item.jacket} / ${item.media} / ${item.pressing}
 매장: ${item.store}
-가격: ₩${item.price.toLocaleString()}`;
+가격: ₩${item.price.toLocaleString()};
     });
 
-    const message = `📦 MOSAIC 장바구니 주문 요청
+    const message = 📦 MOSAIC 장바구니 주문 요청
 
 ${lines.join('\n\n')}
 
@@ -664,7 +646,7 @@ ${lines.join('\n\n')}
 👉 총 ${cart.length}개 (합계: ₩${total.toLocaleString()}) 
 👉 문의자: 직접 입력
 👉 연락처: 직접 입력
-👉 배송지(선택사항): 직접 입력`;
+👉 배송지(선택사항): 직접 입력;
 
     navigator.clipboard.writeText(message).then(() => {
       alert("장바구니 정보가 복사되었습니다. 카카오톡 채널로 이동해 붙여넣어 주세요!");
