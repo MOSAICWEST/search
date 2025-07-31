@@ -395,15 +395,9 @@
       html = `<div class="card-list">`;
       pageData.forEach((item, idx) => {
         const imageURL = item["Image URL"]?.trim();
-const imageBlock = imageURL
-  ? `<div class="card-image" onclick="showDetails(${start + idx})">
-       <img data-src="${imageURL}" src="" alt="앨범 이미지"
-            onerror="this.onerror=null; this.src='https://via.placeholder.com/100?text=NO+IMAGE';">
-     </div>`
-  : `<div class="card-image" onclick="showDetails(${start + idx})">
-       <span style="color:#aaa;font-size:12px;">NO IMAGE</span>
-     </div>`;
-
+        const imageBlock = imageURL
+          ? `<div class="card-image" onclick="showDetails(${start + idx})"><img src="${imageURL}" alt="앨범 이미지"></div>`
+          : `<div class="card-image" onclick="showDetails(${start + idx})"><span style="color:#aaa;font-size:12px;">NO IMAGE</span></div>`;
         html += `
           <div class="card-item">
             ${imageBlock}
@@ -435,24 +429,7 @@ const imageBlock = imageURL
 
     results.innerHTML = html;
     renderPagination(data.length);
-    observeImages();
   }
-
-    function observeImages() {
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const img = entry.target;
-        img.src = img.dataset.src;
-        observer.unobserve(img);
-      }
-    });
-  });
-
-  document.querySelectorAll('img[data-src]').forEach(img => {
-    observer.observe(img);
-  });
-}
 
   window.showDetails = function(index) {
     const item = window.currentData[index];
