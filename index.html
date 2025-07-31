@@ -396,7 +396,7 @@
       pageData.forEach((item, idx) => {
         const imageURL = item["Image URL"]?.trim();
         const imageBlock = imageURL
-          ? `<div class="card-image" onclick="showDetails(${start + idx})"><img src="${imageURL}" alt="앨범 이미지"></div>`
+          ? `<div class="card-image" onclick="showDetails(${start + idx})"><img src="${imageURL}" alt="앨범 이미지"> loading="lazy"</div>`
           : `<div class="card-image" onclick="showDetails(${start + idx})"><span style="color:#aaa;font-size:12px;">NO IMAGE</span></div>`;
         html += `
           <div class="card-item">
