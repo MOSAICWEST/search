@@ -8,14 +8,9 @@
   <style>
     /* 공통 스타일 */
     * { box-sizing: border-box; }
-    body {
-      font-family: 'Inter', sans-serif;
-      margin: 0; padding: 0; background-color: #fafafa; color: #1f1f1f;
-    }
+    body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background-color: #fafafa; color: #1f1f1f; }
     h1 { text-align: center; margin: 30px 0 10px; font-size: 28px; font-weight: 600; }
-    select, input[type="text"], button {
-      font-size: 16px; padding: 10px; border: 1px solid #ccc; border-radius: 8px; transition: all 0.2s ease;
-    }
+    select, input[type="text"], button { font-size: 16px; padding: 10px; border: 1px solid #ccc; border-radius: 8px; transition: all 0.2s ease; }
     input[type="text"]:focus, select:focus { border-color: #0071e3; box-shadow: 0 0 0 3px rgba(0,113,227,0.2); }
     button { background-color: #333; color: #fff; cursor: pointer; }
     button:hover { background-color: #555; }
@@ -39,10 +34,7 @@
     .table-image .no-image { color: #aaa; font-size: 12px; }
 
     /* TOP 버튼 */
-    .top-button {
-      position: fixed; bottom: 30px; right: 30px; z-index: 99;
-      background-color: #333; color: #fff; border: none; padding: 10px 14px; border-radius: 6px; font-size: 14px;
-    }
+    .top-button { position: fixed; bottom: 30px; right: 30px; z-index: 99; background-color: #333; color: #fff; border: none; padding: 10px 14px; border-radius: 6px; font-size: 14px; }
     .top-button:hover { background-color: #555; }
 
     .fab-menu { display: none; }
@@ -120,9 +112,9 @@
   <div id="pagination" style="text-align:center; margin-bottom: 40px;"></div>
 
   <!-- 상세 모달 -->
-  <div id="detailModal" class="modal">
+  <div id="detailModal" class="modal" onclick="if(event.target.id==='detailModal'){ this.style.display='none'; }">
     <div class="modal-content">
-      <span id="modalClose" class="modal-close">&times;</span>
+      <span id="cartModalClose" class="modal-close" onclick="document.getElementById('detailModal').style.display='none'">&times;</span>
       <div id="modalBody"></div>
     </div>
   </div>
@@ -135,7 +127,7 @@
 
   /* 감열지 용지 너비(mm) — 58mm/80mm 등으로 쉽게 변경 */
   const PAPER_WIDTH_MM = 58;
-  /* 인쇄 지연(ms) — 폰트 로드/렌더링 이후 인쇄 */
+  /* 인쇄 지연(ms) */
   const PRINT_DELAY_MS = 200;
 
   /* 테이블 컬럼 */
@@ -305,13 +297,10 @@
 
     const title = `${item["Artist"] || ""} - ${item["Title"] || ""}`;
     const ref = item["Ref"] || "";
-
     let content = `<h4 style="margin-top: 0;">${title}</h4><p style="margin-top: -8px;">${ref}</p>`;
 
     const mainImg = getMainImageUrl(item["Image URL"]);
-    if (mainImg) {
-      content += `<p><strong>이미지:</strong><br><img src="${mainImg}" alt="이미지" style="max-width: 100%; margin: 10px 0;" loading="lazy"></p>`;
-    }
+    if (mainImg) content += `<p><strong>이미지:</strong><br><img src="${mainImg}" alt="이미지" style="max-width: 100%; margin: 10px 0;" loading="lazy"></p>`;
 
     const store   = item.OriginSheet || "";
     const pressing = item.Pressing || "";
@@ -333,28 +322,19 @@
     if (item.Youtube?.trim()) {
       const url = item.Youtube.trim();
       let embedUrl = "";
-      if (url.includes("youtube.com/watch?v=")) {
-        embedUrl = `https://www.youtube.com/embed/${url.split("v=")[1].split("&")[0]}`;
-      } else if (url.includes("youtu.be/")) {
-        embedUrl = `https://www.youtube.com/embed/${url.split("youtu.be/")[1].split("?")[0]}`;
-      }
-      if (embedUrl) {
-        content += `<p><strong>YouTube:</strong><br><div class="video-wrapper"><iframe src="${embedUrl}" frameborder="0" allowfullscreen></iframe></div></p>`;
-      }
+      if (url.includes("youtube.com/watch?v=")) embedUrl = `https://www.youtube.com/embed/${url.split("v=")[1].split("&")[0]}`;
+      else if (url.includes("youtu.be/")) embedUrl = `https://www.youtube.com/embed/${url.split("youtu.be/")[1].split("?")[0]}`;
+      if (embedUrl) content += `<p><strong>YouTube:</strong><br><div class="video-wrapper"><iframe src="${embedUrl}" frameborder="0" allowfullscreen></iframe></div></p>`;
     }
 
     if (item.Tracklist?.trim()) {
       const list = item.Tracklist.split("•").map(s => s.trim()).filter(Boolean);
-      if (list.length) {
-        content += `<p><strong>Tracklist:</strong><ul>${list.map(track => `<li>${track}</li>`).join('')}</ul></p>`;
-      }
+      if (list.length) content += `<p><strong>Tracklist:</strong><ul>${list.map(track => `<li>${track}</li>`).join('')}</ul></p>`;
     }
 
     if (item.Credits?.trim()) {
       const credits = item.Credits.split("•").map(s => s.trim()).filter(Boolean);
-      if (credits.length) {
-        content += `<p><strong>Credits:</strong><br>${credits.join("<br>")}</p>`;
-      }
+      if (credits.length) content += `<p><strong>Credits:</strong><br>${credits.join("<br>")}</p>`;
     }
 
     content += `<div style="text-align: right; margin-top: 20px;">
@@ -365,66 +345,7 @@
     modal.style.display = "flex";
   };
 
-  document.getElementById("modalClose").onclick = () => {
-    document.getElementById("detailModal").style.display = "none";
-  };
-  window.onclick = e => {
-    if (e.target === document.getElementById("detailModal"))
-      document.getElementById("detailModal").style.display = "none";
-  };
-
-  document.getElementById("searchInput").addEventListener("keydown", e => {
-    if (e.key === "Enter") { e.target.blur(); filterAndRenderTable(); }
-  });
-  document.getElementById("searchBtn").addEventListener("click", () => {
-    document.getElementById("searchInput").blur(); filterAndRenderTable();
-  });
-  document.getElementById("storeFilter").addEventListener("change", filterAndRenderTable);
-  document.getElementById("genreFilter").addEventListener("change", filterAndRenderTable);
-  document.getElementById("searchScope").addEventListener("change", filterAndRenderTable);
-
-  document.addEventListener("keydown", e => {
-    if (e.key === "Escape") { document.getElementById("detailModal").style.display = "none"; }
-  });
-
-  function debounce(func, delay = 300) {
-    let timeout;
-    return function (...args) { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); };
-  }
-  window.addEventListener("resize", debounce(() => {
-    if (window.currentData?.length > 0) renderTable(window.currentData);
-    else filterAndRenderTable();
-  }, 300));
-
-  function renderPagination(totalItems) {
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-    const pagination = document.getElementById("pagination");
-    let html = "";
-    if (totalPages <= 1) { pagination.innerHTML = ""; return; }
-    html += `<button onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>« 이전</button>`;
-    for (let i = 1; i <= totalPages; i++) {
-      if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 2) {
-        html += `<button onclick="goToPage(${i})" ${i === currentPage ? 'disabled' : ''}>${i}</button>`;
-      } else if ((i === 2 && currentPage - 3 > 1) || (i === totalPages - 1 && currentPage + 3 < totalPages)) {
-        html += `<span style="margin:0 4px;">...</span>`;
-      }
-    }
-    html += `<button onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>다음 »</button>`;
-    pagination.innerHTML = html;
-  }
-  function goToPage(page) { currentPage = page; renderTable(window.currentData); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-
-  /* 장바구니 */
-  document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("viewCartBtn").onclick = renderCartModal;
-    document.getElementById("cartModalClose").onclick = () => { document.getElementById("cartModal").style.display = "none"; };
-    window.addEventListener("click", e => {
-      if (e.target === document.getElementById("cartModal")) {
-        document.getElementById("cartModal").style.display = "none";
-      }
-    });
-  });
-
+  /* 장바구니 렌더 */
   function renderCartModal() {
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
     const cartBody = document.getElementById("cartBody");
@@ -440,14 +361,14 @@
   <strong>${idx + 1}. [${item.ref}] ${item.artist} – ${item.title}</strong><br>
   <span style="font-size: 14px;">
     ${item.jacket} / ${item.media} / ${item.pressing}<br>
-    진열 위치: ${item.subcategory || "-"}<br>
+    진열 위치(Subcategory): ${item.subcategory || "-"}<br>
     매장: ${item.store}<br>
     가격: ₩${Number(item.price || 0).toLocaleString()}
   </span>
 </div>`;
       }).join('');
 
-      /* ▶ 인쇄 버튼을 카카오톡 왼쪽으로 배치 */
+      document.getElementById("cartModal").style.display = "flex";
       cartBody.innerHTML = `
 ${itemsHtml}
 <hr>
@@ -465,8 +386,6 @@ ${itemsHtml}
 `;
       monitorCartCheckboxes();
     }
-
-    document.getElementById("cartModal").style.display = "flex";
   }
 
   function clearCart() {
@@ -480,7 +399,6 @@ ${itemsHtml}
   function addToCart(index) {
     const item = window.currentData[index];
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-
     const exists = cart.some(c => c.ref === item.Ref);
     if (exists) { alert("이미 장바구니에 담긴 상품입니다."); return; }
 
@@ -508,16 +426,16 @@ ${itemsHtml}
     if (!confirm("선택한 항목을 장바구니에서 삭제할까요?")) return;
 
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    const updatedCart = cart.filter((_, idx) => {
-      return !Array.from(checkboxes).some(cb => Number(cb.dataset.index) === idx);
-    });
+    const updatedCart = cart.filter((_, idx) =>
+      !Array.from(checkboxes).some(cb => Number(cb.dataset.index) === idx)
+    );
 
     localStorage.setItem("cart", JSON.stringify(updatedCart));
     alert("선택한 항목이 삭제되었습니다.");
     renderCartModal(); // 다시 로드
   }
 
-  /* ▶ 인쇄: 새 창에 영수증 HTML을 만들어 인쇄 (브라우저 호환성 ↑) */
+  /* 인쇄: 새 창에서 출력 */
   function printCart() {
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
     if (cart.length === 0) { alert("장바구니가 비어 있습니다."); return; }
@@ -549,7 +467,7 @@ ${itemsHtml}
       `;
     }).join('');
 
-    const footer = `<div class="foot mono">※ 매장 진열 위치를 기준으로 상품을 찾아주세요.</div>`;
+    const footer = `<div class="foot mono">※ 매장 진열 위치(Subcategory)를 기준으로 상품을 찾아주세요.</div>`;
 
     const css = `
       @page { size: ${PAPER_WIDTH_MM}mm auto; margin: 0; }
@@ -581,25 +499,19 @@ ${itemsHtml}
     ${header}${items}${footer}
   </div>
   <script>
-    // 폰트/레이아웃 렌더링 후 인쇄
     setTimeout(function(){ window.print(); window.close(); }, ${PRINT_DELAY_MS});
   <\/script>
 </body>
 </html>`.trim();
 
     const w = window.open('', '_blank', 'noopener,noreferrer,width=400,height=600');
-    if (!w) {
-      alert('팝업이 차단되었습니다. 브라우저 팝업 허용 후 다시 시도해주세요.');
-      return;
-    }
-    w.document.open();
-    w.document.write(html);
-    w.document.close();
+    if (!w) { alert('팝업이 차단되었습니다. 브라우저 팝업 허용 후 다시 시도해주세요.'); return; }
+    w.document.open(); w.document.write(html); w.document.close();
   }
   </script>
 
-  <!-- 🛒 장바구니 보기 버튼 (데스크톱 전용) -->
-  <button id="viewCartBtn" style="
+  <!-- 🛒 장바구니 보기 버튼 (데스크톱 전용) — 인라인 onclick으로 바인딩 -->
+  <button id="viewCartBtn" onclick="renderCartModal()" style="
     position: fixed;
     bottom: 80px;
     right: 30px;
@@ -615,9 +527,9 @@ ${itemsHtml}
   ">🛒 장바구니</button>
 
   <!-- 장바구니 모달 -->
-  <div id="cartModal" class="modal">
+  <div id="cartModal" class="modal" onclick="if(event.target.id==='cartModal'){ this.style.display='none'; }">
     <div class="modal-content" style="max-width: 700px;">
-      <span id="cartModalClose" class="modal-close">&times;</span>
+      <span class="modal-close" onclick="document.getElementById('cartModal').style.display='none'">&times;</span>
       <div id="cartBody"></div>
     </div>
   </div>
