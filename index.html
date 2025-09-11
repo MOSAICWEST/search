@@ -93,71 +93,38 @@
     tbody tr:hover { background-color: #eef6ff; }
 
     /* 데스크톱 이미지 셀 */
-    td.image-cell {
-      width: 110px;
-      min-width: 110px;
-    }
+    td.image-cell { width: 110px; min-width: 110px; }
     .table-image {
-      width: 90px;
-      height: 90px;
-      background: #eee;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-      overflow: hidden;
-      cursor: pointer;
-      user-select: none;
+      width: 90px; height: 90px; background: #eee;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 8px; overflow: hidden; cursor: pointer; user-select: none;
     }
-    .table-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-    .table-image .no-image {
-      color: #aaa;
-      font-size: 12px;
-    }
+    .table-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .table-image .no-image { color: #aaa; font-size: 12px; }
 
     /* TOP 버튼 */
     .top-button {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      z-index: 99;
-      background-color: #333;
-      color: #fff;
-      border: none;
-      padding: 10px 14px;
-      border-radius: 6px;
-      font-size: 14px;
+      position: fixed; bottom: 30px; right: 30px; z-index: 99;
+      background-color: #333; color: #fff; border: none;
+      padding: 10px 14px; border-radius: 6px; font-size: 14px;
     }
     .top-button:hover { background-color: #555; }
 
     .fab-menu { display: none; }
 
-    /* FAB 메뉴 스타일 (모바일 전용) */
+    /* FAB 메뉴 (모바일 전용) */
     @media (max-width: 600px) {
-      .top-button,
-      #viewCartBtn { display: none !important; }
+      .top-button, #viewCartBtn { display: none !important; }
 
       .fab-menu {
-        display: flex;
-        position: fixed;
-        right: 20px;
-        bottom: 90px;
-        z-index: 999;
-        flex-direction: column-reverse;
-        align-items: flex-end;
+        display: flex; position: fixed; right: 20px; bottom: 90px; z-index: 999;
+        flex-direction: column-reverse; align-items: flex-end;
       }
       .fab-main {
         width: 40px; height: 40px; font-size: 22px;
         display: flex; align-items: center; justify-content: center;
-        border-radius: 50%;
-        background-color: #0071e3; color: white; border: none;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        cursor: pointer; padding: 0; transition: transform 0.3s ease;
+        border-radius: 50%; background-color: #0071e3; color: white; border: none;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2); cursor: pointer; padding: 0; transition: transform 0.3s ease;
       }
       .fab-actions {
         flex-direction: column; gap: 10px; margin-bottom: 10px;
@@ -168,91 +135,44 @@
       .fab-action {
         padding: 10px 16px; background-color: #333; color: white;
         border: none; border-radius: 6px; font-size: 14px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.15); cursor: pointer;
-        transition: background-color 0.2s ease;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.15); cursor: pointer; transition: background-color 0.2s ease;
       }
       .fab-action:hover { background-color: #555; }
     }
 
-    /* 모달 영역 */
+    /* 모달 */
     .modal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0; top: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      justify-content: center; align-items: center;
+      display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center;
     }
     .modal-content {
-      background: #fff;
-      padding: 24px;
-      width: 90%;
-      max-width: 600px;
-      max-height: 90vh;
-      overflow-y: auto;
-      border-radius: 10px;
-      position: relative;
-      animation: slideUp 0.3s ease forwards;
+      background: #fff; padding: 24px; width: 90%; max-width: 600px; max-height: 90vh;
+      overflow-y: auto; border-radius: 10px; position: relative; animation: slideUp 0.3s ease forwards;
       box-shadow: 0 4px 20px rgba(0,0,0,0.2);
     }
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(40px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .modal-close {
-      position: absolute; top: 12px; right: 16px;
-      font-size: 24px; cursor: pointer; color: #666; transition: color 0.3s;
-    }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+    .modal-close { position: absolute; top: 12px; right: 16px; font-size: 24px; cursor: pointer; color: #666; transition: color 0.3s; }
     .modal-close:hover { color: #000; }
-
-    /* 모달 내부 텍스트 */
-    #modalBody h4 { font-size: 18px; margin-bottom: 4px; }
-    #modalBody p { font-size: 14px; margin-bottom: 12px; line-height: 1.5; }
-    #modalBody ul { padding-left: 18px; margin: 0 0 12px 0; }
-    #modalBody li { font-size: 14px; line-height: 1.4; margin-bottom: 4px; }
-    #modalBody strong { color: #222; }
 
     /* 상세 정보 블록 (이미지와 유튜브 사이) */
     .info-block {
-      border: 1px solid #eee;
-      background: #fafafa;
-      border-radius: 8px;
-      padding: 12px 14px;
-      margin: 12px 0 16px;
-      line-height: 1.6;
+      border: 1px solid #eee; background: #fafafa; border-radius: 8px;
+      padding: 12px 14px; margin: 12px 0 16px; line-height: 1.6;
     }
-    .info-block p {
-      margin: 4px 0;
-      word-break: keep-all;
-    }
+    .info-block p { margin: 4px 0; word-break: keep-all; }
 
-    /* 비디오 영역 */
-    .video-wrapper {
-      position: relative; padding-top: 56.25%; height: 0;
-      overflow: hidden; margin-bottom: 16px;
-    }
-    .video-wrapper iframe {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    }
+    /* 비디오 */
+    .video-wrapper { position: relative; padding-top: 56.25%; height: 0; overflow: hidden; margin-bottom: 16px; }
+    .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
 
     /* 모바일 카드 뷰 */
     @media (max-width: 600px) {
       table { display: none; }
-      .card-list {
-        display: flex; flex-direction: column; gap: 16px; padding: 0 5%;
-      }
-      .card-item {
-        display: flex; background: #fff; border-radius: 10px;
-        overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-      }
-      .card-item .card-image {
-        width: 100px; height: 100px; background-color: #eee;
-        display: flex; align-items: center; justify-content: center; cursor: pointer;
-      }
+      .card-list { display: flex; flex-direction: column; gap: 16px; padding: 0 5%; }
+      .card-item { display: flex; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+      .card-item .card-image { width: 100px; height: 100px; background-color: #eee; display: flex; align-items: center; justify-content: center; cursor: pointer; }
       .card-item .card-image img { width: 100%; height: 100%; object-fit: cover; }
-      .card-content {
-        padding: 12px; flex: 1; display: flex; flex-direction: column; justify-content: center;
-      }
+      .card-content { padding: 12px; flex: 1; display: flex; flex-direction: column; justify-content: center; }
       .card-content div { margin-bottom: 4px; font-size: 14px; }
     }
 
@@ -272,6 +192,7 @@
 </head>
 <body>
   <h1>MOSAIC 재고 검색</h1>
+
   <div class="search-wrapper">
     <div class="filters">
       <select id="storeFilter">
@@ -310,7 +231,10 @@
   <script>
   const SHEET_URL = "./data.json";
 
-  /* 데스크톱: 이미지 컬럼 포함 */
+  /* 감열지 용지 너비(mm) — 58mm/80mm 등으로 쉽게 변경 */
+  const PAPER_WIDTH_MM = 58;
+
+  /* 데스크톱 테이블 표시 컬럼 */
   const displayOrder = [
     "Image",
     "Artist", "Title", "Label", "Pressing", "Genre", "Style",
@@ -340,6 +264,38 @@
   results.innerHTML = `<div style="text-align:center; margin:40px 0; color:#555; font-size:16px;">데이터 불러오는 중입니다...</div>`;
   document.getElementById("searchBtn").disabled = true;
 
+  /* 동적 프린트 스타일(@page size)을 주입 */
+  function ensurePrintCSS() {
+    const styleId = 'dynamicPrintStyle';
+    let styleEl = document.getElementById(styleId);
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = styleId;
+      document.head.appendChild(styleEl);
+    }
+    styleEl.textContent = `
+      @page { size: ${PAPER_WIDTH_MM}mm auto; margin: 0; }
+      @media print {
+        body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        body * { visibility: hidden; }
+        #printArea, #printArea * { visibility: visible; }
+        #printArea {
+          position: fixed; left: 0; top: 0;
+          width: ${PAPER_WIDTH_MM}mm; padding: 4mm;
+          background: #fff; color: #000; font-size: 12px; line-height: 1.45;
+        }
+        #printArea .r-title { font-weight: 700; font-size: 14px; text-align: center; margin-bottom: 2mm; }
+        #printArea .r-meta { text-align: center; font-size: 11px; margin-bottom: 3mm; }
+        #printArea .cut { border-top: 1px dashed #000; margin: 2mm 0; }
+        #printArea .item { margin: 2mm 0; }
+        #printArea .line1 { font-weight: 700; }
+        #printArea .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+        #printArea .price { font-weight: 700; }
+        #printArea .foot { margin-top: 3mm; text-align:center; font-size: 11px; }
+      }
+    `;
+  }
+
   fetch(SHEET_URL)
     .then(res => res.json())
     .then(data => {
@@ -353,6 +309,7 @@
     })
     .finally(() => {
       document.getElementById("searchBtn").disabled = false;
+      ensurePrintCSS();
     });
 
   function populateGenreFilter(data) {
@@ -489,7 +446,7 @@
       content += `<p><strong>이미지:</strong><br><img src="${mainImg}" alt="이미지" style="max-width: 100%; margin: 10px 0;" loading="lazy"></p>`;
     }
 
-    /* ✅ 정보 블록 (예시 형식에 맞춤) */
+    /* 정보 블록 */
     const store   = item.OriginSheet || "";
     const pressing = item.Pressing || "";
     const jacket  = item["Condition Jacket"] || "";
@@ -578,11 +535,8 @@
   }
 
   window.addEventListener("resize", debounce(() => {
-    if (window.currentData?.length > 0) {
-      renderTable(window.currentData);
-    } else {
-      filterAndRenderTable();
-    }
+    if (window.currentData?.length > 0) { renderTable(window.currentData); }
+    else { filterAndRenderTable(); }
   }, 300));
 
   function renderPagination(totalItems) {
@@ -610,49 +564,9 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  /* 장바구니 */
+  /* 장바구니 로직 */
   document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("viewCartBtn").onclick = () => {
-      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      const cartBody = document.getElementById("cartBody");
-
-      if (cart.length === 0) {
-        cartBody.innerHTML = `<p>장바구니가 비어 있습니다.</p>`;
-      } else {
-        let total = 0;
-        const itemsHtml = cart.map((item, idx) => {
-          total += item.price;
-          return `<div style="margin-bottom: 12px;">
-    <input type="checkbox" class="cart-item-checkbox" data-index="${idx}" style="margin-right: 6px;">
-    <strong>${idx + 1}. [${item.ref}] ${item.artist} – ${item.title}</strong><br>
-    <span style="font-size: 14px;">
-      ${item.jacket} / ${item.media} / ${item.pressing}<br>
-      매장: ${item.store}<br>
-      가격: ₩${item.price.toLocaleString()}
-    </span>
-  </div>`;
-        }).join('');
-
-        cartBody.innerHTML = `
-  ${itemsHtml}
-  <hr>
-  <p><strong>총 ${cart.length}개 (합계: ₩${total.toLocaleString()})</strong></p>
-<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 16px;">
-  <div>
-    <button onclick="copyCartToClipboard()" style="margin-right: 10px;">📋 텍스트 복사</button>
-    <button onclick="window.open('https://pf.kakao.com/_xxx/chat', '_blank')">💬 카카오톡 문의</button>
-  </div>
-  <div>
-    <button id="deleteSelectedBtn" onclick="deleteSelectedCartItems()" style="background:#ccc; color:#000; margin-right: 10px;" disabled>🗑 선택 항목 삭제</button>
-    <button onclick="clearCart()" style="background:#ccc; color:#000;">❌ 전체 비우기</button>
-  </div>
-</div>
-`;
-        monitorCartCheckboxes();
-      }
-
-      document.getElementById("cartModal").style.display = "flex";
-    };
+    document.getElementById("viewCartBtn").onclick = renderCartModal;
 
     document.getElementById("cartModalClose").onclick = () => {
       document.getElementById("cartModal").style.display = "none";
@@ -664,43 +578,56 @@
     });
   });
 
+  function renderCartModal() {
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    const cartBody = document.getElementById("cartBody");
+
+    if (cart.length === 0) {
+      cartBody.innerHTML = `<p>장바구니가 비어 있습니다.</p>`;
+    } else {
+      let total = 0;
+      const itemsHtml = cart.map((item, idx) => {
+        total += Number(item.price || 0);
+        return `<div style="margin-bottom: 12px;">
+  <input type="checkbox" class="cart-item-checkbox" data-index="${idx}" style="margin-right: 6px;">
+  <strong>${idx + 1}. [${item.ref}] ${item.artist} – ${item.title}</strong><br>
+  <span style="font-size: 14px;">
+    ${item.jacket} / ${item.media} / ${item.pressing}<br>
+    진열 위치(Subcategory): ${item.subcategory || "-"}<br>
+    매장: ${item.store}<br>
+    가격: ₩${Number(item.price || 0).toLocaleString()}
+  </span>
+</div>`;
+      }).join('');
+
+      cartBody.innerHTML = `
+${itemsHtml}
+<hr>
+<p><strong>총 ${cart.length}개 (합계: ₩${total.toLocaleString()})</strong></p>
+<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-top:16px;">
+  <div>
+    <!-- 카카오톡 문의 버튼은 유지(원하시면 제거 가능) -->
+    <button onclick="window.open('https://pf.kakao.com/_xxx/chat', '_blank')">💬 카카오톡 문의</button>
+  </div>
+  <div>
+    <button id="deleteSelectedBtn" onclick="deleteSelectedCartItems()" style="background:#ccc; color:#000; margin-right: 10px;" disabled>🗑 선택 항목 삭제</button>
+    <button onclick="printCart()" style="background:#0071e3;">🖨 인쇄하기</button>
+    <button onclick="clearCart()" style="background:#ccc; color:#000; margin-left: 10px;">❌ 전체 비우기</button>
+  </div>
+</div>
+`;
+      monitorCartCheckboxes();
+    }
+
+    document.getElementById("cartModal").style.display = "flex";
+  }
+
   function clearCart() {
     if (confirm("장바구니를 모두 비우시겠습니까?")) {
       localStorage.removeItem("cart");
       document.getElementById("cartModal").style.display = "none";
       alert("장바구니가 비워졌습니다.");
     }
-  }
-
-  function copyCartToClipboard() {
-    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    if (cart.length === 0) return;
-
-    let total = 0;
-    const lines = cart.map((item, i) => {
-      total += item.price;
-      return `${i + 1}. [${item.ref}] ${item.artist} – ${item.title}
-${item.jacket} / ${item.media} / ${item.pressing}
-매장: ${item.store}
-가격: ₩${item.price.toLocaleString()}`;
-    });
-
-    const message = `📦 MOSAIC 장바구니 주문 요청
-
-${lines.join('\n\n')}
-
-* 오프라인 매장에서 판매중인 상품이므로 실재고 확인 후 입금 안내를 드립니다.
-* 상품 위치가 다른 경우 물품을 합쳐야 하므로 발송, 픽업 준비에 7일 이상 소요될 수 있습니다.
-* 택배시 ₩4,000 추가금이 발생합니다. (CJ/로젠택배)
-
-👉 총 ${cart.length}개 (합계: ₩${total.toLocaleString()}) 
-👉 문의자: 직접 입력
-👉 연락처: 직접 입력
-👉 배송지(선택사항): 직접 입력`;
-
-    navigator.clipboard.writeText(message).then(() => {
-      alert("장바구니 정보가 복사되었습니다. 카카오톡 채널로 이동해 붙여넣어 주세요!");
-    });
   }
 
   function addToCart(index) {
@@ -718,6 +645,7 @@ ${lines.join('\n\n')}
       jacket: item["Condition Jacket"] || "",
       media: item["Condition Media"] || "",
       pressing: item.Pressing || "",
+      subcategory: item.Subcategory || item["Subcategory"] || "",
       price: price,
       store: item.OriginSheet || ""
     };
@@ -739,7 +667,7 @@ ${lines.join('\n\n')}
 
     localStorage.setItem("cart", JSON.stringify(updatedCart));
     alert("선택한 항목이 삭제되었습니다.");
-    document.getElementById("viewCartBtn").click(); // 장바구니 다시 로드
+    renderCartModal(); // 다시 로드
   }
 
   function monitorCartCheckboxes() {
@@ -755,18 +683,47 @@ ${lines.join('\n\n')}
     updateDeleteButtonState();
   }
 
-  function toggleFab() {
-    const fab = document.querySelector(".fab-menu");
-    fab.classList.toggle("open");
+  /* 인쇄용 HTML 생성 & 출력 */
+  function printCart() {
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    if (cart.length === 0) { alert("장바구니가 비어 있습니다."); return; }
+
+    ensurePrintCSS();
+
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mi = String(now.getMinutes()).padStart(2, '0');
+
+    const header = `
+      <div class="r-title">MOSAIC PICK LIST</div>
+      <div class="r-meta mono">${yyyy}-${mm}-${dd} ${hh}:${mi} | 총 ${cart.length}개</div>
+      <div class="cut"></div>
+    `;
+
+    const items = cart.map((it, i) => {
+      const priceStr = Number(it.price || 0).toLocaleString();
+      return `
+        <div class="item">
+          <div class="line1">#${i+1} [${it.ref}] ${it.artist} – ${it.title}</div>
+          ${it.pressing ? `<div>Pressing : ${it.pressing}</div>` : ``}
+          <div>Jacket : ${it.jacket || '-'} / Media : ${it.media || '-'}</div>
+          <div>Subcategory : ${it.subcategory || '-'}</div>
+          <div class="price">Price : ₩${priceStr}</div>
+        </div>
+        <div class="cut"></div>
+      `;
+    }).join('');
+
+    const footer = `<div class="foot mono">※ 매장 진열 위치(Subcategory)를 기준으로 상품을 찾아주세요.</div>`;
+
+    const printArea = document.getElementById('printArea');
+    printArea.innerHTML = header + items + footer;
+
+    window.print();
   }
-  function closeFab() {
-    const fab = document.querySelector(".fab-menu");
-    fab.classList.remove("open");
-  }
-  document.addEventListener("click", function(event) {
-    const fabMenu = document.querySelector(".fab-menu");
-    if (fabMenu && !fabMenu.contains(event.target)) { fabMenu.classList.remove("open"); }
-  });
   </script>
 
   <!-- 🛒 장바구니 보기 버튼 (데스크톱 전용) -->
@@ -793,13 +750,16 @@ ${lines.join('\n\n')}
     </div>
   </div>
 
-  <!-- FAB 버튼 메뉴 (모바일 전용) -->
+  <!-- FAB 메뉴 (모바일 전용) -->
   <div class="fab-menu">
-    <button class="fab-main" onclick="toggleFab()" aria-label="FAB 메뉴 열기">＋</button>
+    <button class="fab-main" onclick="document.querySelector('.fab-menu').classList.toggle('open')" aria-label="FAB 메뉴 열기">＋</button>
     <div class="fab-actions">
-      <button class="fab-action" onclick="window.scrollTo({ top: 0, behavior: 'smooth' }); closeFab()">TOP</button>
-      <button class="fab-action" onclick="document.getElementById('viewCartBtn').click(); closeFab()">🛒 장바구니</button>
+      <button class="fab-action" onclick="window.scrollTo({ top: 0, behavior: 'smooth' }); document.querySelector('.fab-menu').classList.remove('open')">TOP</button>
+      <button class="fab-action" onclick="document.getElementById('viewCartBtn').click(); document.querySelector('.fab-menu').classList.remove('open')">🛒 장바구니</button>
     </div>
   </div>
+
+  <!-- 🔒 인쇄 전용 영역(화면에 표시되지 않음) -->
+  <div id="printArea" style="display:block; position:absolute; left:-9999px; top:-9999px;"></div>
 </body>
 </html>
