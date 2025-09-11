@@ -92,6 +92,34 @@
     tbody tr:nth-child(odd) { background-color: #fcfcfc; }
     tbody tr:hover { background-color: #eef6ff; }
 
+    /* 데스크톱 이미지 셀 */
+    td.image-cell {
+      width: 110px;
+      min-width: 110px;
+    }
+    .table-image {
+      width: 90px;
+      height: 90px;
+      background: #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+      user-select: none;
+    }
+    .table-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .table-image .no-image {
+      color: #aaa;
+      font-size: 12px;
+    }
+
     /* TOP 버튼 */
     .top-button {
       position: fixed;
@@ -107,86 +135,81 @@
     }
     .top-button:hover { background-color: #555; }
 
+    .fab-menu { display: none; }
 
-.fab-menu {
-  display: none;
-}
+    /* FAB 메뉴 스타일 (모바일 전용) */
+    @media (max-width: 600px) {
+      /* 기존 버튼 숨김 (TOP / 장바구니) */
+      .top-button,
+      #viewCartBtn {
+        display: none !important;
+      }
 
-/* FAB 메뉴 스타일 (모바일 전용) */
-@media (max-width: 600px) {
-  /* 기존 버튼 숨김 (TOP / 장바구니) */
-  .top-button,
-  #viewCartBtn {
-    display: none !important;
-  }
+      /* FAB 메뉴 컨테이너 */
+      .fab-menu {
+        display: flex;
+        position: fixed;
+        right: 20px;
+        bottom: 90px;
+        z-index: 999;
+        flex-direction: column-reverse;
+        align-items: flex-end;
+      }
 
-  /* FAB 메뉴 컨테이너 */
-  .fab-menu {
-    display: flex;
-    position: fixed;
-    right: 20px;
-    bottom: 90px;
-    z-index: 999;
-    flex-direction: column-reverse;
-    align-items: flex-end;
-  }
+      /* FAB 메인 버튼 (＋) */
+      .fab-main {
+        width: 40px;
+        height: 40px;
+        font-size: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background-color: #0071e3;
+        color: white;
+        border: none;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        padding: 0;
+        transition: transform 0.3s ease;
+      }
 
-  /* FAB 메인 버튼 (＋) */
-  .fab-main {
-    width: 40px;
-    height: 40px;
-    font-size: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background-color: #0071e3;
-    color: white;
-    border: none;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    cursor: pointer;
-    padding: 0;
-    transition: transform 0.3s ease;
-  }
+      /* FAB 액션 버튼들 (초기에는 숨김 + 애니메이션 준비) */
+      .fab-actions {
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 10px;
+        opacity: 0;
+        transform: translateY(20px);
+        pointer-events: none;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        display: flex;
+      }
 
-  /* FAB 액션 버튼들 (초기에는 숨김 + 애니메이션 준비) */
-  .fab-actions {
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 10px;
-    opacity: 0;
-    transform: translateY(20px);
-    pointer-events: none;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    display: flex;
-  }
+      /* FAB 메뉴가 열렸을 때 애니메이션 */
+      .fab-menu.open .fab-actions {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
 
-  /* FAB 메뉴가 열렸을 때 애니메이션 */
-  .fab-menu.open .fab-actions {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
-  }
+      /* FAB 액션 버튼 개별 스타일 */
+      .fab-action {
+        padding: 10px 16px;
+        background-color: #333;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+      }
 
-  /* FAB 액션 버튼 개별 스타일 */
-  .fab-action {
-    padding: 10px 16px;
-    background-color: #333;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-size: 14px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-  }
-
-  .fab-action:hover {
-    background-color: #555;
-  }
-}
-
-
+      .fab-action:hover {
+        background-color: #555;
+      }
+    }
 
     /* 모달 영역 */
     .modal {
@@ -359,24 +382,38 @@
   </div>
   <div id="results"></div>
   <div id="pagination" style="text-align:center; margin-bottom: 40px;"></div>
+
+  <!-- 상세 모달 -->
   <div id="detailModal" class="modal">
     <div class="modal-content">
       <span id="modalClose" class="modal-close">&times;</span>
       <div id="modalBody"></div>
     </div>
   </div>
+
+  <!-- TOP 버튼 (데스크톱 전용) -->
   <button class="top-button" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">TOP</button>
+
   <script>
   const SHEET_URL = "./data.json";
-  const displayOrder = ["Artist", "Title", "Label", "Pressing", "Genre", "Style", "Subcategory", "Condition Jacket", "Condition Media", "Selling at", "Details"];
+
+  /* ✅ 데스크톱에도 이미지 컬럼 추가 */
+  const displayOrder = [
+    "Image",              // ← 추가: 데스크톱 테이블 좌측 이미지
+    "Artist", "Title", "Label", "Pressing", "Genre", "Style",
+    "Subcategory", "Condition Jacket", "Condition Media",
+    "Selling at", "Details"
+  ];
+
   const allDisplayNames = {
+    "Image": "이미지",        // ← 추가된 헤더 이름
     "Ref": "상품번호", "Artist": "아티스트", "Title": "타이틀",
     "Label": "레이블", "Pressing": "프레싱", "Genre": "장르", "Style": "스타일",
     "Subcategory": "진열 위치", "Condition Jacket": "자켓", "Condition Media": "미디어",
     "Selling at": "가격", "Details": "상세", "Youtube": "YouTube"
   };
 
- function getMainImageUrl(urlField) {
+  function getMainImageUrl(urlField) {
     if (!urlField) return "";
     const parts = String(urlField)
       .split("•")
@@ -384,7 +421,7 @@
       .filter(Boolean);
     return parts[0] || "";
   }
-    
+
   let allData = [];
   let currentPage = 1;
   const itemsPerPage = 30;
@@ -482,12 +519,13 @@
     let html = "";
 
     if (window.innerWidth <= 600) {
+      /* 모바일 카드 뷰 */
       html = `<div class="card-list">`;
       pageData.forEach((item, idx) => {
         const imageURL = getMainImageUrl(item["Image URL"]);
-const imageBlock = imageURL
-  ? `<div class="card-image" onclick="showDetails(${start + idx})"><img src="${imageURL}" alt="앨범 이미지" loading="lazy"></div>`
-  : `<div class="card-image" onclick="showDetails(${start + idx})"><span style="color:#aaa;font-size:12px;">NO IMAGE</span></div>`;
+        const imageBlock = imageURL
+          ? `<div class="card-image" onclick="showDetails(${start + idx})"><img src="${imageURL}" alt="앨범 이미지" loading="lazy"></div>`
+          : `<div class="card-image" onclick="showDetails(${start + idx})"><span style="color:#aaa;font-size:12px;">NO IMAGE</span></div>`;
         html += `
           <div class="card-item">
             ${imageBlock}
@@ -501,12 +539,25 @@ const imageBlock = imageURL
       });
       html += `</div>`;
     } else {
+      /* 데스크톱 테이블 뷰 (이미지 컬럼 포함) */
       html = `<div class="table-wrapper"><table><thead><tr>`;
-      displayOrder.forEach(key => html += `<th>${allDisplayNames[key] || key}</th>`);
+      displayOrder.forEach(key => {
+        html += `<th>${allDisplayNames[key] || key}</th>`;
+      });
       html += `</tr></thead><tbody>`;
+
       pageData.forEach((row, idx) => {
         html += `<tr>`;
         displayOrder.forEach(key => {
+          if (key === "Image") {
+            const imageURL = getMainImageUrl(row["Image URL"]);
+            const imgHtml = imageURL
+              ? `<div class="table-image" onclick="showDetails(${start + idx})"><img src="${imageURL}" alt="이미지" loading="lazy"></div>`
+              : `<div class="table-image" onclick="showDetails(${start + idx})"><span class="no-image">NO IMAGE</span></div>`;
+            html += `<td class="image-cell">${imgHtml}</td>`;
+            return;
+          }
+
           let cell = row[key] ?? "";
           if (key === "Selling at" && !isNaN(cell)) cell = Number(cell).toLocaleString();
           if (key === "Details") cell = `<button onclick="showDetails(${start + idx})">상세</button>`;
@@ -532,9 +583,9 @@ const imageBlock = imageURL
     let content = `<h4 style="margin-top: 0;">${title}</h4><p style="margin-top: -8px;">${ref}</p>`;
 
     const mainImg = getMainImageUrl(item["Image URL"]);
-if (mainImg) {
-  content += `<p><strong>이미지:</strong><br><img src="${mainImg}" alt="이미지" style="max-width: 100%; margin: 10px 0;" loading="lazy"></p>`;
-}
+    if (mainImg) {
+      content += `<p><strong>이미지:</strong><br><img src="${mainImg}" alt="이미지" style="max-width: 100%; margin: 10px 0;" loading="lazy"></p>`;
+    }
 
     const jacket = item["Condition Jacket"] || "";
     const media = item["Condition Media"] || "";
@@ -636,7 +687,7 @@ if (mainImg) {
     for (let i = 1; i <= totalPages; i++) {
       if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 2) {
         html += `<button onclick="goToPage(${i})" ${i === currentPage ? 'disabled' : ''}>${i}</button>`;
-      } else if (i === 2 && currentPage - 3 > 1 || i === totalPages - 1 && currentPage + 3 < totalPages) {
+      } else if ((i === 2 && currentPage - 3 > 1) || (i === totalPages - 1 && currentPage + 3 < totalPages)) {
         html += `<span style="margin:0 4px;">...</span>`;
       }
     }
@@ -660,9 +711,9 @@ if (mainImg) {
         cartBody.innerHTML = `<p>장바구니가 비어 있습니다.</p>`;
       } else {
         let total = 0;
-   const itemsHtml = cart.map((item, idx) => {
-  total += item.price;
-  return `<div style="margin-bottom: 12px;">
+        const itemsHtml = cart.map((item, idx) => {
+          total += item.price;
+          return `<div style="margin-bottom: 12px;">
     <input type="checkbox" class="cart-item-checkbox" data-index="${idx}" style="margin-right: 6px;">
     <strong>${idx + 1}. [${item.ref}] ${item.artist} – ${item.title}</strong><br>
     <span style="font-size: 14px;">
@@ -671,10 +722,9 @@ if (mainImg) {
       가격: ₩${item.price.toLocaleString()}
     </span>
   </div>`;
-}).join('');
+        }).join('');
 
-
-cartBody.innerHTML = `
+        cartBody.innerHTML = `
   ${itemsHtml}
   <hr>
   <p><strong>총 ${cart.length}개 (합계: ₩${total.toLocaleString()})</strong></p>
@@ -689,7 +739,7 @@ cartBody.innerHTML = `
   </div>
 </div>
 `;
-monitorCartCheckboxes();
+        monitorCartCheckboxes();
       }
 
       document.getElementById("cartModal").style.display = "flex";
@@ -770,98 +820,96 @@ ${lines.join('\n\n')}
     localStorage.setItem("cart", JSON.stringify(cart));
     alert("장바구니에 추가되었습니다.");
   }
-function deleteSelectedCartItems() {
-  const checkboxes = document.querySelectorAll(".cart-item-checkbox:checked");
-  if (checkboxes.length === 0) {
-    alert("삭제할 항목을 선택해주세요.");
-    return;
+
+  function deleteSelectedCartItems() {
+    const checkboxes = document.querySelectorAll(".cart-item-checkbox:checked");
+    if (checkboxes.length === 0) {
+      alert("삭제할 항목을 선택해주세요.");
+      return;
+    }
+
+    const confirmed = confirm("선택한 항목을 장바구니에서 삭제할까요?");
+    if (!confirmed) return;
+
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+
+    // 선택되지 않은 항목만 남김
+    const updatedCart = cart.filter((_, idx) => {
+      return !Array.from(checkboxes).some(cb => Number(cb.dataset.index) === idx);
+    });
+
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+    alert("선택한 항목이 삭제되었습니다.");
+    document.getElementById("viewCartBtn").click(); // 장바구니 다시 로드
   }
 
-  const confirmed = confirm("선택한 항목을 장바구니에서 삭제할까요?");
-  if (!confirmed) return;
+  function monitorCartCheckboxes() {
+    const checkboxes = document.querySelectorAll(".cart-item-checkbox");
+    const deleteBtn = document.getElementById("deleteSelectedBtn");
 
-  const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    if (!deleteBtn) return;
 
-  // 선택되지 않은 항목만 남김
-  const updatedCart = cart.filter((_, idx) => {
-    return !Array.from(checkboxes).some(cb => Number(cb.dataset.index) === idx);
-  });
+    const updateDeleteButtonState = () => {
+      const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+      deleteBtn.disabled = !anyChecked;
+    };
 
-localStorage.setItem("cart", JSON.stringify(updatedCart));
-alert("선택한 항목이 삭제되었습니다.");
-document.getElementById("viewCartBtn").click(); // 장바구니 다시 로드
+    checkboxes.forEach(cb => {
+      cb.addEventListener("change", updateDeleteButtonState);
+    });
 
-}
-
-function monitorCartCheckboxes() {
-  const checkboxes = document.querySelectorAll(".cart-item-checkbox");
-  const deleteBtn = document.getElementById("deleteSelectedBtn");
-
-  if (!deleteBtn) return;
-
-  const updateDeleteButtonState = () => {
-    const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
-    deleteBtn.disabled = !anyChecked;
-  };
-
-  checkboxes.forEach(cb => {
-    cb.addEventListener("change", updateDeleteButtonState);
-  });
-
-  updateDeleteButtonState(); // 최초 상태도 반영
-}
-
-function toggleFab() {
-  const fab = document.querySelector(".fab-menu");
-  fab.classList.toggle("open");
-}
-
-function closeFab() {
-  const fab = document.querySelector(".fab-menu");
-  fab.classList.remove("open");
-}
-
-document.addEventListener("click", function(event) {
-  const fabMenu = document.querySelector(".fab-menu");
-  if (!fabMenu.contains(event.target)) {
-    fabMenu.classList.remove("open");
+    updateDeleteButtonState(); // 최초 상태도 반영
   }
-});
 
+  function toggleFab() {
+    const fab = document.querySelector(".fab-menu");
+    fab.classList.toggle("open");
+  }
 
-</script>
-<!-- 🛒 장바구니 보기 버튼 -->
-<button id="viewCartBtn" style="
-  position: fixed;
-  bottom: 80px;
-  right: 30px;
-  z-index: 100;
-  padding: 10px 16px;
-  font-size: 14px;
-  background-color: #0071e3;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-">🛒 장바구니</button>
+  function closeFab() {
+    const fab = document.querySelector(".fab-menu");
+    fab.classList.remove("open");
+  }
 
-<!-- 장바구니 모달 -->
-<div id="cartModal" class="modal">
-  <div class="modal-content" style="max-width: 700px;">
-    <span id="cartModalClose" class="modal-close">&times;</span>
-    <div id="cartBody"></div>
+  document.addEventListener("click", function(event) {
+    const fabMenu = document.querySelector(".fab-menu");
+    if (fabMenu && !fabMenu.contains(event.target)) {
+      fabMenu.classList.remove("open");
+    }
+  });
+  </script>
+
+  <!-- 🛒 장바구니 보기 버튼 (데스크톱 전용) -->
+  <button id="viewCartBtn" style="
+    position: fixed;
+    bottom: 80px;
+    right: 30px;
+    z-index: 100;
+    padding: 10px 16px;
+    font-size: 14px;
+    background-color: #0071e3;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  ">🛒 장바구니</button>
+
+  <!-- 장바구니 모달 -->
+  <div id="cartModal" class="modal">
+    <div class="modal-content" style="max-width: 700px;">
+      <span id="cartModalClose" class="modal-close">&times;</span>
+      <div id="cartBody"></div>
+    </div>
   </div>
-</div>
+
   <!-- FAB 버튼 메뉴 (모바일 전용) -->
-<!-- FAB 버튼 메뉴 (모바일 전용) -->
-<div class="fab-menu">
-  <button class="fab-main" onclick="toggleFab()" aria-label="FAB 메뉴 열기">＋</button>
-  <div class="fab-actions">
-    <button class="fab-action" onclick="window.scrollTo({ top: 0, behavior: 'smooth' }); closeFab()">TOP</button>
-    <button class="fab-action" onclick="document.getElementById('viewCartBtn').click(); closeFab()">🛒 장바구니</button>
+  <div class="fab-menu">
+    <button class="fab-main" onclick="toggleFab()" aria-label="FAB 메뉴 열기">＋</button>
+    <div class="fab-actions">
+      <button class="fab-action" onclick="window.scrollTo({ top: 0, behavior: 'smooth' }); closeFab()">TOP</button>
+      <button class="fab-action" onclick="document.getElementById('viewCartBtn').click(); closeFab()">🛒 장바구니</button>
+    </div>
   </div>
-</div>
-
 </body>
 </html>
