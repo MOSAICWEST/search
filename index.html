@@ -66,10 +66,7 @@
       width: 95%;
       animation: fadeIn 0.4s ease-in;
     }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -233,6 +230,8 @@
 
   /* 감열지 용지 너비(mm) — 58mm/80mm 등으로 쉽게 변경 */
   const PAPER_WIDTH_MM = 58;
+  /* 일부 브라우저에서 빈 인쇄 방지용 지연(ms) */
+  const PRINT_DELAY_MS = 120;
 
   /* 데스크톱 테이블 표시 컬럼 */
   const displayOrder = [
@@ -600,19 +599,19 @@
 </div>`;
       }).join('');
 
+      /* ✅ 인쇄 버튼을 왼쪽(카카오 왼쪽)으로 이동 */
       cartBody.innerHTML = `
 ${itemsHtml}
 <hr>
 <p><strong>총 ${cart.length}개 (합계: ₩${total.toLocaleString()})</strong></p>
 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-top:16px;">
   <div>
-    <!-- 카카오톡 문의 버튼은 유지(원하시면 제거 가능) -->
+    <button onclick="printCart()" style="background:#0071e3; margin-right:10px;">🖨 인쇄하기</button>
     <button onclick="window.open('https://pf.kakao.com/_xxx/chat', '_blank')">💬 카카오톡 문의</button>
   </div>
   <div>
     <button id="deleteSelectedBtn" onclick="deleteSelectedCartItems()" style="background:#ccc; color:#000; margin-right: 10px;" disabled>🗑 선택 항목 삭제</button>
-    <button onclick="printCart()" style="background:#0071e3;">🖨 인쇄하기</button>
-    <button onclick="clearCart()" style="background:#ccc; color:#000; margin-left: 10px;">❌ 전체 비우기</button>
+    <button onclick="clearCart()" style="background:#ccc; color:#000;">❌ 전체 비우기</button>
   </div>
 </div>
 `;
@@ -722,7 +721,10 @@ ${itemsHtml}
     const printArea = document.getElementById('printArea');
     printArea.innerHTML = header + items + footer;
 
-    window.print();
+    /* ✅ 짧은 지연 후 인쇄(빈 인쇄 방지) */
+    setTimeout(() => {
+      window.print();
+    }, PRINT_DELAY_MS);
   }
   </script>
 
