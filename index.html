@@ -459,10 +459,14 @@
     const pagination = document.getElementById("pagination");
 
     if (data.length === 0) {
-      results.innerHTML = `<div style="text-align:center; margin:40px 0; font-size:16px; color:#777;">검색 결과가 없습니다.</div>`;
-      pagination.innerHTML = "";
-      return;
-    }
+  results.innerHTML = `
+    <div style="text-align:center; margin:40px 0; font-size:16px; color:#777;">
+      <span class="ko">검색 결과가 없습니다.</span>
+      <span class="en" lang="en" style="display:block; margin-top:4px;">No results found.</span>
+    </div>`;
+  pagination.innerHTML = "";
+  return;
+}
 
     const start = (currentPage - 1) * itemsPerPage;
     const end = start + itemsPerPage;
