@@ -22,28 +22,29 @@
       font-weight: 600;
     }
     /* 헤더: 한글/영문 2줄 + 짧은 설명 */
-h1 .ko { display:block; }
-h1 .en {
-  display:block;
-  margin-top: 4px;
-  font-size: 16px;
-  font-weight: 400;
-  color: #666;
-  letter-spacing: .2px;
-}
-h1 .desc {
-  display:block;
-  margin-top: 6px;
-  font-size: 13px;
-  color: #888;
-}
+    h1 .ko { display:block; }
+    h1 .en {
+      display:block;
+      margin-top: 4px;
+      font-size: 16px;
+      font-weight: 400;
+      color: #666;
+      letter-spacing: .2px;
+    }
+    h1 .desc {
+      display:block;
+      margin-top: 6px;
+      font-size: 13px;
+      color: #888;
+    }
 
-/* 모바일에서 살짝 축소 */
-@media (max-width: 600px) {
-  h1 { font-size: 24px; }
-  h1 .en { font-size: 13px; }
-  h1 .desc { font-size: 12px; }
-}
+    /* 모바일에서 살짝 축소 */
+    @media (max-width: 600px) {
+      h1 { font-size: 24px; }
+      h1 .en { font-size: 13px; }
+      h1 .desc { font-size: 12px; }
+    }
+
     select, input[type="text"], button {
       font-size: 16px;
       padding: 10px;
@@ -112,6 +113,17 @@ h1 .desc {
       z-index: 10;
       white-space: nowrap;
     }
+
+    /* ✅ 테이블 헤더: 한글/영문 2줄 */
+    th .ko { display:block; }
+    th .en {
+      display:block;
+      margin-top: 2px;
+      font-size: 12px;
+      color: #666;
+      letter-spacing: .2px;
+    }
+
     tbody tr:nth-child(odd) { background-color: #fcfcfc; }
     tbody tr:hover { background-color: #eef6ff; }
 
@@ -295,10 +307,10 @@ h1 .desc {
 </head>
 <body>
   <h1>
-  <span class="ko">MOSAIC 재고 검색</span>
-  <span class="en" lang="en">MOSAIC Inventory Search</span>
-  </small>
-</h1>
+    <span class="ko">MOSAIC 재고 검색</span>
+    <span class="en" lang="en">MOSAIC Inventory Search</span>
+  </h1>
+
   <div class="search-wrapper">
     <div class="filters">
       <select id="storeFilter">
@@ -345,12 +357,23 @@ h1 .desc {
     "Selling at", "Details"
   ];
 
+  /* ✅ 테이블 헤더 라벨(한/영 2줄) */
+  const th2 = (ko, en) => `<span class="ko">${ko}</span><span class="en" lang="en">${en}</span>`;
   const allDisplayNames = {
-    "Image": "이미지",
-    "Ref": "상품번호", "Artist": "아티스트", "Title": "타이틀",
-    "Label": "레이블", "Pressing": "프레싱", "Genre": "장르", "Style": "스타일",
-    "Subcategory": "진열 위치", "Condition Jacket": "자켓", "Condition Media": "미디어",
-    "Selling at": "가격", "Details": "상세", "Youtube": "YouTube"
+    "Image": th2("이미지", "Image"),
+    "Ref": th2("상품번호", "Ref"),
+    "Artist": th2("아티스트", "Artist"),
+    "Title": th2("타이틀", "Title"),
+    "Label": th2("레이블", "Label"),
+    "Pressing": th2("프레싱", "Pressing"),
+    "Genre": th2("장르", "Genre"),
+    "Style": th2("스타일", "Style"),
+    "Subcategory": th2("진열 위치", "Subcategory"),
+    "Condition Jacket": th2("자켓", "Jacket"),
+    "Condition Media": th2("미디어", "Media"),
+    "Selling at": th2("가격", "Price"),
+    "Details": th2("상세", "Details"),
+    "Youtube": th2("YouTube", "YouTube")
   };
 
   function getMainImageUrl(urlField) {
@@ -442,7 +465,7 @@ h1 .desc {
     }
 
     const start = (currentPage - 1) * itemsPerPage;
-       const end = start + itemsPerPage;
+    const end = start + itemsPerPage;
     const pageData = data.slice(start, end);
     window.currentData = data;
 
