@@ -21,6 +21,29 @@
       font-size: 28px;
       font-weight: 600;
     }
+    /* 헤더: 한글/영문 2줄 + 짧은 설명 */
+h1 .ko { display:block; }
+h1 .en {
+  display:block;
+  margin-top: 4px;
+  font-size: 16px;
+  font-weight: 400;
+  color: #666;
+  letter-spacing: .2px;
+}
+h1 .desc {
+  display:block;
+  margin-top: 6px;
+  font-size: 13px;
+  color: #888;
+}
+
+/* 모바일에서 살짝 축소 */
+@media (max-width: 600px) {
+  h1 { font-size: 24px; }
+  h1 .en { font-size: 13px; }
+  h1 .desc { font-size: 12px; }
+}
     select, input[type="text"], button {
       font-size: 16px;
       padding: 10px;
@@ -271,7 +294,14 @@
   </style>
 </head>
 <body>
-  <h1>MOSAIC 재고 검색</h1>
+  <h1>
+  <span class="ko">MOSAIC 재고 검색</span>
+  <span class="en" lang="en">MOSAIC Inventory Search</span>
+  <!-- 선택: 영문 안내 한 줄 추가 -->
+  <small class="desc" lang="en">
+    Browse our in-store vinyl inventory. Prices in KRW; availability confirmed after inquiry.
+  </small>
+</h1>
   <div class="search-wrapper">
     <div class="filters">
       <select id="storeFilter">
