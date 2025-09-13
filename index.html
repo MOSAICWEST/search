@@ -412,7 +412,7 @@
       const genre = item["Genre"];
       if (genre) genreSet.add(genre.trim());
     });
-    genreSelect.innerHTML = `<option value="all">장르 전체</option>`;
+    genreSelect.innerHTML = `<option value="all">Genre filter</option>`;
     [...genreSet].sort().forEach(genre => {
       const option = document.createElement("option");
       option.value = genre;
