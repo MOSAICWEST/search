@@ -303,6 +303,28 @@
       background-color: #fff; border: 1px solid #ccc; color: #111; font-weight: bold; cursor: default;
     }
     #pagination span { display: inline-block; margin: 0 6px; color: #888; font-size: 14px; }
+
+    /* 상단 로고 바 */
+.logo-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 14px 0 4px;
+}
+.logo-bar img {
+  height: 48px;             /* 필요 시 40~56px로 조절 */
+  max-width: 90%;
+  border-radius: 4px;        /* 모서리 살짝 */
+  cursor: pointer;           /* 클릭 가능 표시 */
+  user-select: none;
+  -webkit-user-drag: none;
+  transition: transform .15s ease, opacity .15s ease;
+}
+.logo-bar img:hover { transform: scale(1.02); opacity: .95; }
+@media (max-width: 600px) {
+  .logo-bar img { height: 40px; }
+}
+
   </style>
 </head>
 <body>
@@ -310,6 +332,16 @@
     <span class="ko">MOSAIC 재고 검색</span>
     <span class="en" lang="en">MOSAIC Inventory Search</span>
   </h1>
+
+  <div class="logo-bar">
+    <img
+      id="brandLogo"
+      src="https://mosaicseoul.kr/web/upload/category/editor/2020/05/20/cbc65df4772ca44dd5fa58d4ccbc3fa4.jpg"
+      alt="MOSAIC SEOUL"
+      loading="lazy"
+      decoding="async"
+    />
+  </div>
 
   <div class="search-wrapper">
     <div class="filters">
@@ -891,6 +923,38 @@ hr { border: 0; border-top: 1px dashed #999; margin: 8px 0; }
   function escapeHtml(s) {
     return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   }
+
+    /* 홈(초기화) 이동: 로고 클릭 시 실행 */
+function goHome() {
+  // 1) 검색어/필터 초기화
+  const storeSel  = document.getElementById("storeFilter");
+  const genreSel  = document.getElementById("genreFilter");
+  const scopeSel  = document.getElementById("searchScope");
+  const input     = document.getElementById("searchInput");
+
+  if (storeSel) storeSel.value = "all";
+  if (genreSel) genreSel.value = "all";
+  if (scopeSel) scopeSel.value = "all";
+  if (input)    input.value = "";
+
+  // 2) 페이지 초기화 + 렌더
+  currentPage = 1;
+  filterAndRenderTable();
+
+  // 3) 모달 열려 있으면 닫기
+  const modal = document.getElementById("detailModal");
+  if (modal) modal.style.display = "none";
+
+  // 4) 맨 위로 스크롤
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* 로고 클릭 핸들러 연결 */
+document.addEventListener("DOMContentLoaded", () => {
+  const logo = document.getElementById("brandLogo");
+  if (logo) logo.addEventListener("click", goHome);
+});
+   
   </script>
 
   <!-- 🛒 장바구니 보기 버튼 (데스크톱 전용) -->
