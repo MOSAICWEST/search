@@ -648,9 +648,21 @@
     const dateFilterBar = document.getElementById("dateFilterBar");
     if (!dateFilterBar) return;
 
+    const selectedStore = document.getElementById("storeFilter")?.value || "all";
+    const selectedGenre = document.getElementById("genreFilter")?.value || "all";
+
     const dateMap = new Map();
 
     data.forEach(item => {
+      const store = String(item.OriginSheet ?? "").trim();
+      const genre = String(item["Genre"] ?? "").trim();
+
+      // 현재 선택된 매장에 해당하는 상품의 날짜만 버튼으로 생성
+      if (selectedStore !== "all" && store !== selectedStore) return;
+
+      // 현재 선택된 장르에 해당하는 상품의 날짜만 버튼으로 생성
+      if (selectedGenre !== "all" && genre !== selectedGenre) return;
+
       const sortRef = item._sortRef;
       if (!sortRef?.isValidDateRef) return;
 
@@ -662,6 +674,12 @@
     const dates = [...dateMap.entries()]
       .sort((a, b) => b[0] - a[0])
       .slice(0, 12);
+
+    // 매장/장르 필터 변경 후 현재 선택된 날짜가 더 이상 없으면 날짜 필터 초기화
+    const availableDateValues = new Set(dates.map(([dateValue]) => String(dateValue)));
+    if (selectedDateValue !== "all" && !availableDateValues.has(String(selectedDateValue))) {
+      selectedDateValue = "all";
+    }
 
     let html = `<button type="button" data-date="all" class="${selectedDateValue === "all" ? "active" : ""}">전체</button>`;
 
@@ -929,8 +947,17 @@
   document.getElementById("searchBtn").addEventListener("click", () => {
     document.getElementById("searchInput").blur(); filterAndRenderTable();
   });
-  document.getElementById("storeFilter").addEventListener("change", filterAndRenderTable);
-  document.getElementById("genreFilter").addEventListener("change", filterAndRenderTable);
+
+  document.getElementById("storeFilter").addEventListener("change", () => {
+    populateDateFilter(allData);
+    filterAndRenderTable();
+  });
+
+  document.getElementById("genreFilter").addEventListener("change", () => {
+    populateDateFilter(allData);
+    filterAndRenderTable();
+  });
+
   document.getElementById("searchScope").addEventListener("change", filterAndRenderTable);
 
   document.addEventListener("keydown", e => {
