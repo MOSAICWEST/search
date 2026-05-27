@@ -468,9 +468,11 @@
   fetch(SHEET_URL)
     .then(res => res.json())
     .then(data => {
-      allData = data;
+      // 최신 재고가 위로 오도록 data.json 순서를 뒤집음
+      allData = [...data].reverse();
       window.allData = allData;
-      populateGenreFilter(data);
+      
+      populateGenreFilter(allData);
       filterAndRenderTable();
     })
     .catch(err => {
