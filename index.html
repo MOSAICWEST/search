@@ -21,6 +21,7 @@
       font-size: 28px;
       font-weight: 600;
     }
+
     /* 헤더: 한글/영문 2줄 + 짧은 설명 */
     h1 .ko { display:block; }
     h1 .en {
@@ -155,6 +156,37 @@
       font-size: 12px;
     }
 
+    /* 상품 위치 뱃지 */
+    .image-badge-wrap {
+      position: relative;
+    }
+
+    .store-badge {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.62);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 20px;
+      text-align: center;
+      letter-spacing: 0.2px;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .card-image.image-badge-wrap .store-badge {
+      top: 6px;
+      left: 6px;
+    }
+
     /* TOP 버튼 */
     .top-button {
       position: fixed;
@@ -283,6 +315,7 @@
       .card-item .card-image {
         width: 100px; height: 100px; background-color: #eee;
         display: flex; align-items: center; justify-content: center; cursor: pointer;
+        overflow: hidden;
       }
       .card-item .card-image img { width: 100%; height: 100%; object-fit: cover; }
       .card-content {
@@ -415,6 +448,15 @@
     return parts[0] || "";
   }
 
+  function getStoreBadge(store) {
+    const s = String(store || "").trim().toUpperCase();
+
+    if (s === "WEST") return "W";
+    if (s === "EAST" || s === "ONLINE") return "E";
+
+    return "";
+  }
+
   let allData = [];
   let currentPage = 1;
   const itemsPerPage = 30;
@@ -427,6 +469,7 @@
     .then(res => res.json())
     .then(data => {
       allData = data;
+      window.allData = allData;
       populateGenreFilter(data);
       filterAndRenderTable();
     })
@@ -515,9 +558,19 @@
       html = `<div class="card-list">`;
       pageData.forEach((item, idx) => {
         const imageURL = getMainImageUrl(item["Image URL"]);
+        const storeBadge = getStoreBadge(item.OriginSheet);
+        const badgeHtml = storeBadge ? `<span class="store-badge">${storeBadge}</span>` : "";
+
         const imageBlock = imageURL
-          ? `<div class="card-image" onclick="showDetails(${start + idx})"><img src="${imageURL}" alt="앨범 이미지" loading="lazy"></div>`
-          : `<div class="card-image" onclick="showDetails(${start + idx})"><span style="color:#aaa;font-size:12px;">NO IMAGE</span></div>`;
+          ? `<div class="card-image image-badge-wrap" onclick="showDetails(${start + idx})">
+              ${badgeHtml}
+              <img src="${imageURL}" alt="앨범 이미지" loading="lazy">
+            </div>`
+          : `<div class="card-image image-badge-wrap" onclick="showDetails(${start + idx})">
+              ${badgeHtml}
+              <span style="color:#aaa;font-size:12px;">NO IMAGE</span>
+            </div>`;
+
         html += `
           <div class="card-item">
             ${imageBlock}
@@ -542,9 +595,19 @@
         displayOrder.forEach(key => {
           if (key === "Image") {
             const imageURL = getMainImageUrl(row["Image URL"]);
+            const storeBadge = getStoreBadge(row.OriginSheet);
+            const badgeHtml = storeBadge ? `<span class="store-badge">${storeBadge}</span>` : "";
+
             const imgHtml = imageURL
-              ? `<div class="table-image" onclick="showDetails(${start + idx})"><img src="${imageURL}" alt="이미지" loading="lazy"></div>`
-              : `<div class="table-image" onclick="showDetails(${start + idx})"><span class="no-image">NO IMAGE</span></div>`;
+              ? `<div class="table-image image-badge-wrap" onclick="showDetails(${start + idx})">
+                  ${badgeHtml}
+                  <img src="${imageURL}" alt="이미지" loading="lazy">
+                </div>`
+              : `<div class="table-image image-badge-wrap" onclick="showDetails(${start + idx})">
+                  ${badgeHtml}
+                  <span class="no-image">NO IMAGE</span>
+                </div>`;
+
             html += `<td class="image-cell">${imgHtml}</td>`;
             return;
           }
