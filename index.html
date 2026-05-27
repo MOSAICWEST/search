@@ -187,6 +187,35 @@
       left: 6px;
     }
 
+    /* 날짜별 업데이트 필터 */
+    .date-filter-bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 95%;
+      margin-top: 4px;
+    }
+
+    .date-filter-bar button {
+      background-color: #f2f2f2;
+      border: 1px solid #ccc;
+      color: #333;
+      padding: 7px 11px;
+      border-radius: 999px;
+      font-size: 13px;
+    }
+
+    .date-filter-bar button:hover {
+      background-color: #e0e0e0;
+    }
+
+    .date-filter-bar button.active {
+      background-color: #0071e3;
+      border-color: #0071e3;
+      color: #fff;
+    }
+
     /* TOP 버튼 */
     .top-button {
       position: fixed;
@@ -396,6 +425,7 @@
       <input type="text" id="searchInput" placeholder="search..." />
       <button id="searchBtn">검색</button>
     </div>
+    <div id="dateFilterBar" class="date-filter-bar"></div>
   </div>
 
   <div id="results"></div>
@@ -481,18 +511,18 @@
       return {
         isValidDateRef: false,
         dateValue: 0,
-        sequenceValue: 0
+        sequenceValue: 0,
+        dateString: ""
       };
     }
 
-    const datePart = match[2];        // 예: 50604
+    const datePart = match[2];
     const sequencePart = match[3] || "0";
 
     const yearDigit = Number(datePart.slice(0, 1));
     const month = Number(datePart.slice(1, 3));
     const day = Number(datePart.slice(3, 5));
 
-    // 날짜로 볼 수 없는 값도 뒤로 보냄
     if (
       !Number.isFinite(yearDigit) ||
       !Number.isFinite(month) ||
@@ -505,23 +535,49 @@
       return {
         isValidDateRef: false,
         dateValue: 0,
-        sequenceValue: 0
+        sequenceValue: 0,
+        dateString: ""
       };
     }
 
     const year = 2020 + yearDigit;
+    const dateValue = year * 10000 + month * 100 + day;
 
     return {
       isValidDateRef: true,
-      dateValue: year * 10000 + month * 100 + day,
-      sequenceValue: Number(sequencePart) || 0
+      dateValue,
+      sequenceValue: Number(sequencePart) || 0,
+      dateString: `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+    };
+  }
+
+  function prepareItem(item) {
+    const ref = String(item["Ref"] ?? "").toLowerCase();
+    const artist = String(item["Artist"] ?? "").toLowerCase();
+    const title = String(item["Title"] ?? "").toLowerCase();
+    const label = String(item["Label"] ?? "").toLowerCase();
+    const tracklist = String(item["Tracklist"] ?? "").toLowerCase();
+    const credits = String(item["Credits"] ?? "").toLowerCase();
+
+    return {
+      ...item,
+      _sortRef: parseRefForSort(item.Ref),
+      _search: {
+        ref,
+        artist,
+        title,
+        label,
+        tracklist,
+        credits,
+        all: [ref, artist, title, label, tracklist, credits].join(" ")
+      }
     };
   }
 
   function sortByRefNewestFirst(data) {
     return [...data].sort((a, b) => {
-      const refA = parseRefForSort(a.Ref);
-      const refB = parseRefForSort(b.Ref);
+      const refA = a._sortRef || parseRefForSort(a.Ref);
+      const refB = b._sortRef || parseRefForSort(b.Ref);
 
       // 1순위: 날짜를 읽을 수 있는 Ref를 위로
       if (refA.isValidDateRef !== refB.isValidDateRef) {
@@ -546,6 +602,7 @@
   let allData = [];
   let currentPage = 1;
   const itemsPerPage = 30;
+  let selectedDateValue = "all";
 
   const results = document.getElementById("results");
   results.innerHTML = `<div style="text-align:center; margin:40px 0; color:#555; font-size:16px;">데이터 불러오는 중입니다...</div>`;
@@ -554,17 +611,13 @@
   fetch(SHEET_URL)
     .then(res => res.json())
     .then(data => {
-      // Ref 기준 최신순 정렬
-      // 예:
-      // W60527-001  → 2026-05-27 / 001
-      // O51123-123  → 2025-11-23 / 123
-      // W50604143   → 2025-06-04 / 143
-      // W506041433  → 2025-06-04 / 1433
-      // 7O-0957     → 날짜 판독 불가, 뒤쪽 정렬
-      allData = sortByRefNewestFirst(data);
+      // 검색/정렬/날짜 필터에 사용할 값을 미리 준비한 뒤 Ref 기준 최신순으로 정렬
+      const preparedData = data.map(prepareItem);
+      allData = sortByRefNewestFirst(preparedData);
       window.allData = allData;
       
       populateGenreFilter(allData);
+      populateDateFilter(allData);
       filterAndRenderTable();
     })
     .catch(err => {
@@ -591,6 +644,54 @@
     });
   }
 
+  function populateDateFilter(data) {
+    const dateFilterBar = document.getElementById("dateFilterBar");
+    if (!dateFilterBar) return;
+
+    const dateMap = new Map();
+
+    data.forEach(item => {
+      const sortRef = item._sortRef;
+      if (!sortRef?.isValidDateRef) return;
+
+      if (!dateMap.has(sortRef.dateValue)) {
+        dateMap.set(sortRef.dateValue, sortRef.dateString);
+      }
+    });
+
+    const dates = [...dateMap.entries()]
+      .sort((a, b) => b[0] - a[0])
+      .slice(0, 12);
+
+    let html = `<button type="button" data-date="all" class="${selectedDateValue === "all" ? "active" : ""}">전체</button>`;
+
+    dates.forEach(([dateValue, dateString]) => {
+      const label = formatDateButtonLabel(dateString);
+      html += `<button type="button" data-date="${dateValue}" class="${String(selectedDateValue) === String(dateValue) ? "active" : ""}">${label}</button>`;
+    });
+
+    dateFilterBar.innerHTML = html;
+
+    dateFilterBar.querySelectorAll("button").forEach(button => {
+      button.addEventListener("click", () => {
+        selectedDateValue = button.dataset.date;
+        currentPage = 1;
+        populateDateFilter(allData);
+        filterAndRenderTable();
+      });
+    });
+  }
+
+  function formatDateButtonLabel(dateString) {
+    const parts = String(dateString || "").split("-");
+    if (parts.length !== 3) return dateString || "";
+
+    const month = Number(parts[1]);
+    const day = Number(parts[2]);
+
+    return `${month}/${day}`;
+  }
+
   function filterAndRenderTable() {
     const keyword = document.getElementById("searchInput").value.trim().toLowerCase();
     const scope = document.getElementById("searchScope").value;
@@ -600,25 +701,47 @@
     const filtered = allData.filter(item => {
       const store = String(item.OriginSheet ?? "").trim();
       const genre = String(item["Genre"] ?? "").trim();
+
       if (selectedStore !== "all" && store !== selectedStore) return false;
       if (selectedGenre !== "all" && genre !== selectedGenre) return false;
 
-      const ref = String(item["Ref"] ?? "").toLowerCase();
-      const artist = String(item["Artist"] ?? "").toLowerCase();
-      const title = String(item["Title"] ?? "").toLowerCase();
-      const label = String(item["Label"] ?? "").toLowerCase();
-      const tracklist = String(item["Tracklist"] ?? "").toLowerCase();
-      const credits = String(item["Credits"] ?? "").toLowerCase();
+      if (selectedDateValue !== "all") {
+        const sortRef = item._sortRef;
+
+        if (
+          !sortRef?.isValidDateRef ||
+          String(sortRef.dateValue) !== String(selectedDateValue)
+        ) {
+          return false;
+        }
+      }
+
+      const s = item._search || {
+        ref: String(item["Ref"] ?? "").toLowerCase(),
+        artist: String(item["Artist"] ?? "").toLowerCase(),
+        title: String(item["Title"] ?? "").toLowerCase(),
+        label: String(item["Label"] ?? "").toLowerCase(),
+        tracklist: String(item["Tracklist"] ?? "").toLowerCase(),
+        credits: String(item["Credits"] ?? "").toLowerCase(),
+        all: [
+          String(item["Ref"] ?? "").toLowerCase(),
+          String(item["Artist"] ?? "").toLowerCase(),
+          String(item["Title"] ?? "").toLowerCase(),
+          String(item["Label"] ?? "").toLowerCase(),
+          String(item["Tracklist"] ?? "").toLowerCase(),
+          String(item["Credits"] ?? "").toLowerCase()
+        ].join(" ")
+      };
 
       switch (scope) {
-        case "Ref": return ref.includes(keyword);
-        case "Artist": return artist.includes(keyword);
-        case "Title": return title.includes(keyword);
-        case "Label": return label.includes(keyword);
-        case "Tracklist": return tracklist.includes(keyword);
-        case "Credits": return credits.includes(keyword);
+        case "Ref": return s.ref.includes(keyword);
+        case "Artist": return s.artist.includes(keyword);
+        case "Title": return s.title.includes(keyword);
+        case "Label": return s.label.includes(keyword);
+        case "Tracklist": return s.tracklist.includes(keyword);
+        case "Credits": return s.credits.includes(keyword);
         default:
-          return ref.includes(keyword) || artist.includes(keyword) || title.includes(keyword) || label.includes(keyword) || tracklist.includes(keyword) || credits.includes(keyword);
+          return s.all.includes(keyword);
       }
     });
 
@@ -669,10 +792,10 @@
           <div class="card-item">
             ${imageBlock}
             <div class="card-content">
-              <div style="color:#777; font-size:12px;">${item.Ref || ""}</div>
-              <div><strong>${item.Artist || ""}</strong> - ${item.Title || ""}</div>
-              <div>${item.Pressing || ""}</div>
-              <div>${item["Condition Jacket"] || ""} / ${item["Condition Media"] || ""}</div>
+              <div style="color:#777; font-size:12px;">${escapeHtml(item.Ref || "")}</div>
+              <div><strong>${escapeHtml(item.Artist || "")}</strong> - ${escapeHtml(item.Title || "")}</div>
+              <div>${escapeHtml(item.Pressing || "")}</div>
+              <div>${escapeHtml(item["Condition Jacket"] || "")} / ${escapeHtml(item["Condition Media"] || "")}</div>
               <div><strong>₩${Number(item["Selling at"] || 0).toLocaleString()}</strong></div>
             </div>
           </div>`;
@@ -708,7 +831,7 @@
           let cell = row[key] ?? "";
           if (key === "Selling at" && !isNaN(cell)) cell = Number(cell).toLocaleString();
           if (key === "Details") cell = `<button onclick="showDetails(${start + idx})">상세</button>`;
-          html += `<td>${cell}</td>`;
+          html += `<td>${key === "Details" ? cell : escapeHtml(cell)}</td>`;
         });
         html += `</tr>`;
       });
@@ -728,7 +851,7 @@
     const title = `${item["Artist"] || ""} - ${item["Title"] || ""}`;
     const ref = item["Ref"] || "";
 
-    let content = `<h4 style="margin-top: 0;">${title}</h4><p style="margin-top: -8px;">${ref}</p>`;
+    let content = `<h4 style="margin-top: 0;">${escapeHtml(title)}</h4><p style="margin-top: -8px;">${escapeHtml(ref)}</p>`;
 
     /* 이미지 */
     const mainImg = getMainImageUrl(item["Image URL"]);
@@ -746,9 +869,9 @@
     const price   = isNaN(priceN) ? "" : priceN.toLocaleString();
 
     let info = `<div class="info-block">`;
-    if (store)   info += `<p><strong>Store :</strong> ${store}</p>`;
-    if (pressing)info += `<p><strong>Pressing :</strong> ${pressing}</p>`;
-    if (jacket || media) info += `<p><strong>Jacket:</strong> ${jacket || "-"} <strong>/ Media:</strong> ${media || "-"}</p>`;
+    if (store)   info += `<p><strong>Store :</strong> ${escapeHtml(store)}</p>`;
+    if (pressing)info += `<p><strong>Pressing :</strong> ${escapeHtml(pressing)}</p>`;
+    if (jacket || media) info += `<p><strong>Jacket:</strong> ${escapeHtml(jacket || "-")} <strong>/ Media:</strong> ${escapeHtml(media || "-")}</p>`;
     if (comment) info += `<p>●${escapeHtml(comment)}</p>`;
     if (price)   info += `<p><strong>Price :</strong> ${price}</p>`;
     info += `</div>`;
@@ -1097,6 +1220,8 @@ hr { border: 0; border-top: 1px dashed #999; margin: 8px 0; }
     if (genreSel) genreSel.value = "all";
     if (scopeSel) scopeSel.value = "all";
     if (input)    input.value = "";
+    selectedDateValue = "all";
+    populateDateFilter(allData);
 
     // 2) 페이지 초기화 + 렌더
     currentPage = 1;
