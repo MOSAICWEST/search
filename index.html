@@ -457,6 +457,92 @@
     return "";
   }
 
+  function parseRefForSort(ref) {
+    const raw = String(ref || "").trim().toUpperCase();
+
+    /*
+      지원 형태:
+      W60527-001   → 영문 + 날짜5자리 + -순번
+      OO60524-123  → 영문 여러 개 + 날짜5자리 + -순번
+      E50324-123   → 영문 + 날짜5자리 + -순번
+      O51123-123   → 영문 + 날짜5자리 + -순번
+      W50604143    → 영문 + 날짜5자리 + 순번, 하이픈 없음
+      W506041433   → 영문 + 날짜5자리 + 순번, 하이픈 없음
+
+      불규칙 형태:
+      7O-0957
+      O5-0889
+      → 날짜 판독 불가이므로 정렬 뒤쪽으로 보냄
+    */
+
+    const match = raw.match(/^([A-Z]+)(\d{5})(?:-?(\d+))?$/);
+
+    if (!match) {
+      return {
+        isValidDateRef: false,
+        dateValue: 0,
+        sequenceValue: 0
+      };
+    }
+
+    const datePart = match[2];        // 예: 50604
+    const sequencePart = match[3] || "0";
+
+    const yearDigit = Number(datePart.slice(0, 1));
+    const month = Number(datePart.slice(1, 3));
+    const day = Number(datePart.slice(3, 5));
+
+    // 날짜로 볼 수 없는 값도 뒤로 보냄
+    if (
+      !Number.isFinite(yearDigit) ||
+      !Number.isFinite(month) ||
+      !Number.isFinite(day) ||
+      month < 1 ||
+      month > 12 ||
+      day < 1 ||
+      day > 31
+    ) {
+      return {
+        isValidDateRef: false,
+        dateValue: 0,
+        sequenceValue: 0
+      };
+    }
+
+    const year = 2020 + yearDigit;
+
+    return {
+      isValidDateRef: true,
+      dateValue: year * 10000 + month * 100 + day,
+      sequenceValue: Number(sequencePart) || 0
+    };
+  }
+
+  function sortByRefNewestFirst(data) {
+    return [...data].sort((a, b) => {
+      const refA = parseRefForSort(a.Ref);
+      const refB = parseRefForSort(b.Ref);
+
+      // 1순위: 날짜를 읽을 수 있는 Ref를 위로
+      if (refA.isValidDateRef !== refB.isValidDateRef) {
+        return refA.isValidDateRef ? -1 : 1;
+      }
+
+      // 2순위: 날짜 최신순
+      if (refB.dateValue !== refA.dateValue) {
+        return refB.dateValue - refA.dateValue;
+      }
+
+      // 3순위: 같은 날짜 안에서는 뒤 번호 큰 순
+      if (refB.sequenceValue !== refA.sequenceValue) {
+        return refB.sequenceValue - refA.sequenceValue;
+      }
+
+      // 4순위: 그 외에는 Ref 문자 기준
+      return String(b.Ref || "").localeCompare(String(a.Ref || ""));
+    });
+  }
+
   let allData = [];
   let currentPage = 1;
   const itemsPerPage = 30;
@@ -468,8 +554,14 @@
   fetch(SHEET_URL)
     .then(res => res.json())
     .then(data => {
-      // 최신 재고가 위로 오도록 data.json 순서를 뒤집음
-      allData = [...data].reverse();
+      // Ref 기준 최신순 정렬
+      // 예:
+      // W60527-001  → 2026-05-27 / 001
+      // O51123-123  → 2025-11-23 / 123
+      // W50604143   → 2025-06-04 / 143
+      // W506041433  → 2025-06-04 / 1433
+      // 7O-0957     → 날짜 판독 불가, 뒤쪽 정렬
+      allData = sortByRefNewestFirst(data);
       window.allData = allData;
       
       populateGenreFilter(allData);
