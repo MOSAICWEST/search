@@ -1533,6 +1533,14 @@
     };
   }
 
+  /* Condition Comment 앞의 중복 ● 정리 */
+  function normalizeConditionComment(value) {
+    return String(value || "")
+      .trim()
+      .replace(/^[●•\s]+/, "")
+      .trim();
+  }
+
   /* 상세 모달 */
   window.showDetails = function(index) {
     const item = window.currentData[index];
@@ -1565,7 +1573,8 @@
     if (store) info += `<p><strong>${escapeHtml(t("store"))} :</strong> ${escapeHtml(store)}</p>`;
     if (pressing) info += `<p><strong>${escapeHtml(t("pressing"))} :</strong> ${escapeHtml(pressing)}</p>`;
     if (jacket || media) info += `<p><strong>${escapeHtml(t("jacket"))}:</strong> ${renderConditionBadge(jacket || "-")} <strong>/ ${escapeHtml(t("media"))}:</strong> ${renderConditionBadge(media || "-")}</p>`;
-    if (comment) info += `<p>●${escapeHtml(comment)}</p>`;
+    const cleanComment = normalizeConditionComment(comment);
+    if (cleanComment) info += `<p>● ${escapeHtml(cleanComment)}</p>`;
     if (price) info += `<p><strong>${escapeHtml(t("price"))} :</strong> ₩${price}</p>`;
     info += `</div>`;
     content += info;
@@ -1972,7 +1981,7 @@ ${lines.join('\n\n')}
   <div>${escapeHtml(t("store"))} : ${escapeHtml(c.store || "")}</div>
   <div>${escapeHtml(t("pressing"))} : ${escapeHtml(c.pressing || "")}</div>
   <div>${escapeHtml(t("jacket"))}: ${escapeHtml(c.jacket || "-")} / ${escapeHtml(t("media"))}: ${escapeHtml(c.media || "-")}</div>
-  ${comment ? `<div>●${escapeHtml(comment)}</div>` : ""}
+  ${normalizeConditionComment(comment) ? `<div>● ${escapeHtml(normalizeConditionComment(comment))}</div>` : ""}
   ${subcat ? `<div>Subcategory : ${escapeHtml(subcat)}</div>` : ""}
   <div>${escapeHtml(t("price"))} : ₩${numberText(c.price || 0)}</div>
 </div>
