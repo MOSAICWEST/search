@@ -300,8 +300,8 @@
     }
 
     @media (hover: hover) and (pointer: fine) and (min-width: 601px) {
-      .filter-nav-item:hover .filter-dropdown,
-      .filter-nav-item:focus-within .filter-dropdown {
+      .filter-nav-item:not(.click-only):hover .filter-dropdown,
+      .filter-nav-item:not(.click-only):focus-within .filter-dropdown {
         opacity: 1;
         visibility: visible;
         transform: translateY(0) scale(1);
@@ -310,13 +310,13 @@
       #genreFilterNav:focus-within .filter-dropdown {
         transform: translate(-50%, 0) scale(1);
       }
-      .filter-nav-item:hover .filter-chevron,
-      .filter-nav-item:focus-within .filter-chevron {
+      .filter-nav-item:not(.click-only):hover .filter-chevron,
+      .filter-nav-item:not(.click-only):focus-within .filter-chevron {
         transform: rotate(225deg);
         color: #1d1d1f;
       }
-      .filter-nav-item:hover .filter-trigger,
-      .filter-nav-item:focus-within .filter-trigger {
+      .filter-nav-item:not(.click-only):hover .filter-trigger,
+      .filter-nav-item:not(.click-only):focus-within .filter-trigger {
         color: #111;
       }
     }
@@ -445,33 +445,33 @@
       left: 6px;
     }
 
-    /* 날짜별 업데이트 필터 */
-    .date-filter-bar {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: center;
-      max-width: 95%;
-      margin-top: 4px;
+    /* 최근 업데이트: 다른 필터와 같은 네비게이션형 드롭다운 */
+    #dateFilterNav .filter-dropdown {
+      min-width: 170px;
+      max-width: 210px;
+      max-height: 390px;
     }
 
-    .date-filter-bar button {
-      background-color: #f2f2f2;
-      border: 1px solid #ccc;
-      color: #333;
-      padding: 7px 11px;
-      border-radius: 999px;
-      font-size: 13px;
+    /* 검색어는 유지하고 필터 조건만 초기화하는 간단한 리셋 버튼 */
+    .filter-reset-btn {
+      border: 0;
+      background: transparent;
+      color: #a1a1a6;
+      padding: 5px 7px;
+      margin-left: 9px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.2;
+      white-space: nowrap;
+      cursor: pointer;
+      box-shadow: none;
     }
-
-    .date-filter-bar button:hover {
-      background-color: #e0e0e0;
-    }
-
-    .date-filter-bar button.active {
-      background-color: #0071e3;
-      border-color: #0071e3;
-      color: #fff;
+    .filter-reset-btn:hover,
+    .filter-reset-btn:focus-visible {
+      background: rgba(0,0,0,.045);
+      color: #1d1d1f;
+      outline: none;
     }
 
     /* TOP 버튼 */
@@ -691,6 +691,11 @@
         font-size: 13px;
         padding: 4px 2px;
       }
+      .filter-reset-btn {
+        margin-left: 5px;
+        padding: 5px 4px;
+        font-size: 11px;
+      }
       .filter-chevron {
         width: 7px;
         height: 7px;
@@ -705,7 +710,18 @@
         max-height: min(68vh, 430px);
       }
 
-      /* 첫 번째: 매장 필터 → 왼쪽 기준으로 열기 */
+      /* 첫 번째: 최근 업데이트 → 왼쪽 기준으로 열기 */
+      #dateFilterNav .filter-dropdown {
+        left: 0;
+        right: auto;
+        min-width: 170px;
+        width: 180px;
+        max-width: calc(100vw - 24px);
+        transform: translateY(-5px) scale(.985);
+        transform-origin: top left;
+      }
+
+      /* 두 번째: 매장 필터 → 왼쪽 기준으로 열기 */
       #storeFilterNav .filter-dropdown {
         left: 0;
         right: auto;
@@ -738,6 +754,7 @@
         transform-origin: top right;
       }
 
+      #dateFilterNav.open .filter-dropdown,
       #storeFilterNav.open .filter-dropdown,
       #scopeFilterNav.open .filter-dropdown {
         transform: translateY(0) scale(1);
@@ -872,6 +889,14 @@
       </div>
 
       <nav id="filterNav" class="filter-nav" aria-label="Inventory filters">
+        <div id="dateFilterNav" class="filter-nav-item click-only">
+          <button type="button" class="filter-trigger" aria-haspopup="true" aria-expanded="false">
+            <span class="filter-trigger-label">최근 업데이트</span>
+            <span class="filter-chevron" aria-hidden="true"></span>
+          </button>
+          <div id="dateFilterBar" class="filter-dropdown" role="menu"></div>
+        </div>
+        <span class="filter-nav-separator" aria-hidden="true">/</span>
         <div id="storeFilterNav" class="filter-nav-item" data-filter="storeFilter">
           <button type="button" class="filter-trigger" aria-haspopup="true" aria-expanded="false">
             <span class="filter-trigger-label">전체 매장</span>
@@ -895,9 +920,9 @@
           </button>
           <div class="filter-dropdown" role="menu"></div>
         </div>
+        <button type="button" id="filterResetBtn" class="filter-reset-btn">필터 리셋</button>
       </nav>
     </div>
-    <div id="dateFilterBar" class="date-filter-bar"></div>
   </div>
 
   <div id="resultSummary" class="result-summary"></div>
@@ -937,6 +962,8 @@
       allStores: "전체 매장",
       allGenres: "전체 장르",
       allFields: "전체 항목",
+      recentUpdates: "최근 업데이트",
+      filterReset: "필터 리셋",
       dateAll: "전체",
       loading: "데이터 불러오는 중입니다...",
       loadError: "데이터를 불러오지 못했습니다.",
@@ -1010,6 +1037,8 @@
       allStores: "All Stores",
       allGenres: "All Genres",
       allFields: "All Fields",
+      recentUpdates: "Recent Updates",
+      filterReset: "Reset Filters",
       dateAll: "All",
       loading: "Loading inventory...",
       loadError: "Unable to load inventory data.",
@@ -1083,6 +1112,8 @@
       allStores: "全店舗",
       allGenres: "全ジャンル",
       allFields: "すべての項目",
+      recentUpdates: "最近の更新",
+      filterReset: "フィルター解除",
       dateAll: "すべて",
       loading: "在庫データを読み込んでいます...",
       loadError: "在庫データを読み込めませんでした。",
@@ -1256,6 +1287,15 @@
     dropdown.appendChild(grid);
   }
 
+  function refreshDateFilterNav() {
+    const item = document.getElementById("dateFilterNav");
+    const label = item?.querySelector(".filter-trigger-label");
+    if (!item || !label) return;
+
+    label.textContent = t("recentUpdates");
+    item.classList.toggle("has-selection", selectedDateValue !== "all");
+  }
+
   function refreshFilterNav() {
     document.querySelectorAll(".filter-nav-item[data-filter]").forEach(item => {
       const select = document.getElementById(item.dataset.filter);
@@ -1278,10 +1318,12 @@
         dropdown.appendChild(makeFilterOptionButton(select, option));
       });
     });
+
+    refreshDateFilterNav();
   }
 
   function initFilterNav() {
-    document.querySelectorAll(".filter-nav-item[data-filter]").forEach(item => {
+    document.querySelectorAll(".filter-nav-item").forEach(item => {
       const trigger = item.querySelector(".filter-trigger");
       if (!trigger) return;
 
@@ -1336,6 +1378,12 @@
 
     const searchBtnEl = document.getElementById("searchBtn");
     if (searchBtnEl) searchBtnEl.textContent = dict.searchButton;
+
+    const dateTriggerLabel = document.querySelector("#dateFilterNav .filter-trigger-label");
+    if (dateTriggerLabel) dateTriggerLabel.textContent = dict.recentUpdates;
+
+    const filterResetBtn = document.getElementById("filterResetBtn");
+    if (filterResetBtn) filterResetBtn.textContent = dict.filterReset;
 
     const storeAll = document.querySelector('#storeFilter option[value="all"]');
     if (storeAll) storeAll.textContent = dict.allStores;
@@ -1608,19 +1656,24 @@
       selectedDateValue = "all";
     }
 
-    let html = `<button type="button" data-date="all" class="${selectedDateValue === "all" ? "active" : ""}">${escapeHtml(t("dateAll"))}</button>`;
+    let html = `<button type="button" role="menuitem" data-date="all" class="${selectedDateValue === "all" ? "active" : ""}" aria-current="${selectedDateValue === "all" ? "true" : "false"}">${escapeHtml(t("dateAll"))}</button>`;
 
     dates.forEach(([dateValue, dateString]) => {
       const label = formatDateButtonLabel(dateString);
-      html += `<button type="button" data-date="${dateValue}" class="${String(selectedDateValue) === String(dateValue) ? "active" : ""}">${label}</button>`;
+      const active = String(selectedDateValue) === String(dateValue);
+      html += `<button type="button" role="menuitem" data-date="${dateValue}" class="${active ? "active" : ""}" aria-current="${active ? "true" : "false"}">${label}</button>`;
     });
 
     dateFilterBar.innerHTML = html;
+    refreshDateFilterNav();
 
     dateFilterBar.querySelectorAll("button").forEach(button => {
-      button.addEventListener("click", () => {
+      button.addEventListener("click", e => {
+        e.preventDefault();
+        e.stopPropagation();
         selectedDateValue = button.dataset.date;
         currentPage = 1;
+        closeFilterMenus();
         populateDateFilter(allData);
         filterAndRenderTable();
       });
@@ -2103,6 +2156,29 @@
 
   document.getElementById("searchBtn").addEventListener("click", () => {
     filterAndRenderTable();
+  });
+
+  function resetFiltersKeepSearch() {
+    const storeSel = document.getElementById("storeFilter");
+    const genreSel = document.getElementById("genreFilter");
+    const scopeSel = document.getElementById("searchScope");
+
+    // 검색창의 검색어는 그대로 유지하고 필터 조건만 초기화
+    if (storeSel) storeSel.value = "all";
+    if (genreSel) genreSel.value = "all";
+    if (scopeSel) scopeSel.value = "all";
+    selectedDateValue = "all";
+    currentPage = 1;
+
+    closeFilterMenus();
+    refreshFilterNav();
+    populateDateFilter(allData);
+    filterAndRenderTable();
+  }
+
+  document.getElementById("filterResetBtn")?.addEventListener("click", e => {
+    e.preventDefault();
+    resetFiltersKeepSearch();
   });
 
   document.getElementById("storeFilter").addEventListener("change", () => {
