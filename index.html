@@ -544,58 +544,174 @@
       transform: scale(.94);
     }
 
-    /* TOP 버튼 */
-    .top-button {
+    /* =========================
+       Floating Utility Bar
+       - 모바일 / 태블릿 / 데스크톱 공통
+       - 상단에서는 CART만 표시
+       - 스크롤 후 ↑ 표시
+       - 모바일에서 페이지네이션이 화면에 들어오면 CART만 남기고 자동 회피
+       ========================= */
+    .utility-bar {
       position: fixed;
-      bottom: 30px;
-      right: 30px;
-      z-index: 99;
-      background-color: #333;
-      color: #fff;
-      border: none;
-      padding: 10px 14px;
-      border-radius: 6px;
-      font-size: 14px;
+      right: 24px;
+      bottom: 24px;
+      z-index: 250;
+      display: flex;
+      align-items: center;
+      min-height: 44px;
+      padding: 4px;
+      border: 1px solid rgba(0,0,0,.10);
+      border-radius: 999px;
+      background: rgba(250,250,252,.90);
+      -webkit-backdrop-filter: blur(16px) saturate(150%);
+      backdrop-filter: blur(16px) saturate(150%);
+      box-shadow:
+        0 8px 24px rgba(0,0,0,.10),
+        0 1px 3px rgba(0,0,0,.06);
+      transition:
+        bottom .22s ease,
+        transform .18s ease,
+        box-shadow .18s ease,
+        background-color .18s ease;
     }
-    .top-button:hover { background-color: #555; }
+    .utility-bar:hover {
+      background: rgba(255,255,255,.95);
+      box-shadow:
+        0 10px 28px rgba(0,0,0,.12),
+        0 1px 4px rgba(0,0,0,.07);
+    }
+    .utility-segment {
+      height: 36px;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: #35383d;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 650;
+      line-height: 1;
+      cursor: pointer;
+      transition:
+        width .20s ease,
+        padding .20s ease,
+        opacity .16s ease,
+        background-color .16s ease,
+        color .16s ease,
+        transform .12s ease;
+    }
+    .utility-segment:hover {
+      background: rgba(0,0,0,.055);
+      color: #1d1d1f;
+    }
+    .utility-segment:active {
+      transform: scale(.97);
+    }
 
-    .fab-menu { display: none; }
+    .utility-top {
+      width: 0;
+      padding: 0;
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
+      font-size: 18px;
+      font-weight: 500;
+    }
+    .utility-divider {
+      width: 0;
+      height: 20px;
+      margin: 0;
+      overflow: hidden;
+      opacity: 0;
+      background: rgba(0,0,0,.12);
+      transition:
+        width .20s ease,
+        margin .20s ease,
+        opacity .16s ease;
+    }
+    .utility-bar.show-top .utility-top {
+      width: 38px;
+      padding: 0 8px;
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .utility-bar.show-top .utility-divider {
+      width: 1px;
+      margin: 0 2px;
+      opacity: 1;
+    }
 
-    /* FAB 메뉴 스타일 (모바일 전용) */
+    .utility-cart {
+      min-width: 82px;
+      padding: 0 11px;
+      white-space: nowrap;
+    }
+    .utility-cart .cart-count {
+      min-width: 20px;
+      height: 20px;
+      margin-left: 5px;
+      padding: 0 6px;
+      background: #4b5563;
+      color: #fff;
+      line-height: 20px;
+      box-shadow: none;
+    }
+    .utility-cart.count-pop {
+      animation: utilityCartPop .22s ease;
+    }
+    @keyframes utilityCartPop {
+      0%   { transform: scale(1); }
+      45%  { transform: scale(1.07); }
+      100% { transform: scale(1); }
+    }
+
+    /* 태블릿 */
+    @media (min-width: 601px) and (max-width: 1024px) {
+      .utility-bar {
+        right: 18px;
+        bottom: 20px;
+      }
+    }
+
+    /* 모바일
+       기존 + 버튼처럼 화면 하단에서 약간 띄워 페이지 이동 영역과 거리를 둠 */
     @media (max-width: 600px) {
-      .top-button,
-      #viewCartBtn { display: none !important; }
+      .utility-bar {
+        right: 14px;
+        bottom: var(--utility-mobile-bottom, calc(86px + env(safe-area-inset-bottom)));
+        min-height: 42px;
+        padding: 3px;
+        max-width: calc(100vw - 28px);
+      }
+      .utility-segment {
+        height: 36px;
+        font-size: 12px;
+      }
+      .utility-bar.show-top .utility-top {
+        width: 36px;
+        padding: 0 7px;
+      }
+      .utility-cart {
+        min-width: 76px;
+        padding: 0 10px;
+      }
 
-      .fab-menu {
-        display: flex;
-        position: fixed;
-        right: 20px;
-        bottom: 90px;
-        z-index: 999;
-        flex-direction: column-reverse;
-        align-items: flex-end;
+      /* 페이지네이션이 보일 때는 TOP을 감추고 CART만 최소 크기로 유지 */
+      .utility-bar.pagination-near .utility-top {
+        width: 0 !important;
+        padding: 0 !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
       }
-      .fab-main {
-        width: 40px; height: 40px; font-size: 22px;
-        display: flex; align-items: center; justify-content: center;
-        border-radius: 50%;
-        background-color: #0071e3; color: white; border: none;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        cursor: pointer; padding: 0; transition: transform 0.3s ease;
+      .utility-bar.pagination-near .utility-divider {
+        width: 0 !important;
+        margin: 0 !important;
+        opacity: 0 !important;
       }
-      .fab-actions {
-        flex-direction: column; gap: 10px; margin-bottom: 10px;
-        opacity: 0; transform: translateY(20px); pointer-events: none;
-        transition: opacity 0.3s ease, transform 0.3s ease; display: flex;
+      .utility-bar.pagination-near .utility-cart {
+        min-width: 72px;
+        padding-left: 9px;
+        padding-right: 9px;
       }
-      .fab-menu.open .fab-actions { opacity: 1; transform: translateY(0); pointer-events: auto; }
-      .fab-action {
-        padding: 10px 16px; background-color: #333; color: white;
-        border: none; border-radius: 6px; font-size: 14px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.15); cursor: pointer;
-        transition: background-color 0.2s ease;
-      }
-      .fab-action:hover { background-color: #555; }
     }
 
     /* 모달 영역 */
@@ -1594,9 +1710,6 @@
     </div>
   </div>
 
-  <!-- TOP 버튼 (데스크톱 전용) -->
-  <button id="topButton" class="top-button" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">TOP</button>
-
   <div id="toastContainer" class="toast-container" aria-live="polite"></div>
 
   <script>
@@ -1661,6 +1774,8 @@
       printTotal: "총 {count}개 / 합계: ₩{total}",
       copyDone: "장바구니 정보가 복사되었습니다. 카카오톡 채널로 이동해 붙여넣어 주세요!",
       fabMenu: "빠른 메뉴 열기",
+      cartOpen: "장바구니 열기",
+      backToTop: "맨 위로 이동",
       scope: {
         Ref: "상품번호",
         Artist: "아티스트",
@@ -1738,6 +1853,8 @@
       printTotal: "{count} items / Total: ₩{total}",
       copyDone: "Cart information copied. Paste it into the KakaoTalk channel.",
       fabMenu: "Open quick menu",
+      cartOpen: "Open cart",
+      backToTop: "Back to top",
       scope: {
         Ref: "Ref",
         Artist: "Artist",
@@ -1815,6 +1932,8 @@
       printTotal: "合計 {count}点 / ₩{total}",
       copyDone: "カート情報をコピーしました。KakaoTalkチャンネルに貼り付けてください。",
       fabMenu: "クイックメニューを開く",
+      cartOpen: "カートを開く",
+      backToTop: "ページ上部へ",
       scope: {
         Ref: "商品番号",
         Artist: "アーティスト",
@@ -2103,8 +2222,17 @@
       btn.setAttribute("aria-pressed", active ? "true" : "false");
     });
 
-    const fabMain = document.querySelector(".fab-main");
-    if (fabMain) fabMain.setAttribute("aria-label", dict.fabMenu);
+    const utilityCartBtn = document.getElementById("viewCartBtn");
+    if (utilityCartBtn) {
+      utilityCartBtn.setAttribute("aria-label", dict.cartOpen);
+      utilityCartBtn.setAttribute("title", dict.cartOpen);
+    }
+
+    const utilityTopBtn = document.getElementById("utilityTopBtn");
+    if (utilityTopBtn) {
+      utilityTopBtn.setAttribute("aria-label", dict.backToTop);
+      utilityTopBtn.setAttribute("title", dict.backToTop);
+    }
 
     if (allData.length) {
       populateGenreFilter(allData);
@@ -2999,7 +3127,11 @@
     const pagination = document.getElementById("pagination");
     let html = "";
 
-    if (totalPages <= 1) { pagination.innerHTML = ""; return; }
+    if (totalPages <= 1) {
+      pagination.innerHTML = "";
+      scheduleUtilityBarUpdate();
+      return;
+    }
 
     html += `<button onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>${escapeHtml(t("prev"))}</button>`;
     for (let i = 1; i <= totalPages; i++) {
@@ -3011,6 +3143,7 @@
     }
     html += `<button onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>${escapeHtml(t("next"))}</button>`;
     pagination.innerHTML = html;
+    scheduleUtilityBarUpdate();
   }
 
   function goToPage(page) {
@@ -3262,9 +3395,25 @@ ${lines.join('\n\n')}
 
   function updateCartCount() {
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    const count = cart.length;
+
     document.querySelectorAll(".cart-count").forEach(el => {
-      el.textContent = cart.length;
+      el.textContent = count;
     });
+
+    const cartButton = document.getElementById("viewCartBtn");
+    if (cartButton) {
+      const previous = cartButton.dataset.cartCount;
+
+      if (previous !== undefined && previous !== String(count)) {
+        cartButton.classList.remove("count-pop");
+        void cartButton.offsetWidth;
+        cartButton.classList.add("count-pop");
+        window.setTimeout(() => cartButton.classList.remove("count-pop"), 240);
+      }
+
+      cartButton.dataset.cartCount = String(count);
+    }
   }
 
   let toastTimer = null;
@@ -3318,17 +3467,91 @@ ${lines.join('\n\n')}
     updateDeleteButtonState();
   }
 
-  function toggleFab() {
-    const fab = document.querySelector(".fab-menu");
-    fab.classList.toggle("open");
+  /* =========================
+     Floating Utility Bar
+     ========================= */
+  let utilityBarRaf = 0;
+
+  function updateUtilityBarState() {
+    utilityBarRaf = 0;
+
+    const bar = document.getElementById("utilityBar");
+    if (!bar) return;
+
+    const isMobile = window.matchMedia("(max-width: 600px)").matches;
+    const showTop = window.scrollY > 420;
+
+    bar.classList.toggle("show-top", showTop);
+
+    let paginationNear = false;
+
+    if (isMobile) {
+      const pagination = document.getElementById("pagination");
+
+      if (pagination && pagination.children.length > 0) {
+        const rect = pagination.getBoundingClientRect();
+        const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+
+        paginationNear =
+          rect.top < viewportHeight - 6 &&
+          rect.bottom > 0;
+
+        if (paginationNear) {
+          /*
+            바의 아래쪽이 페이지네이션의 위쪽보다 12px 위에 오도록 계산.
+            따라서 페이지 번호/이전/다음 버튼을 가리지 않음.
+          */
+          const calculatedBottom = Math.max(
+            86,
+            viewportHeight - rect.top + 12
+          );
+
+          bar.style.setProperty(
+            "--utility-mobile-bottom",
+            `${Math.round(calculatedBottom)}px`
+          );
+        } else {
+          bar.style.removeProperty("--utility-mobile-bottom");
+        }
+      } else {
+        bar.style.removeProperty("--utility-mobile-bottom");
+      }
+    } else {
+      bar.style.removeProperty("--utility-mobile-bottom");
+    }
+
+    bar.classList.toggle("pagination-near", paginationNear);
   }
-  function closeFab() {
-    const fab = document.querySelector(".fab-menu");
-    fab.classList.remove("open");
+
+  function scheduleUtilityBarUpdate() {
+    if (utilityBarRaf) return;
+    utilityBarRaf = window.requestAnimationFrame(updateUtilityBarState);
   }
-  document.addEventListener("click", function(event) {
-    const fabMenu = document.querySelector(".fab-menu");
-    if (fabMenu && !fabMenu.contains(event.target)) { fabMenu.classList.remove("open"); }
+
+  function scrollToPageTop() {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  }
+
+  window.addEventListener("scroll", scheduleUtilityBarUpdate, { passive: true });
+  window.addEventListener("resize", scheduleUtilityBarUpdate);
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const topBtn = document.getElementById("utilityTopBtn");
+    if (topBtn) topBtn.addEventListener("click", scrollToPageTop);
+
+    const pagination = document.getElementById("pagination");
+    if (pagination && "MutationObserver" in window) {
+      const observer = new MutationObserver(scheduleUtilityBarUpdate);
+      observer.observe(pagination, {
+        childList: true,
+        subtree: true
+      });
+    }
+
+    scheduleUtilityBarUpdate();
   });
 
   /* =========================
@@ -3441,49 +3664,36 @@ hr { border: 0; border-top: 1px dashed #999; margin: 8px 0; }
   });
   </script>
 
-  <!-- 🛒 장바구니 보기 버튼 (데스크톱 전용) -->
-  <button id="viewCartBtn" style="
-    position: fixed;
-    bottom: 80px;
-    right: 30px;
-    z-index: 100;
-    padding: 10px 16px;
-    font-size: 14px;
-    background-color: #4b5563;
-    color: white;
-    border: 1px solid #4b5563;
-    border-radius: 9px;
-    cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-  ">CART <span class="cart-count">0</span></button>
+  <!-- Floating Utility Bar : 모바일 / 태블릿 / 데스크톱 공통 -->
+  <div id="utilityBar" class="utility-bar">
+    <button
+      id="utilityTopBtn"
+      class="utility-segment utility-top"
+      type="button"
+      aria-label="맨 위로 이동"
+      title="맨 위로 이동"
+    >
+      <span aria-hidden="true">↑</span>
+    </button>
 
-  <style>
-    #viewCartBtn {
-      transition: background-color .18s ease, border-color .18s ease, transform .12s ease;
-    }
-    #viewCartBtn:hover {
-      background-color: #3f4854 !important;
-      border-color: #3f4854 !important;
-    }
-    #viewCartBtn:active {
-      transform: scale(.98);
-    }
-  </style>
+    <span class="utility-divider" aria-hidden="true"></span>
+
+    <button
+      id="viewCartBtn"
+      class="utility-segment utility-cart"
+      type="button"
+      aria-label="장바구니 열기"
+      title="장바구니 열기"
+    >
+      CART <span class="cart-count">0</span>
+    </button>
+  </div>
 
   <!-- 장바구니 모달 -->
   <div id="cartModal" class="modal">
     <div class="modal-content" style="max-width: 700px;">
       <span id="cartModalClose" class="modal-close">&times;</span>
       <div id="cartBody"></div>
-    </div>
-  </div>
-
-  <!-- FAB 버튼 메뉴 (모바일 전용) -->
-  <div class="fab-menu">
-    <button class="fab-main" onclick="toggleFab()" aria-label="빠른 메뉴 열기">＋</button>
-    <div class="fab-actions">
-      <button class="fab-action" onclick="window.scrollTo({ top: 0, behavior: 'smooth' }); closeFab()">TOP</button>
-      <button class="fab-action" onclick="document.getElementById('viewCartBtn').click(); closeFab()">CART <span class="cart-count">0</span></button>
     </div>
   </div>
 </body>
