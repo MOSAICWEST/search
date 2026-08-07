@@ -713,6 +713,15 @@
       line-height: 20px;
     }
 
+    /* 태블릿: 검색창이 화면 전체로 과도하게 길어 보이지 않도록 별도 폭 적용 */
+    @media (min-width: 601px) and (max-width: 1024px) {
+      .search-main {
+        width: min(640px, 88%);
+        margin-left: auto;
+        margin-right: auto;
+      }
+    }
+
     /* Toast */
     .toast-container {
       position: fixed;
@@ -747,29 +756,49 @@
       .search-main { gap: 6px; }
       .search-main input[type="text"] { font-size: 15px; }
       .search-main button { min-width: 68px; padding-left: 12px; padding-right: 12px; }
+      /* 모바일: 필터와 리셋 버튼을 반드시 한 줄에 유지 */
       .filter-nav {
         justify-content: center;
-        row-gap: 2px;
+        flex-wrap: nowrap;
+        row-gap: 0;
+        width: 100%;
+      }
+      .filter-nav-item {
+        min-width: 0;
+        flex: 0 1 auto;
       }
       .filter-nav-separator {
-        margin: 0 3px;
-        font-size: 15px;
+        flex: 0 0 auto;
+        margin: 0 2px;
+        font-size: 13px;
       }
       .filter-trigger {
+        min-width: 0;
         min-height: 34px;
-        gap: 5px;
-        font-size: 13px;
-        padding: 4px 2px;
+        gap: 3px;
+        font-size: 12px;
+        padding: 4px 1px;
       }
+      .filter-trigger-label {
+        display: block;
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      #dateFilterNav .filter-trigger-label { max-width: 76px; }
+      #storeFilterNav .filter-trigger-label { max-width: 68px; }
+      #genreFilterNav .filter-trigger-label { max-width: 72px; }
+      #scopeFilterNav .filter-trigger-label { max-width: 68px; }
       .filter-reset-btn {
-        width: 30px;
-        height: 30px;
-        flex-basis: 30px;
-        margin-left: 4px;
+        width: 28px;
+        height: 28px;
+        flex: 0 0 28px;
+        margin-left: 3px;
       }
       .filter-reset-btn svg {
-        width: 16px;
-        height: 16px;
+        width: 15px;
+        height: 15px;
       }
       .date-filter-bar {
         max-width: 100%;
@@ -858,6 +887,35 @@
       }
       .result-summary { width: 90%; margin-bottom: 10px; }
       .floating-table-header { display: none !important; }
+    }
+
+    /* 360px 이하의 작은 화면에서는 구분자와 텍스트를 한 단계 더 압축 */
+    @media (max-width: 360px) {
+      .filter-nav-separator {
+        margin: 0 1px;
+        font-size: 11px;
+      }
+      .filter-trigger {
+        gap: 2px;
+        font-size: 11px;
+      }
+      #dateFilterNav .filter-trigger-label { max-width: 62px; }
+      #storeFilterNav .filter-trigger-label,
+      #genreFilterNav .filter-trigger-label,
+      #scopeFilterNav .filter-trigger-label { max-width: 54px; }
+      .filter-chevron {
+        width: 6px;
+        height: 6px;
+        flex-basis: 6px;
+        margin-left: 1px;
+        margin-right: 1px;
+      }
+      .filter-reset-btn {
+        width: 26px;
+        height: 26px;
+        flex-basis: 26px;
+        margin-left: 2px;
+      }
     }
 
     /* 모바일 카드 뷰 */
