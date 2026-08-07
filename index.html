@@ -570,7 +570,8 @@
         0 1px 3px rgba(0,0,0,.06);
       transition:
         bottom .22s ease,
-        transform .18s ease,
+        transform .22s ease,
+        opacity .20s ease,
         box-shadow .18s ease,
         background-color .18s ease;
     }
@@ -662,6 +663,16 @@
       0%   { transform: scale(1); }
       45%  { transform: scale(1.07); }
       100% { transform: scale(1); }
+    }
+
+    /* 모바일/태블릿 자동 숨김
+       활동 중에는 표시되고, 잠시 정지하면 화면 아래쪽으로 부드럽게 사라짐 */
+    @media (max-width: 1024px) {
+      .utility-bar.auto-hidden {
+        opacity: 0;
+        transform: translateY(16px) scale(.98);
+        pointer-events: none;
+      }
     }
 
     /* 태블릿 */
@@ -3413,6 +3424,11 @@ ${lines.join('\n\n')}
       }
 
       cartButton.dataset.cartCount = String(count);
+
+      /* 상품 추가/삭제 직후에는 모바일·태블릿에서도 CART 수량을 잠시 보여줌 */
+      if (previous !== undefined && previous !== String(count)) {
+        revealUtilityBarTemporarily(2200);
+      }
     }
   }
 
@@ -3469,8 +3485,53 @@ ${lines.join('\n\n')}
 
   /* =========================
      Floating Utility Bar
+     - 모바일/태블릿: 활동 중 표시 → 정지 후 자동 숨김
+     - 데스크톱: 항상 표시
      ========================= */
   let utilityBarRaf = 0;
+  let utilityBarHideTimer = null;
+  const UTILITY_IDLE_HIDE_MS = 1400;
+
+  function isCompactUtilityViewport() {
+    return window.matchMedia("(max-width: 1024px)").matches;
+  }
+
+  function showUtilityBarNow() {
+    const bar = document.getElementById("utilityBar");
+    if (!bar) return;
+
+    bar.classList.remove("auto-hidden");
+  }
+
+  function hideUtilityBarNow() {
+    const bar = document.getElementById("utilityBar");
+    if (!bar || !isCompactUtilityViewport()) return;
+
+    bar.classList.add("auto-hidden");
+  }
+
+  function revealUtilityBarTemporarily(duration = UTILITY_IDLE_HIDE_MS) {
+    const bar = document.getElementById("utilityBar");
+    if (!bar) return;
+
+    if (utilityBarHideTimer) {
+      clearTimeout(utilityBarHideTimer);
+      utilityBarHideTimer = null;
+    }
+
+    /*
+      데스크톱에서는 항상 표시.
+      모바일/태블릿에서만 일정 시간 뒤 자동으로 숨김.
+    */
+    bar.classList.remove("auto-hidden");
+
+    if (!isCompactUtilityViewport()) return;
+
+    utilityBarHideTimer = window.setTimeout(() => {
+      hideUtilityBarNow();
+      utilityBarHideTimer = null;
+    }, duration);
+  }
 
   function updateUtilityBarState() {
     utilityBarRaf = 0;
@@ -3521,11 +3582,28 @@ ${lines.join('\n\n')}
     }
 
     bar.classList.toggle("pagination-near", paginationNear);
+
+    /*
+      화면이 데스크톱으로 넓어졌다면 auto-hidden 상태를 즉시 해제.
+      태블릿/모바일로 돌아오면 다음 활동 이후 다시 자동 숨김.
+    */
+    if (!isCompactUtilityViewport()) {
+      if (utilityBarHideTimer) {
+        clearTimeout(utilityBarHideTimer);
+        utilityBarHideTimer = null;
+      }
+      bar.classList.remove("auto-hidden");
+    }
   }
 
   function scheduleUtilityBarUpdate() {
     if (utilityBarRaf) return;
     utilityBarRaf = window.requestAnimationFrame(updateUtilityBarState);
+  }
+
+  function handleUtilityScrollActivity() {
+    revealUtilityBarTemporarily();
+    scheduleUtilityBarUpdate();
   }
 
   function scrollToPageTop() {
@@ -3535,8 +3613,17 @@ ${lines.join('\n\n')}
     });
   }
 
-  window.addEventListener("scroll", scheduleUtilityBarUpdate, { passive: true });
-  window.addEventListener("resize", scheduleUtilityBarUpdate);
+  window.addEventListener("scroll", handleUtilityScrollActivity, { passive: true });
+
+  window.addEventListener("resize", () => {
+    scheduleUtilityBarUpdate();
+
+    if (isCompactUtilityViewport()) {
+      revealUtilityBarTemporarily();
+    } else {
+      showUtilityBarNow();
+    }
+  });
 
   document.addEventListener("DOMContentLoaded", () => {
     const topBtn = document.getElementById("utilityTopBtn");
@@ -3552,6 +3639,16 @@ ${lines.join('\n\n')}
     }
 
     scheduleUtilityBarUpdate();
+
+    /*
+      처음 페이지를 열었을 때는 기능 위치를 인지할 수 있도록 잠시 보여준 뒤,
+      모바일/태블릿에서만 자동으로 숨김.
+    */
+    if (isCompactUtilityViewport()) {
+      revealUtilityBarTemporarily(1800);
+    } else {
+      showUtilityBarNow();
+    }
   });
 
   /* =========================
