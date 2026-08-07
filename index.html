@@ -3353,18 +3353,18 @@ ${lines.join('\n\n')}
       const jacket = full["Condition Jacket"] ?? c.jacket ?? "";
       const media = full["Condition Media"] ?? c.media ?? "";
 
-      // ONLINE은 실제 Subcategory와 관계없이 고정 안내 문구 사용
+      // ONLINE은 현재 선택된 언어의 고정 진열 위치 안내 사용
       const shelfLocation = store.toUpperCase() === "ONLINE"
-        ? "신당점 창고 보관 (직원에게 요청)"
+        ? t("onlineShelfLocation")
         : String(full["Subcategory"] ?? c.subcategory ?? "").trim();
 
       return `
 <div class="item">
   <div class="title"><strong>[${escapeHtml(c.ref)}] ${escapeHtml(c.artist)} - ${escapeHtml(c.title)}</strong></div>
-  <div><strong>매장 :</strong> ${escapeHtml(store || "-")}${shelfLocation ? ` / <strong>진열 위치 :</strong> ${escapeHtml(shelfLocation)}` : ""}</div>
-  <div><strong>프레싱 :</strong> ${escapeHtml(pressing || "-")}</div>
-  <div><strong>자켓 :</strong> ${escapeHtml(conditionShortLabel(jacket) || "-")} / <strong>미디어 :</strong> ${escapeHtml(conditionShortLabel(media) || "-")}</div>
-  <div><strong>가격 :</strong> ₩${(c.price || 0).toLocaleString()}</div>
+  <div><strong>${escapeHtml(t("store"))} :</strong> ${escapeHtml(store || "-")}${shelfLocation ? ` / <strong>${escapeHtml(t("shelfLocation"))} :</strong> ${escapeHtml(shelfLocation)}` : ""}</div>
+  <div><strong>${escapeHtml(t("pressing"))} :</strong> ${escapeHtml(pressing || "-")}</div>
+  <div><strong>${escapeHtml(t("jacket"))} :</strong> ${escapeHtml(conditionShortLabel(jacket) || "-")} / <strong>${escapeHtml(t("media"))} :</strong> ${escapeHtml(conditionShortLabel(media) || "-")}</div>
+  <div><strong>${escapeHtml(t("price"))} :</strong> ₩${(c.price || 0).toLocaleString(I18N[currentLanguage].locale)}</div>
 </div>
 <hr/>`;
     }).join("");
