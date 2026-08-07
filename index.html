@@ -748,6 +748,74 @@
        ========================= */
     #cartModal .modal-content {
       max-width: 760px !important;
+      padding: 56px 24px 24px;
+    }
+
+    /* CART 닫기 버튼: 카드와 겹치지 않는 독립된 원형 컨트롤 */
+    #cartModal .modal-close {
+      top: 14px;
+      right: 16px;
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      border-radius: 50%;
+      background: #f5f5f7;
+      color: #6e6e73;
+      font-size: 24px;
+      line-height: 1;
+      z-index: 5;
+      transition: background-color .18s ease, color .18s ease, transform .18s ease;
+    }
+    #cartModal .modal-close:hover {
+      background: #e8e8ed;
+      color: #1d1d1f;
+      transform: scale(1.04);
+    }
+
+    /* CART 삭제 계열 버튼: 활성/비활성 상태를 명확하게 구분 */
+    #cartModal .cart-delete-selected,
+    #cartModal .cart-clear-all {
+      font-weight: 600;
+      transition:
+        background-color .18s ease,
+        border-color .18s ease,
+        color .18s ease,
+        transform .12s ease;
+    }
+
+    #cartModal .cart-delete-selected {
+      background: #fff;
+      color: #d70015;
+      border: 1px solid rgba(215, 0, 21, .34);
+    }
+    #cartModal .cart-delete-selected:hover:not(:disabled) {
+      background: #fff4f5;
+      border-color: rgba(215, 0, 21, .5);
+    }
+    #cartModal .cart-delete-selected:active:not(:disabled),
+    #cartModal .cart-clear-all:active {
+      transform: scale(.98);
+    }
+    #cartModal .cart-delete-selected:disabled {
+      background: #f5f5f7 !important;
+      color: #b6b6ba !important;
+      border-color: #e5e5ea !important;
+      box-shadow: none !important;
+      opacity: 1;
+      cursor: default;
+    }
+
+    #cartModal .cart-clear-all {
+      background: #fff3f4;
+      color: #d70015;
+      border: 1px solid #ffd6da;
+    }
+    #cartModal .cart-clear-all:hover {
+      background: #ffe9eb;
+      border-color: #ffc5ca;
     }
     .cart-card-list {
       display: flex;
@@ -903,7 +971,14 @@
       #cartModal .modal-content {
         width: calc(100% - 24px);
         max-width: none !important;
-        padding: 18px 14px;
+        padding: 54px 14px 18px;
+      }
+      #cartModal .modal-close {
+        top: 12px;
+        right: 12px;
+        width: 32px;
+        height: 32px;
+        font-size: 22px;
       }
       .cart-card-list {
         gap: 10px;
@@ -2966,8 +3041,16 @@
           <button onclick="window.open('https://pf.kakao.com/_xxx/chat', '_blank')">${escapeHtml(t("kakao"))}</button>
         </div>
         <div class="cart-actions-group">
-          <button id="deleteSelectedBtn" onclick="deleteSelectedCartItems()" style="background:#ccc; color:#000;" disabled>${escapeHtml(t("deleteSelected"))}</button>
-          <button onclick="clearCart()" style="background:#ccc; color:#000;">${escapeHtml(t("clearAll"))}</button>
+          <button
+            id="deleteSelectedBtn"
+            class="cart-delete-selected"
+            onclick="deleteSelectedCartItems()"
+            disabled
+          >${escapeHtml(t("deleteSelected"))}</button>
+          <button
+            class="cart-clear-all"
+            onclick="clearCart()"
+          >${escapeHtml(t("clearAll"))}</button>
         </div>
       </div>`;
 
