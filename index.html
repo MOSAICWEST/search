@@ -649,6 +649,15 @@
       margin: 4px 0;
       word-break: keep-all;
     }
+    .info-inline-divider {
+      display: inline-block;
+      margin: 0 5px;
+      color: #b0b0b0;
+    }
+    .shelf-location-value {
+      font-weight: 600;
+      color: #111;
+    }
 
     /* 비디오 영역 */
     .video-wrapper {
@@ -1251,6 +1260,8 @@
       imageAlt: "앨범 이미지",
       image: "이미지",
       store: "매장",
+      shelfLocation: "진열 위치",
+      onlineShelfLocation: "신당점 창고 보관 (직원에게 요청)",
       pressing: "프레싱",
       jacket: "자켓",
       media: "미디어",
@@ -1326,6 +1337,8 @@
       imageAlt: "Album image",
       image: "Image",
       store: "Store",
+      shelfLocation: "Shelf location",
+      onlineShelfLocation: "Stored in Sindang warehouse (ask staff)",
       pressing: "Pressing",
       jacket: "Jacket",
       media: "Media",
@@ -1401,6 +1414,8 @@
       imageAlt: "アルバム画像",
       image: "画像",
       store: "店舗",
+      shelfLocation: "陳列位置",
+      onlineShelfLocation: "新堂店倉庫保管（スタッフにお声がけください）",
       pressing: "プレス",
       jacket: "ジャケット",
       media: "メディア",
@@ -2370,6 +2385,10 @@
     }
 
     const store = item.OriginSheet || "";
+    const subcategory = item["Subcategory"] || "";
+    const shelfLocation = String(store).trim().toUpperCase() === "ONLINE"
+      ? t("onlineShelfLocation")
+      : subcategory;
     const pressing = item.Pressing || "";
     const jacket = item["Condition Jacket"] || "";
     const media = item["Condition Media"] || "";
@@ -2378,7 +2397,13 @@
     const price = isNaN(priceN) ? "" : priceN.toLocaleString(I18N[currentLanguage].locale);
 
     let info = `<div class="info-block">`;
-    if (store) info += `<p><strong>${escapeHtml(t("store"))} :</strong> ${escapeHtml(store)}</p>`;
+    if (store) {
+      info += `<p><strong>${escapeHtml(t("store"))} :</strong> ${escapeHtml(store)}`;
+      if (shelfLocation) {
+        info += ` <span class="info-inline-divider">/</span> <strong>${escapeHtml(t("shelfLocation"))} :</strong> <span class="shelf-location-value">${escapeHtml(shelfLocation)}</span>`;
+      }
+      info += `</p>`;
+    }
     if (pressing) info += `<p><strong>${escapeHtml(t("pressing"))} :</strong> ${escapeHtml(pressing)}</p>`;
     if (jacket || media) info += `<p><strong>${escapeHtml(t("jacket"))}:</strong> ${renderConditionBadge(jacket || "-")} <strong>/ ${escapeHtml(t("media"))}:</strong> ${renderConditionBadge(media || "-")}</p>`;
     const cleanComment = normalizeConditionComment(comment);
