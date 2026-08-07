@@ -698,19 +698,50 @@
         margin-left: 2px;
         margin-right: 3px;
       }
-      .filter-dropdown,
-      #genreFilterNav .filter-dropdown {
-        left: 50%;
+      /* 모바일 드롭다운은 필터 위치에 맞춰 화면 안쪽으로 열리도록 정렬 */
+      .filter-dropdown {
         width: auto;
-        transform: translate(-50%, -5px) scale(.985);
-        min-width: min(290px, calc(100vw - 24px));
         max-width: calc(100vw - 24px);
         max-height: min(68vh, 430px);
       }
-      #genreFilterNav .filter-dropdown {
-        width: min(360px, calc(100vw - 24px));
+
+      /* 첫 번째: 매장 필터 → 왼쪽 기준으로 열기 */
+      #storeFilterNav .filter-dropdown {
+        left: 0;
+        right: auto;
+        min-width: 200px;
+        width: max-content;
+        max-width: calc(100vw - 24px);
+        transform: translateY(-5px) scale(.985);
+        transform-origin: top left;
       }
-      .filter-nav-item.open .filter-dropdown,
+
+      /* 가운데: 장르 필터 → 화면 중앙 쪽으로 열기 */
+      #genreFilterNav .filter-dropdown {
+        left: 50%;
+        right: auto;
+        width: min(360px, calc(100vw - 24px));
+        min-width: min(320px, calc(100vw - 24px));
+        max-width: calc(100vw - 24px);
+        transform: translate(-50%, -5px) scale(.985);
+        transform-origin: top center;
+      }
+
+      /* 마지막: 검색 항목 필터 → 오른쪽 기준으로 열기 */
+      #scopeFilterNav .filter-dropdown {
+        left: auto;
+        right: 0;
+        min-width: 210px;
+        width: max-content;
+        max-width: calc(100vw - 24px);
+        transform: translateY(-5px) scale(.985);
+        transform-origin: top right;
+      }
+
+      #storeFilterNav.open .filter-dropdown,
+      #scopeFilterNav.open .filter-dropdown {
+        transform: translateY(0) scale(1);
+      }
       #genreFilterNav.open .filter-dropdown {
         transform: translate(-50%, 0) scale(1);
       }
