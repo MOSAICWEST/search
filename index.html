@@ -740,6 +740,240 @@
       line-height: 20px;
     }
 
+
+    /* =========================
+       CART 카드형 UI
+       - 데스크톱/모바일 동일한 카드 언어
+       - 모바일에서는 메타 정보만 자연스럽게 줄바꿈
+       ========================= */
+    #cartModal .modal-content {
+      max-width: 760px !important;
+    }
+    .cart-card-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .cart-card-item {
+      position: relative;
+      display: flex;
+      align-items: stretch;
+      gap: 12px;
+      padding: 12px;
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.035);
+    }
+    .cart-card-select {
+      flex: 0 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cart-card-select input {
+      width: 16px;
+      height: 16px;
+      margin: 0;
+      cursor: pointer;
+      accent-color: #1d1d1f;
+    }
+    .cart-card-image {
+      flex: 0 0 96px;
+      width: 96px;
+      height: 96px;
+      border-radius: 9px;
+      overflow: hidden;
+      background: #f1f1f1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cart-card-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .cart-card-image .no-image {
+      color: #aaa;
+      font-size: 11px;
+      letter-spacing: .2px;
+    }
+    .cart-card-content {
+      flex: 1 1 auto;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .cart-card-meta {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 14px;
+      min-width: 0;
+      margin-bottom: 5px;
+      color: #777;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+    .cart-card-ref {
+      flex: 0 0 auto;
+      white-space: nowrap;
+    }
+    .cart-card-location {
+      min-width: 0;
+      text-align: right;
+      color: #666;
+      overflow-wrap: anywhere;
+    }
+    .cart-card-location strong {
+      color: #555;
+      font-weight: 600;
+    }
+    .cart-card-location .location-divider {
+      display: inline-block;
+      margin: 0 5px;
+      color: #b8b8b8;
+    }
+    .cart-card-title {
+      margin-bottom: 5px;
+      color: #1f1f1f;
+      font-size: 15px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+    .cart-card-title strong {
+      font-weight: 600;
+    }
+    .cart-card-pressing {
+      margin-bottom: 8px;
+      color: #777;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+    .cart-card-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .cart-card-condition {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+    .cart-card-condition-separator {
+      color: #aaa;
+      font-size: 12px;
+    }
+    .cart-card-price {
+      flex: 0 0 auto;
+      color: #111;
+      font-size: 15px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .cart-summary {
+      margin: 18px 0 0;
+      padding-top: 14px;
+      border-top: 1px solid #e8e8e8;
+    }
+    .cart-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .cart-actions-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .cart-actions-group button {
+      margin: 0 !important;
+    }
+
+    @media (max-width: 600px) {
+      #cartModal .modal-content {
+        width: calc(100% - 24px);
+        max-width: none !important;
+        padding: 18px 14px;
+      }
+      .cart-card-list {
+        gap: 10px;
+      }
+      .cart-card-item {
+        gap: 9px;
+        padding: 10px;
+        border-radius: 10px;
+      }
+      .cart-card-select {
+        flex-basis: 18px;
+      }
+      .cart-card-select input {
+        width: 15px;
+        height: 15px;
+      }
+      .cart-card-image {
+        flex-basis: 82px;
+        width: 82px;
+        height: 82px;
+        border-radius: 8px;
+      }
+      .cart-card-meta {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 11px;
+      }
+      .cart-card-ref {
+        display: block;
+        margin-bottom: 2px;
+      }
+      .cart-card-location {
+        display: block;
+        text-align: left;
+        line-height: 1.4;
+      }
+      .cart-card-title {
+        margin-bottom: 4px;
+        font-size: 14px;
+      }
+      .cart-card-pressing {
+        margin-bottom: 6px;
+        font-size: 12px;
+      }
+      .cart-card-bottom {
+        align-items: flex-end;
+      }
+      .cart-card-condition {
+        gap: 4px;
+      }
+      .cart-card-condition .condition-badge {
+        min-width: 34px;
+        height: 24px;
+        padding: 0 7px;
+        font-size: 12px;
+      }
+      .cart-card-price {
+        font-size: 14px;
+      }
+      .cart-actions {
+        align-items: stretch;
+      }
+      .cart-actions-group {
+        width: 100%;
+      }
+      .cart-actions-group button {
+        flex: 1 1 auto;
+      }
+    }
+
     /* 태블릿: 데스크톱과 동일한 테이블 구조를 유지하되 가로 스크롤 없이 보이도록 컬럼을 정리 */
     @media (min-width: 601px) and (max-width: 1024px) {
       .search-main {
@@ -2628,6 +2862,26 @@
   }
 
   /* 장바구니 */
+  function getCartFullRecord(cartItem) {
+    return (window.allData || []).find(
+      row => String(row.Ref || "") === String(cartItem.ref || "")
+    ) || {};
+  }
+
+  function getCartShelfLocation(cartItem, fullRecord) {
+    const store = String(
+      fullRecord.OriginSheet ?? cartItem.store ?? ""
+    ).trim();
+
+    if (store.toUpperCase() === "ONLINE") {
+      return t("onlineShelfLocation");
+    }
+
+    return String(
+      fullRecord["Subcategory"] ?? cartItem.subcategory ?? ""
+    ).trim();
+  }
+
   function renderCartModalBody() {
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
     const cartBody = document.getElementById("cartBody");
@@ -2641,28 +2895,78 @@
     let total = 0;
     const itemsHtml = cart.map((item, idx) => {
       total += item.price || 0;
-      return `<div style="margin-bottom: 12px;">
-        <input type="checkbox" class="cart-item-checkbox" data-index="${idx}" style="margin-right: 6px;">
-        <strong>${idx + 1}. [${escapeHtml(item.ref)}] ${escapeHtml(item.artist)} – ${escapeHtml(item.title)}</strong><br>
-        <span style="font-size: 14px;">
-          ${escapeHtml(item.jacket)} / ${escapeHtml(item.media)} / ${escapeHtml(item.pressing)}<br>
-          ${escapeHtml(t("store"))}: ${escapeHtml(item.store)}<br>
-          ${escapeHtml(t("price"))}: ₩${numberText(item.price || 0)}
-        </span>
-      </div>`;
+
+      const full = getCartFullRecord(item);
+      const imageURL = getMainImageUrl(full["Image URL"] || item.imageURL || "");
+      const store = String(full.OriginSheet ?? item.store ?? "").trim();
+      const shelfLocation = getCartShelfLocation(item, full);
+      const pressing = String(full.Pressing ?? item.pressing ?? "").trim();
+      const jacket = full["Condition Jacket"] ?? item.jacket ?? "";
+      const media = full["Condition Media"] ?? item.media ?? "";
+
+      const imageHtml = imageURL
+        ? `<img src="${escapeHtml(imageURL)}" alt="${escapeHtml(t("imageAlt"))}" loading="lazy">`
+        : `<span class="no-image">NO IMAGE</span>`;
+
+      const locationHtml = store || shelfLocation
+        ? `<span class="cart-card-location">
+             ${store ? `<strong>${escapeHtml(t("store"))} :</strong> ${escapeHtml(store)}` : ""}
+             ${store && shelfLocation ? `<span class="location-divider">/</span>` : ""}
+             ${shelfLocation ? `<strong>${escapeHtml(t("shelfLocation"))} :</strong> ${escapeHtml(shelfLocation)}` : ""}
+           </span>`
+        : "";
+
+      return `
+        <div class="cart-card-item">
+          <label class="cart-card-select" aria-label="${escapeHtml(t("deleteSelected"))}">
+            <input type="checkbox" class="cart-item-checkbox" data-index="${idx}">
+          </label>
+
+          <div class="cart-card-image">
+            ${imageHtml}
+          </div>
+
+          <div class="cart-card-content">
+            <div class="cart-card-meta">
+              <span class="cart-card-ref">[${escapeHtml(item.ref || "")}]</span>
+              ${locationHtml}
+            </div>
+
+            <div class="cart-card-title">
+              <strong>${escapeHtml(item.artist || "")}</strong>${item.title ? ` – ${escapeHtml(item.title)}` : ""}
+            </div>
+
+            ${pressing ? `<div class="cart-card-pressing">${escapeHtml(pressing)}</div>` : ""}
+
+            <div class="cart-card-bottom">
+              <div class="cart-card-condition">
+                ${renderConditionBadge(jacket || "-")}
+                <span class="cart-card-condition-separator">/</span>
+                ${renderConditionBadge(media || "-")}
+              </div>
+              <div class="cart-card-price">₩${numberText(item.price || 0)}</div>
+            </div>
+          </div>
+        </div>`;
     }).join('');
 
     cartBody.innerHTML = `
-      ${itemsHtml}
-      <hr>
-      <p><strong>${escapeHtml(t("totalCart", { count: numberText(cart.length), total: numberText(total) }))}</strong></p>
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 16px;">
-        <div>
-          <button onclick="printCart()" style="margin-right: 10px;">${escapeHtml(t("print"))}</button>
+      <div class="cart-card-list">${itemsHtml}</div>
+
+      <div class="cart-summary">
+        <strong>${escapeHtml(t("totalCart", {
+          count: numberText(cart.length),
+          total: numberText(total)
+        }))}</strong>
+      </div>
+
+      <div class="cart-actions">
+        <div class="cart-actions-group">
+          <button onclick="printCart()">${escapeHtml(t("print"))}</button>
           <button onclick="window.open('https://pf.kakao.com/_xxx/chat', '_blank')">${escapeHtml(t("kakao"))}</button>
         </div>
-        <div>
-          <button id="deleteSelectedBtn" onclick="deleteSelectedCartItems()" style="background:#ccc; color:#000; margin-right: 10px;" disabled>${escapeHtml(t("deleteSelected"))}</button>
+        <div class="cart-actions-group">
+          <button id="deleteSelectedBtn" onclick="deleteSelectedCartItems()" style="background:#ccc; color:#000;" disabled>${escapeHtml(t("deleteSelected"))}</button>
           <button onclick="clearCart()" style="background:#ccc; color:#000;">${escapeHtml(t("clearAll"))}</button>
         </div>
       </div>`;
@@ -2752,7 +3056,9 @@ ${lines.join('\n\n')}
       media: item["Condition Media"] || "",
       pressing: item.Pressing || "",
       price: price,
-      store: item.OriginSheet || ""
+      store: item.OriginSheet || "",
+      subcategory: item["Subcategory"] || "",
+      imageURL: getMainImageUrl(item["Image URL"])
     };
 
     cart.push(newItem);
