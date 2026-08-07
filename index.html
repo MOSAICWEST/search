@@ -720,6 +720,119 @@
         margin-left: auto;
         margin-right: auto;
       }
+
+      /* 태블릿에서는 12개 컬럼 가로 테이블 대신 확장 카드형 리스트 사용 */
+      .table-wrapper { display: none !important; }
+      .floating-table-header { display: none !important; }
+
+      .tablet-card-list {
+        width: min(94%, 900px);
+        margin: 0 auto 54px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .tablet-card-item {
+        display: grid;
+        grid-template-columns: 112px minmax(0, 1fr);
+        gap: 16px;
+        padding: 14px;
+        background: #fff;
+        border: 1px solid rgba(0,0,0,.08);
+        border-radius: 14px;
+        box-shadow: 0 1px 4px rgba(0,0,0,.045);
+        min-width: 0;
+      }
+      .tablet-card-image {
+        width: 112px;
+        height: 112px;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #eee;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      }
+      .tablet-card-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .tablet-card-main { min-width: 0; }
+      .tablet-card-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 11px;
+      }
+      .tablet-card-record { min-width: 0; }
+      .tablet-card-artist {
+        font-size: 16px;
+        font-weight: 650;
+        line-height: 1.28;
+        color: #1d1d1f;
+      }
+      .tablet-card-title {
+        margin-top: 2px;
+        font-size: 15px;
+        line-height: 1.35;
+        color: #333;
+        overflow-wrap: anywhere;
+      }
+      .tablet-card-price {
+        flex: 0 0 auto;
+        font-size: 16px;
+        font-weight: 700;
+        white-space: nowrap;
+        color: #111;
+      }
+      .tablet-card-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 9px 18px;
+      }
+      .tablet-field { min-width: 0; }
+      .tablet-field-label {
+        display: block;
+        margin-bottom: 2px;
+        font-size: 10px;
+        font-weight: 650;
+        line-height: 1.2;
+        letter-spacing: .02em;
+        color: #8a8a8e;
+      }
+      .tablet-field-value {
+        display: block;
+        min-width: 0;
+        font-size: 13px;
+        line-height: 1.35;
+        color: #2c2c2e;
+        overflow-wrap: anywhere;
+      }
+      .tablet-card-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        margin-top: 12px;
+      }
+      .tablet-detail-btn {
+        padding: 7px 12px;
+        border: 0;
+        border-radius: 8px;
+        background: #f2f2f2;
+        color: #1d1d1f;
+        font-size: 13px;
+        font-weight: 600;
+      }
+    }
+
+    @media (min-width: 601px) and (max-width: 760px) {
+      .tablet-card-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
     }
 
     /* Toast */
@@ -920,24 +1033,59 @@
 
     /* 모바일 카드 뷰 */
     @media (max-width: 600px) {
+      /* 드롭다운/필터의 시각적 overflow가 문서 폭을 넓혀 카드 여백이 달라 보이지 않도록 차단 */
+      html, body {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+      }
+      #results { width: 100%; }
       table { display: none; }
+      .tablet-card-list { display: none !important; }
       .card-list {
-        display: flex; flex-direction: column; gap: 16px; padding: 0 5%;
+        width: 100%;
+        margin: 0;
+        padding: 0 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
       }
       .card-item {
-        display: flex; background: #fff; border-radius: 10px;
-        overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        width: 100%;
+        min-width: 0;
+        display: flex;
+        background: #fff;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
       }
       .card-item .card-image {
-        width: 100px; height: 100px; background-color: #eee;
-        display: flex; align-items: center; justify-content: center; cursor: pointer;
+        width: 100px;
+        height: 100px;
+        flex: 0 0 100px;
+        background-color: #eee;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
         overflow: hidden;
       }
       .card-item .card-image img { width: 100%; height: 100%; object-fit: cover; }
       .card-content {
-        padding: 12px; flex: 1; display: flex; flex-direction: column; justify-content: center;
+        min-width: 0;
+        overflow: hidden;
+        padding: 12px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
       }
-      .card-content div { margin-bottom: 4px; font-size: 14px; }
+      .card-content div {
+        min-width: 0;
+        margin-bottom: 4px;
+        font-size: 14px;
+        overflow-wrap: anywhere;
+      }
     }
 
     /* 페이지네이션 */
@@ -2057,6 +2205,82 @@
           </div>`;
       });
       html += `</div>`;
+    } else if (window.innerWidth <= 1024) {
+      /* 태블릿 확장 카드 뷰: 가로 스크롤 없이 모든 주요 정보를 한 화면에서 확인 */
+      html = `<div class="tablet-card-list">`;
+
+      pageData.forEach((item, idx) => {
+        const imageURL = getMainImageUrl(item["Image URL"]);
+        const storeBadge = getStoreBadge(item.OriginSheet);
+        const badgeHtml = storeBadge ? `<span class="store-badge">${storeBadge}</span>` : "";
+        const priceN = Number(item["Selling at"] || 0);
+        const price = Number.isFinite(priceN) ? priceN.toLocaleString() : "";
+
+        const imageBlock = imageURL
+          ? `<div class="tablet-card-image image-badge-wrap" onclick="showDetails(${start + idx})">
+              ${badgeHtml}
+              <img src="${imageURL}" alt="${escapeHtml(t("imageAlt"))}" loading="lazy">
+            </div>`
+          : `<div class="tablet-card-image image-badge-wrap" onclick="showDetails(${start + idx})">
+              ${badgeHtml}
+              <span style="color:#aaa;font-size:12px;">NO IMAGE</span>
+            </div>`;
+
+        html += `
+          <div class="tablet-card-item">
+            ${imageBlock}
+            <div class="tablet-card-main">
+              <div class="tablet-card-top">
+                <div class="tablet-card-record">
+                  <div class="tablet-card-artist">${escapeHtml(item.Artist || "")}</div>
+                  <div class="tablet-card-title">${escapeHtml(item.Title || "")}</div>
+                </div>
+                <div class="tablet-card-price">₩${price}</div>
+              </div>
+
+              <div class="tablet-card-grid">
+                <div class="tablet-field">
+                  <span class="tablet-field-label">${escapeHtml(getHeaderLabel("Label"))}</span>
+                  <span class="tablet-field-value">${escapeHtml(item.Label || "-")}</span>
+                </div>
+                <div class="tablet-field">
+                  <span class="tablet-field-label">${escapeHtml(getHeaderLabel("Pressing"))}</span>
+                  <span class="tablet-field-value">${escapeHtml(item.Pressing || "-")}</span>
+                </div>
+                <div class="tablet-field">
+                  <span class="tablet-field-label">${escapeHtml(getHeaderLabel("Genre"))}</span>
+                  <span class="tablet-field-value">${escapeHtml(item.Genre || "-")}</span>
+                </div>
+                <div class="tablet-field">
+                  <span class="tablet-field-label">${escapeHtml(getHeaderLabel("Style"))}</span>
+                  <span class="tablet-field-value">${escapeHtml(item.Style || "-")}</span>
+                </div>
+                <div class="tablet-field">
+                  <span class="tablet-field-label">${escapeHtml(getHeaderLabel("Subcategory"))}</span>
+                  <span class="tablet-field-value">${escapeHtml(item.Subcategory || "-")}</span>
+                </div>
+                <div class="tablet-field">
+                  <span class="tablet-field-label">${escapeHtml(getHeaderLabel("Condition Jacket"))}</span>
+                  <span class="tablet-field-value">${renderConditionBadge(item["Condition Jacket"] || "")}</span>
+                </div>
+                <div class="tablet-field">
+                  <span class="tablet-field-label">${escapeHtml(getHeaderLabel("Condition Media"))}</span>
+                  <span class="tablet-field-value">${renderConditionBadge(item["Condition Media"] || "")}</span>
+                </div>
+                <div class="tablet-field">
+                  <span class="tablet-field-label">${escapeHtml(getHeaderLabel("Selling at"))}</span>
+                  <span class="tablet-field-value">₩${price}</span>
+                </div>
+              </div>
+
+              <div class="tablet-card-actions">
+                <button class="tablet-detail-btn" onclick="showDetails(${start + idx})">${escapeHtml(t("details"))}</button>
+              </div>
+            </div>
+          </div>`;
+      });
+
+      html += `</div>`;
     } else {
       /* 데스크톱 테이블 뷰 */
       html = `<div class="table-wrapper"><table><thead><tr>`;
@@ -2102,7 +2326,7 @@
     renderPagination(data.length);
 
     requestAnimationFrame(() => {
-      if (window.innerWidth > 600) {
+      if (window.innerWidth > 1024) {
         setupFloatingTableHeader();
       } else {
         removeFloatingTableHeader();
@@ -2429,11 +2653,13 @@
     requestAnimationFrame(() => {
       const firstItem = window.innerWidth <= 600
         ? document.querySelector(".card-list .card-item")
-        : document.querySelector(".table-wrapper tbody tr");
+        : window.innerWidth <= 1024
+          ? document.querySelector(".tablet-card-list .tablet-card-item")
+          : document.querySelector(".table-wrapper tbody tr");
 
       if (!firstItem) return;
 
-      const headerOffset = window.innerWidth <= 600 ? 16 : 72;
+      const headerOffset = window.innerWidth <= 1024 ? 16 : 72;
       const targetTop = window.scrollY + firstItem.getBoundingClientRect().top - headerOffset;
 
       window.scrollTo({
