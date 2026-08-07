@@ -95,12 +95,12 @@
       width: min(920px, 100%);
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      padding: 14px;
-      background: #fff;
-      border: 1px solid #e5e5e5;
-      border-radius: 12px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+      gap: 13px;
+      padding: 0;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
     }
     .search-main {
       display: flex;
@@ -111,21 +111,165 @@
       flex: 1;
       min-width: 0;
       padding: 12px 14px;
+      background: #fff;
     }
     .search-main button {
       min-width: 78px;
       padding-left: 18px;
       padding-right: 18px;
     }
-    .filters {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: flex-start;
+
+    /* 네비게이션형 필터
+       - 데스크톱: 마우스를 올리면 목록 표시
+       - 모바일/터치: 클릭하여 열고 닫기
+       - 실제 필터 값은 숨겨진 native select와 동기화 */
+    .filters-native {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+      pointer-events: none !important;
     }
-    .filters select {
-      flex: 1 1 180px;
-      min-width: 0;
+    .filter-nav {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0;
+      min-height: 38px;
+      position: relative;
+      z-index: 40;
+    }
+    .filter-nav-item {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .filter-nav-separator {
+      color: #d0d0d0;
+      font-size: 18px;
+      font-weight: 400;
+      line-height: 1;
+      margin: 0 5px;
+      user-select: none;
+    }
+    .filter-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 36px;
+      padding: 5px 4px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      color: #777;
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.2;
+      white-space: nowrap;
+      cursor: pointer;
+      box-shadow: none;
+    }
+    .filter-trigger:hover,
+    .filter-nav-item.open .filter-trigger,
+    .filter-nav-item.has-selection .filter-trigger {
+      background: transparent;
+      color: #111;
+    }
+    .filter-chevron {
+      width: 24px;
+      height: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 24px;
+      border: 1px solid #d2d2d2;
+      border-radius: 50%;
+      color: #333;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1;
+      transition: transform .18s ease, border-color .18s ease;
+    }
+    .filter-nav-item.open .filter-chevron {
+      transform: rotate(180deg);
+      border-color: #aaa;
+    }
+    .filter-dropdown {
+      position: absolute;
+      top: calc(100% + 7px);
+      left: 0;
+      min-width: 210px;
+      max-width: min(320px, calc(100vw - 32px));
+      max-height: 330px;
+      overflow-y: auto;
+      padding: 12px 0;
+      border: 1px solid #d7d7d7;
+      border-radius: 15px;
+      background: rgba(255,255,255,0.98);
+      box-shadow: 0 14px 34px rgba(0,0,0,.10);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-5px);
+      transition: opacity .14s ease, transform .14s ease, visibility .14s ease;
+      z-index: 80;
+    }
+    .filter-nav-item.open .filter-dropdown {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    .filter-dropdown button {
+      display: block;
+      width: 100%;
+      padding: 10px 18px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      color: #777;
+      font-size: 15px;
+      font-weight: 500;
+      line-height: 1.35;
+      text-align: left;
+      white-space: normal;
+      cursor: pointer;
+    }
+    .filter-dropdown button:hover,
+    .filter-dropdown button:focus-visible {
+      background: #f5f5f5;
+      color: #111;
+      outline: none;
+    }
+    .filter-dropdown button.active {
+      color: #111;
+      font-weight: 700;
+    }
+    #genreFilterNav .filter-dropdown {
+      min-width: 260px;
+    }
+
+    @media (hover: hover) and (pointer: fine) and (min-width: 601px) {
+      .filter-nav-item:hover .filter-dropdown,
+      .filter-nav-item:focus-within .filter-dropdown {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+      .filter-nav-item:hover .filter-chevron,
+      .filter-nav-item:focus-within .filter-chevron {
+        transform: rotate(180deg);
+        border-color: #aaa;
+      }
+      .filter-nav-item:hover .filter-trigger,
+      .filter-nav-item:focus-within .filter-trigger {
+        color: #111;
+      }
     }
     .result-summary {
       width: 95%;
@@ -480,12 +624,45 @@
 
     @media (max-width: 600px) {
       .search-wrapper { padding: 0 5% 16px; }
-      .search-panel { padding: 10px; border-radius: 10px; }
+      .search-panel { padding: 0; border-radius: 0; }
       .search-main { gap: 6px; }
       .search-main input[type="text"] { font-size: 15px; }
       .search-main button { min-width: 68px; padding-left: 12px; padding-right: 12px; }
-      .filters { gap: 6px; }
-      .filters select { flex: 1 1 calc(50% - 6px); font-size: 14px; }
+      .filter-nav {
+        justify-content: center;
+        row-gap: 2px;
+      }
+      .filter-nav-separator {
+        margin: 0 3px;
+        font-size: 15px;
+      }
+      .filter-trigger {
+        min-height: 34px;
+        gap: 5px;
+        font-size: 13px;
+        padding: 4px 2px;
+      }
+      .filter-chevron {
+        width: 22px;
+        height: 22px;
+        flex-basis: 22px;
+        font-size: 13px;
+      }
+      .filter-dropdown,
+      #genreFilterNav .filter-dropdown {
+        left: 50%;
+        transform: translate(-50%, -5px);
+        min-width: min(280px, calc(100vw - 32px));
+        max-width: calc(100vw - 32px);
+        max-height: 300px;
+      }
+      .filter-nav-item.open .filter-dropdown {
+        transform: translate(-50%, 0);
+      }
+      .filter-dropdown button {
+        padding: 11px 18px;
+        font-size: 14px;
+      }
       .result-summary { width: 90%; margin-bottom: 10px; }
       .floating-table-header { display: none !important; }
     }
@@ -573,15 +750,16 @@
         <input type="text" id="searchInput" placeholder="아티스트, 타이틀, 레이블, 상품번호 검색..." autocomplete="off" />
         <button id="searchBtn">검색</button>
       </div>
-      <div class="filters">
-        <select id="storeFilter">
+      <!-- 실제 필터 값은 native select에 유지하고, 화면에는 네비게이션형 필터를 표시 -->
+      <div class="filters-native" aria-hidden="true">
+        <select id="storeFilter" tabindex="-1">
           <option value="all">전체 매장</option>
           <option value="WEST">WEST</option>
           <option value="EAST">EAST</option>
           <option value="ONLINE">ONLINE</option>
         </select>
-        <select id="genreFilter"><option value="all">전체 장르</option></select>
-        <select id="searchScope">
+        <select id="genreFilter" tabindex="-1"><option value="all">전체 장르</option></select>
+        <select id="searchScope" tabindex="-1">
           <option value="all">전체 항목</option>
           <option value="Ref">Ref</option>
           <option value="Artist">Artist</option>
@@ -591,6 +769,32 @@
           <option value="Credits">Credits</option>
         </select>
       </div>
+
+      <nav id="filterNav" class="filter-nav" aria-label="Inventory filters">
+        <div id="storeFilterNav" class="filter-nav-item" data-filter="storeFilter">
+          <button type="button" class="filter-trigger" aria-haspopup="true" aria-expanded="false">
+            <span class="filter-trigger-label">전체 매장</span>
+            <span class="filter-chevron" aria-hidden="true">⌄</span>
+          </button>
+          <div class="filter-dropdown" role="menu"></div>
+        </div>
+        <span class="filter-nav-separator" aria-hidden="true">/</span>
+        <div id="genreFilterNav" class="filter-nav-item" data-filter="genreFilter">
+          <button type="button" class="filter-trigger" aria-haspopup="true" aria-expanded="false">
+            <span class="filter-trigger-label">전체 장르</span>
+            <span class="filter-chevron" aria-hidden="true">⌄</span>
+          </button>
+          <div class="filter-dropdown" role="menu"></div>
+        </div>
+        <span class="filter-nav-separator" aria-hidden="true">/</span>
+        <div id="scopeFilterNav" class="filter-nav-item" data-filter="searchScope">
+          <button type="button" class="filter-trigger" aria-haspopup="true" aria-expanded="false">
+            <span class="filter-trigger-label">전체 항목</span>
+            <span class="filter-chevron" aria-hidden="true">⌄</span>
+          </button>
+          <div class="filter-dropdown" role="menu"></div>
+        </div>
+      </nav>
     </div>
     <div id="dateFilterBar" class="date-filter-bar"></div>
   </div>
@@ -872,6 +1076,88 @@
     return I18N[currentLanguage].headers[key] || key;
   }
 
+  /* =========================
+     네비게이션형 필터 UI
+     - 기존 native select 값을 그대로 사용하므로 검색 로직은 변경하지 않음
+     - desktop hover + click / mobile click 지원
+     ========================= */
+  function closeFilterMenus(exceptItem = null) {
+    document.querySelectorAll(".filter-nav-item.open").forEach(item => {
+      if (item === exceptItem) return;
+      item.classList.remove("open");
+      item.querySelector(".filter-trigger")?.setAttribute("aria-expanded", "false");
+    });
+  }
+
+  function refreshFilterNav() {
+    document.querySelectorAll(".filter-nav-item[data-filter]").forEach(item => {
+      const select = document.getElementById(item.dataset.filter);
+      const trigger = item.querySelector(".filter-trigger");
+      const label = item.querySelector(".filter-trigger-label");
+      const dropdown = item.querySelector(".filter-dropdown");
+      if (!select || !trigger || !label || !dropdown) return;
+
+      const selectedOption = select.options[select.selectedIndex] || select.options[0];
+      label.textContent = selectedOption?.textContent || "";
+      item.classList.toggle("has-selection", select.value !== "all");
+
+      dropdown.innerHTML = "";
+      Array.from(select.options).forEach(option => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.setAttribute("role", "menuitem");
+        btn.dataset.value = option.value;
+        btn.textContent = option.textContent;
+        btn.classList.toggle("active", option.value === select.value);
+        btn.setAttribute("aria-current", option.value === select.value ? "true" : "false");
+
+        btn.addEventListener("click", e => {
+          e.preventDefault();
+          e.stopPropagation();
+          const changed = select.value !== option.value;
+          select.value = option.value;
+          closeFilterMenus();
+          if (changed) {
+            select.dispatchEvent(new Event("change", { bubbles: true }));
+          } else {
+            refreshFilterNav();
+          }
+        });
+        dropdown.appendChild(btn);
+      });
+    });
+  }
+
+  function initFilterNav() {
+    document.querySelectorAll(".filter-nav-item[data-filter]").forEach(item => {
+      const trigger = item.querySelector(".filter-trigger");
+      if (!trigger) return;
+
+      trigger.addEventListener("click", e => {
+        e.preventDefault();
+        e.stopPropagation();
+        const willOpen = !item.classList.contains("open");
+        closeFilterMenus(item);
+        item.classList.toggle("open", willOpen);
+        trigger.setAttribute("aria-expanded", willOpen ? "true" : "false");
+      });
+
+      trigger.addEventListener("keydown", e => {
+        if (e.key === "Escape") {
+          item.classList.remove("open");
+          trigger.setAttribute("aria-expanded", "false");
+          trigger.focus();
+        }
+      });
+    });
+
+    document.addEventListener("click", e => {
+      if (!e.target.closest(".filter-nav-item")) closeFilterMenus();
+    });
+
+    refreshFilterNav();
+  }
+
   /* 데스크톱: 이미지 컬럼 포함 */
   const displayOrder = [
     "Image",
@@ -926,6 +1212,8 @@
       const genreAll = document.querySelector('#genreFilter option[value="all"]');
       if (genreAll) genreAll.textContent = dict.allGenres;
     }
+
+    refreshFilterNav();
 
     if (shouldRerender && allData.length) {
       filterAndRenderTable();
@@ -1085,6 +1373,7 @@
   const itemsPerPage = 30;
   let selectedDateValue = "all";
 
+  initFilterNav();
   applyLanguageUI(false);
 
   const results = document.getElementById("results");
@@ -1127,6 +1416,7 @@
       genreSelect.appendChild(option);
     });
     genreSelect.value = [...genreSelect.options].some(o => o.value === previousValue) ? previousValue : "all";
+    refreshFilterNav();
   }
 
   function populateDateFilter(data) {
@@ -1664,20 +1954,26 @@
   });
 
   document.getElementById("storeFilter").addEventListener("change", () => {
+    refreshFilterNav();
     populateDateFilter(allData);
     filterAndRenderTable();
   });
 
   document.getElementById("genreFilter").addEventListener("change", () => {
+    refreshFilterNav();
     populateDateFilter(allData);
     filterAndRenderTable();
   });
 
-  document.getElementById("searchScope").addEventListener("change", filterAndRenderTable);
+  document.getElementById("searchScope").addEventListener("change", () => {
+    refreshFilterNav();
+    filterAndRenderTable();
+  });
 
   document.addEventListener("keydown", e => {
     if (e.key === "Escape") {
       document.getElementById("detailModal").style.display = "none";
+      closeFilterMenus();
     }
   });
 
@@ -2037,6 +2333,7 @@ hr { border: 0; border-top: 1px dashed #999; margin: 8px 0; }
     if (scopeSel) scopeSel.value = "all";
     if (input)    input.value = "";
     selectedDateValue = "all";
+    refreshFilterNav();
     populateDateFilter(allData);
 
     // 2) 페이지 초기화 + 렌더
