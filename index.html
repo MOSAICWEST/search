@@ -2488,6 +2488,11 @@
 
   function setLanguage(lang) {
     if (!["ko", "en", "ja"].includes(lang)) return;
+
+    if (typeof hideConditionGuidePopover === "function") {
+      hideConditionGuidePopover();
+    }
+
     currentLanguage = lang;
     localStorage.setItem("mosaicInventoryLanguage", lang);
     applyLanguageUI(true);
@@ -2802,94 +2807,274 @@
 
   /*
     MOSAIC CONDITION GUIDE
-    현재 제공된 설명 원문이 한국어이므로 팝오버 설명은 한국어로 표시.
-    Generic은 Jacket에만 가이드가 존재함.
+    - KR / EN / JP language mode linked
+    - Generic has a Jacket guide only
   */
-  const CONDITION_GUIDE_KO = {
-    "GENERIC": {
-      jacket: {
-        title: "범용 또는 무지 커버",
-        description: "오리지널 자켓이 아닌 범용 커버 또는 무지 커버가 제공되는 상태입니다."
+  const CONDITION_GUIDE = {
+    ko: {
+      "GENERIC": {
+        jacket: {
+          title: "범용 또는 무지 커버",
+          description: "오리지널 자켓이 아닌 범용 커버 또는 무지 커버가 제공되는 상태입니다."
+        }
+      },
+      "M": {
+        jacket: {
+          title: "완벽한 상태",
+          description: "사용 흔적이 없는 최상급 상태의 자켓입니다."
+        },
+        media: {
+          title: "완벽한 상태",
+          description: "사용 흔적이 없는 최상급 상태의 음반입니다."
+        }
+      },
+      "NM": {
+        jacket: {
+          title: "완벽한 상태, 방금 개봉한 듯한 상태",
+          description: "눈에 띄는 보관 흔적이나 사용감이 거의 없는 매우 깨끗한 자켓입니다."
+        },
+        media: {
+          title: "완벽한 상태, 방금 개봉한 듯한 상태",
+          description: "눈에 띄는 사용 흔적이 거의 없으며 매우 깨끗한 상태의 음반입니다."
+        }
+      },
+      "EX": {
+        jacket: {
+          title: "전반적으로 매우 깨끗한 상태",
+          description: "매우 미세한 엣지웨어, 얼룩, 까짐, 컷아웃, 펀치, 드릴 또는 발매 당시 스티커가 있을 수 있습니다. 단, 낙서나 임의로 붙인 스티커 등은 없습니다."
+        },
+        media: {
+          title: "전반적으로 매우 깨끗한 상태",
+          description: "음질에 영향이 없는 몇몇 연흔, 미세한 헤어라인, 화학반응으로 인한 보관 얼룩, 미세한 휨 또는 프레싱 흔적이 있을 수 있습니다."
+        }
+      },
+      "VG+": {
+        jacket: {
+          title: "전반적으로 깨끗한 상태",
+          description: "약간의 링웨어, 엣지웨어, 얼룩, 낙서, 테이핑, 변색, 1cm 이하의 찢김 또는 각 테두리 3cm 이하의 벌어짐 중 하나 이상이 있을 수 있습니다. 컷아웃, 펀치, 드릴이 존재할 수 있습니다."
+        },
+        media: {
+          title: "전반적으로 깨끗한 상태",
+          description: "음질에 큰 영향을 주지 않는 다수의 연흔, 헤어라인, 화학반응으로 인한 보관 얼룩, 약간의 휨 또는 프레싱 시 생긴 흔적이 있을 수 있습니다."
+        }
+      },
+      "VG": {
+        jacket: {
+          title: "사용감 있음",
+          description: "눈에 띄는 링웨어, 엣지웨어, 얼룩, 낙서, 테이핑, 변색, 1~5cm의 찢김 또는 3cm를 초과하는 테두리 벌어짐·한 곳 이상의 벌어짐 등이 있을 수 있습니다."
+        },
+        media: {
+          title: "사용감 있음",
+          description: "음질에 영향을 줄 수 있는 다수의 연흔, 헤어라인, 손으로 느껴지는 작은 스크래치 또는 마크가 있을 수 있습니다."
+        }
+      },
+      "G+": {
+        jacket: {
+          title: "사용감 많음",
+          description: "테두리 두 곳 이상 또는 전체 벌어짐, 일부 찢김, 심한 얼룩, 낙서, 변색, 5cm 이상의 찢김 등으로 자켓 본래의 역할이 어려울 수 있는 상태입니다."
+        },
+        media: {
+          title: "사용감 많음",
+          description: "다수의 연흔과 헤어라인이 가득하고 길거나 넓은 범위에 손으로 느껴지는 스크래치·마크가 있으며, 이로 인해 잡음·튐·스킵 등이 발생할 수 있습니다."
+        }
+      },
+      "G": {
+        jacket: {
+          title: "손상 심함",
+          description: "보관용 자켓으로 사용하기 부적합하거나 자켓 본래의 역할을 제대로 하기 어려운 상태입니다."
+        },
+        media: {
+          title: "손상 심함",
+          description: "다수의 연흔과 헤어라인, 길고 넓은 범위의 스크래치·마크가 상당수 존재하며 잡음·튐·스킵이 발생하거나 일부 구간의 재생이 어려울 수 있습니다."
+        }
+      },
+      "F": {
+        jacket: {
+          title: "심한 손상",
+          description: "심한 마모, 찢어짐, 오염 또는 구조적인 손상이 있어 보관용 자켓으로 사용하기 어려운 상태입니다."
+        },
+        media: {
+          title: "재생 상태 좋지 않음",
+          description: "심한 마모와 스크래치로 인해 지속적인 잡음, 튐 또는 스킵이 발생하며 정상적인 감상이 어려울 수 있습니다."
+        }
       }
     },
-    "M": {
-      jacket: {
-        title: "완벽한 상태",
-        description: "사용 흔적이 없는 최상급 상태의 자켓입니다."
+
+    en: {
+      "GENERIC": {
+        jacket: {
+          title: "Generic or plain sleeve",
+          description: "Comes with a generic or plain sleeve rather than the original jacket."
+        }
       },
-      media: {
-        title: "완벽한 상태",
-        description: "사용 흔적이 없는 최상급 상태의 음반입니다."
+      "M": {
+        jacket: {
+          title: "Perfect condition",
+          description: "A top-grade jacket with no signs of use."
+        },
+        media: {
+          title: "Perfect condition",
+          description: "A top-grade record with no signs of use."
+        }
+      },
+      "NM": {
+        jacket: {
+          title: "Near-perfect, looks freshly opened",
+          description: "An exceptionally clean jacket with virtually no visible storage wear or signs of use."
+        },
+        media: {
+          title: "Near-perfect, looks freshly opened",
+          description: "An exceptionally clean record with virtually no visible signs of use."
+        }
+      },
+      "EX": {
+        jacket: {
+          title: "Overall, very clean condition",
+          description: "May have very slight edge wear, staining, scuffing, a cut-out, punch hole, drill hole, or an original release sticker. There is no writing or aftermarket sticker."
+        },
+        media: {
+          title: "Overall, very clean condition",
+          description: "May have a few paper scuffs, faint hairlines, storage marks caused by chemical reaction, a very slight warp, or pressing marks that do not affect sound quality."
+        }
+      },
+      "VG+": {
+        jacket: {
+          title: "Overall, clean condition",
+          description: "May show one or more of the following: light ring wear, edge wear, staining, writing, tape, discoloration, a tear up to 1 cm, or seam splits up to 3 cm on each edge. A cut-out, punch hole, or drill hole may also be present."
+        },
+        media: {
+          title: "Overall, clean condition",
+          description: "May have multiple paper scuffs, hairlines, storage marks caused by chemical reaction, a slight warp, or pressing marks that do not significantly affect playback."
+        }
+      },
+      "VG": {
+        jacket: {
+          title: "Noticeable wear",
+          description: "May show noticeable ring wear, edge wear, staining, writing, tape, discoloration, tears of 1–5 cm, seam splits over 3 cm, or splits in more than one place."
+        },
+        media: {
+          title: "Noticeable wear",
+          description: "May have multiple paper scuffs and hairlines, as well as small scratches or marks that can be felt and may affect playback."
+        }
+      },
+      "G+": {
+        jacket: {
+          title: "Heavy wear",
+          description: "May have splits on two or more seams or fully split seams, partial tears, heavy staining, writing, discoloration, tears over 5 cm, or similar damage that can make the jacket difficult to use for its intended purpose."
+        },
+        media: {
+          title: "Heavy wear",
+          description: "Covered with numerous paper scuffs and hairlines, with long or wide scratches or marks that can be felt. These may cause noise, pops, or skips."
+        }
+      },
+      "G": {
+        jacket: {
+          title: "Heavily damaged",
+          description: "Unsuitable for storage or unable to properly serve its original function as a record jacket."
+        },
+        media: {
+          title: "Heavily damaged",
+          description: "Has numerous paper scuffs and hairlines, along with many long or wide scratches and marks. Noise, pops, or skips may occur, and some passages may be difficult to play."
+        }
+      },
+      "F": {
+        jacket: {
+          title: "Severe damage",
+          description: "Heavy wear, tears, staining, or structural damage make the jacket difficult to use for record storage."
+        },
+        media: {
+          title: "Poor playback condition",
+          description: "Severe wear and scratches cause persistent noise, pops, or skips, making normal listening difficult."
+        }
       }
     },
-    "NM": {
-      jacket: {
-        title: "완벽한 상태, 방금 개봉한 듯한 상태",
-        description: "눈에 띄는 보관 흔적이나 사용감이 거의 없는 매우 깨끗한 자켓입니다."
+
+    ja: {
+      "GENERIC": {
+        jacket: {
+          title: "汎用または無地スリーブ",
+          description: "オリジナルジャケットではなく、汎用スリーブまたは無地スリーブが付属する状態です。"
+        }
       },
-      media: {
-        title: "완벽한 상태, 방금 개봉한 듯한 상태",
-        description: "눈에 띄는 사용 흔적이 거의 없으며 매우 깨끗한 상태의 음반입니다."
-      }
-    },
-    "EX": {
-      jacket: {
-        title: "전반적으로 매우 깨끗한 상태",
-        description: "매우 미세한 엣지웨어, 얼룩, 까짐, 컷아웃, 펀치, 드릴 또는 발매 당시 스티커가 있을 수 있습니다. 단, 낙서나 임의로 붙인 스티커 등은 없습니다."
+      "M": {
+        jacket: {
+          title: "完全な状態",
+          description: "使用感のない最上級コンディションのジャケットです。"
+        },
+        media: {
+          title: "完全な状態",
+          description: "使用感のない最上級コンディションのレコードです。"
+        }
       },
-      media: {
-        title: "전반적으로 매우 깨끗한 상태",
-        description: "음질에 영향이 없는 몇몇 연흔, 미세한 헤어라인, 화학반응으로 인한 보관 얼룩, 미세한 휨 또는 프레싱 흔적이 있을 수 있습니다."
-      }
-    },
-    "VG+": {
-      jacket: {
-        title: "전반적으로 깨끗한 상태",
-        description: "약간의 링웨어, 엣지웨어, 얼룩, 낙서, 테이핑, 변색, 1cm 이하의 찢김 또는 각 테두리 3cm 이하의 벌어짐 중 하나 이상이 있을 수 있습니다. 컷아웃, 펀치, 드릴이 존재할 수 있습니다."
+      "NM": {
+        jacket: {
+          title: "ほぼ完璧、開封直後のような状態",
+          description: "目立つ保管跡や使用感がほとんどない、非常にきれいなジャケットです。"
+        },
+        media: {
+          title: "ほぼ完璧、開封直後のような状態",
+          description: "目立つ使用跡がほとんどなく、非常にきれいな状態のレコードです。"
+        }
       },
-      media: {
-        title: "전반적으로 깨끗한 상태",
-        description: "음질에 큰 영향을 주지 않는 다수의 연흔, 헤어라인, 화학반응으로 인한 보관 얼룩, 약간의 휨 또는 프레싱 시 생긴 흔적이 있을 수 있습니다."
-      }
-    },
-    "VG": {
-      jacket: {
-        title: "사용감 있음",
-        description: "눈에 띄는 링웨어, 엣지웨어, 얼룩, 낙서, 테이핑, 변색, 1~5cm의 찢김 또는 3cm를 초과하는 테두리 벌어짐·한 곳 이상의 벌어짐 등이 있을 수 있습니다."
+      "EX": {
+        jacket: {
+          title: "全体的に非常にきれいな状態",
+          description: "ごく軽微なエッジウェア、汚れ、擦れ、カットアウト、パンチ穴、ドリル穴、または発売当時のステッカーがある場合があります。ただし、書き込みや後から貼られたステッカーなどはありません。"
+        },
+        media: {
+          title: "全体的に非常にきれいな状態",
+          description: "音質に影響しない軽いスレ、微細なヘアライン、化学反応による保管跡、ごくわずかな反り、またはプレス跡がある場合があります。"
+        }
       },
-      media: {
-        title: "사용감 있음",
-        description: "음질에 영향을 줄 수 있는 다수의 연흔, 헤어라인, 손으로 느껴지는 작은 스크래치 또는 마크가 있을 수 있습니다."
-      }
-    },
-    "G+": {
-      jacket: {
-        title: "사용감 많음",
-        description: "테두리 두 곳 이상 또는 전체 벌어짐, 일부 찢김, 심한 얼룩, 낙서, 변색, 5cm 이상의 찢김 등으로 자켓 본래의 역할이 어려울 수 있는 상태입니다."
+      "VG+": {
+        jacket: {
+          title: "全体的にきれいな状態",
+          description: "軽いリングウェア、エッジウェア、汚れ、書き込み、テープ補修、変色、1cm以下の破れ、各辺3cm以下の裂けのいずれか、または複数がある場合があります。カットアウト、パンチ穴、ドリル穴がある場合もあります。"
+        },
+        media: {
+          title: "全体的にきれいな状態",
+          description: "音質に大きく影響しない複数のスレ、ヘアライン、化学反応による保管跡、軽い反り、またはプレス時の跡がある場合があります。"
+        }
       },
-      media: {
-        title: "사용감 많음",
-        description: "다수의 연흔과 헤어라인이 가득하고 길거나 넓은 범위에 손으로 느껴지는 스크래치·마크가 있으며, 이로 인해 잡음·튐·스킵 등이 발생할 수 있습니다."
-      }
-    },
-    "G": {
-      jacket: {
-        title: "손상 심함",
-        description: "보관용 자켓으로 사용하기 부적합하거나 자켓 본래의 역할을 제대로 하기 어려운 상태입니다."
+      "VG": {
+        jacket: {
+          title: "使用感あり",
+          description: "目立つリングウェア、エッジウェア、汚れ、書き込み、テープ補修、変色、1〜5cmの破れ、3cmを超える裂け、または複数箇所の裂けなどがある場合があります。"
+        },
+        media: {
+          title: "使用感あり",
+          description: "音質に影響する可能性のある複数のスレやヘアライン、指で触れて分かる小さなキズやマークがある場合があります。"
+        }
       },
-      media: {
-        title: "손상 심함",
-        description: "다수의 연흔과 헤어라인, 길고 넓은 범위의 스크래치·마크가 상당수 존재하며 잡음·튐·스킵이 발생하거나 일부 구간의 재생이 어려울 수 있습니다."
-      }
-    },
-    "F": {
-      jacket: {
-        title: "심한 손상",
-        description: "심한 마모, 찢어짐, 오염 또는 구조적인 손상이 있어 보관용 자켓으로 사용하기 어려운 상태입니다."
+      "G+": {
+        jacket: {
+          title: "使用感がかなり強い",
+          description: "2辺以上の裂けまたは完全な裂け、一部の破れ、強い汚れ、書き込み、変色、5cm以上の破れなどがあり、ジャケット本来の役割を果たしにくい場合があります。"
+        },
+        media: {
+          title: "使用感がかなり強い",
+          description: "多数のスレやヘアラインで覆われ、長いまたは広範囲にわたる、指で触れて分かるキズやマークがあり、ノイズ、ポップノイズ、針飛びが発生する場合があります。"
+        }
       },
-      media: {
-        title: "재생 상태 좋지 않음",
-        description: "심한 마모와 스크래치로 인해 지속적인 잡음, 튐 또는 스킵이 발생하며 정상적인 감상이 어려울 수 있습니다."
+      "G": {
+        jacket: {
+          title: "損傷が大きい",
+          description: "保管用ジャケットとして不適切、またはジャケット本来の役割を十分に果たしにくい状態です。"
+        },
+        media: {
+          title: "損傷が大きい",
+          description: "多数のスレとヘアライン、長く広範囲のキズやマークがかなり多く、ノイズ、ポップノイズ、針飛びが発生したり、一部区間の再生が難しい場合があります。"
+        }
+      },
+      "F": {
+        jacket: {
+          title: "深刻な損傷",
+          description: "激しい摩耗、破れ、汚れ、または構造的な損傷があり、保管用ジャケットとして使用しにくい状態です。"
+        },
+        media: {
+          title: "再生状態が良くない",
+          description: "激しい摩耗やキズにより継続的なノイズ、ポップノイズ、針飛びが発生し、通常の鑑賞が難しい状態です。"
+        }
       }
     }
   };
@@ -2900,7 +3085,8 @@
   }
 
   function getConditionGuide(grade, kind) {
-    const group = CONDITION_GUIDE_KO[grade];
+    const languageGuide = CONDITION_GUIDE[currentLanguage] || CONDITION_GUIDE.ko;
+    const group = languageGuide[grade];
     if (!group) return null;
     return group[kind] || null;
   }
@@ -2971,8 +3157,13 @@
       return `<span class="condition-badge">${escapeHtml(label)}</span>`;
     }
 
-    const ariaKind = validKind === "jacket" ? "자켓" : "미디어";
-    const ariaLabel = `${grade} ${ariaKind} 컨디션 설명`;
+    const ariaKind = validKind === "jacket" ? t("jacket") : t("media");
+    const guideWord = currentLanguage === "ko"
+      ? "컨디션 설명"
+      : currentLanguage === "ja"
+        ? "コンディション説明"
+        : "condition guide";
+    const ariaLabel = `${grade} ${ariaKind} ${guideWord}`;
 
     return `<span
       class="condition-badge has-condition-guide"
@@ -3347,7 +3538,7 @@
     const { popover, meta, title, description } = getConditionGuidePopoverElements();
     if (!popover || !meta || !title || !description) return;
 
-    const kindLabel = kind === "jacket" ? "자켓" : "미디어";
+    const kindLabel = kind === "jacket" ? t("jacket") : t("media");
 
     meta.textContent = `${grade} · ${kindLabel}`;
     title.textContent = guide.title;
@@ -3412,25 +3603,38 @@
     scheduleConditionGuideHide(90);
   });
 
-  /* 키보드 접근 */
+  /*
+    키보드 접근:
+    실제 hover/fine-pointer 환경에서만 focus 이벤트로 팝오버를 제어.
+    모바일에서는 터치 시 focusin → click이 연속 발생해 첫 탭에
+    열렸다가 즉시 닫히는 현상이 생길 수 있으므로 focus 처리를 분리.
+  */
   document.addEventListener("focusin", event => {
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+
     const badge = event.target.closest?.(".condition-badge.has-condition-guide");
     if (badge) showConditionGuidePopover(badge);
   });
 
   document.addEventListener("focusout", event => {
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+
     const badge = event.target.closest?.(".condition-badge.has-condition-guide");
     if (badge) scheduleConditionGuideHide(80);
   });
 
   /*
-    모바일/태블릿 tap.
-    같은 뱃지를 다시 누르면 닫히고 다른 곳을 누르면 닫힘.
+    모바일/태블릿 tap:
+    hover가 없는 환경에서는 click 하나만 사용하므로 한 번의 터치로 열림.
+    같은 뱃지를 다시 누르면 닫히고, 다른 곳을 누르면 닫힘.
   */
   document.addEventListener("click", event => {
     const badge = event.target.closest?.(".condition-badge.has-condition-guide");
+    const isTouchStyleInput =
+      window.matchMedia("(hover: none)").matches ||
+      window.matchMedia("(pointer: coarse)").matches;
 
-    if (badge) {
+    if (badge && isTouchStyleInput) {
       event.preventDefault();
       event.stopPropagation();
 
@@ -3442,7 +3646,7 @@
       return;
     }
 
-    if (activeConditionGuideBadge) {
+    if (!badge && activeConditionGuideBadge) {
       hideConditionGuidePopover();
     }
   });
