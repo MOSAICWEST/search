@@ -75,13 +75,58 @@
       flex-direction: column;
       align-items: center;
       gap: 10px;
-      padding: 0 5% 30px;
+      padding: 0 5% 18px;
+    }
+    .search-panel {
+      width: min(920px, 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 14px;
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .search-main {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+    }
+    .search-main input[type="text"] {
+      flex: 1;
+      min-width: 0;
+      padding: 12px 14px;
+    }
+    .search-main button {
+      min-width: 78px;
+      padding-left: 18px;
+      padding-right: 18px;
     }
     .filters {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
-      justify-content: center;
+      justify-content: flex-start;
+    }
+    .filters select {
+      flex: 1 1 180px;
+      min-width: 0;
+    }
+    .result-summary {
+      width: 95%;
+      margin: 0 auto 12px;
+      font-size: 13px;
+      color: #666;
+      min-height: 20px;
+    }
+    .result-summary strong {
+      color: #111;
+      font-weight: 600;
+    }
+    .result-summary .en {
+      margin-left: 8px;
+      color: #999;
     }
 
     /* 테이블 영역 */
@@ -109,10 +154,30 @@
     }
     th {
       background-color: #f7f7f7;
-      position: sticky;
-      top: 0;
-      z-index: 10;
+      position: static;
       white-space: nowrap;
+    }
+
+    /* 스크롤 시에만 나타나는 데스크톱 고정 헤더 */
+    .floating-table-header {
+      display: none;
+      position: fixed;
+      top: 0;
+      z-index: 900;
+      overflow: hidden;
+      background: #f7f7f7;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+      pointer-events: none;
+    }
+    .floating-table-header.visible { display: block; }
+    .floating-table-header table {
+      margin: 0;
+      width: auto;
+      table-layout: fixed;
+      background: #fff;
+    }
+    .floating-table-header th {
+      background: #f7f7f7;
     }
 
     /* ✅ 테이블 헤더: 한글/영문 2줄 */
@@ -331,6 +396,81 @@
       position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     }
 
+    /* 컨디션 배지 */
+    .condition-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 38px;
+      height: 24px;
+      padding: 0 8px;
+      border: 1px solid #d7d7d7;
+      border-radius: 999px;
+      background: #f5f5f5;
+      color: #222;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    /* 장바구니 숫자 */
+    .cart-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 20px;
+      height: 20px;
+      margin-left: 6px;
+      padding: 0 6px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.20);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 20px;
+    }
+
+    /* Toast */
+    .toast-container {
+      position: fixed;
+      left: 50%;
+      bottom: 28px;
+      z-index: 2000;
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+    .toast {
+      min-width: 220px;
+      max-width: min(420px, calc(100vw - 32px));
+      padding: 11px 16px;
+      border-radius: 8px;
+      background: rgba(30,30,30,0.94);
+      color: #fff;
+      font-size: 14px;
+      text-align: center;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.20);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity .18s ease, transform .18s ease;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 600px) {
+      .search-wrapper { padding: 0 5% 16px; }
+      .search-panel { padding: 10px; border-radius: 10px; }
+      .search-main { gap: 6px; }
+      .search-main input[type="text"] { font-size: 15px; }
+      .search-main button { min-width: 68px; padding-left: 12px; padding-right: 12px; }
+      .filters { gap: 6px; }
+      .filters select { flex: 1 1 calc(50% - 6px); font-size: 14px; }
+      .result-summary { width: 90%; margin-bottom: 10px; }
+      .floating-table-header { display: none !important; }
+    }
+
     /* 모바일 카드 뷰 */
     @media (max-width: 600px) {
       table { display: none; }
@@ -405,29 +545,34 @@
   </h1>
 
   <div class="search-wrapper">
-    <div class="filters">
-      <select id="storeFilter">
-        <option value="all">All Stores</option>
-        <option value="WEST">WEST</option>
-        <option value="EAST">EAST</option>
-        <option value="ONLINE">ONLINE</option>
-      </select>
-      <select id="genreFilter"><option value="all">All Genres</option></select>
-      <select id="searchScope">
-        <option value="all">All Fields</option>
-        <option value="Ref">Ref</option>
-        <option value="Artist">Artist</option>
-        <option value="Title">Title</option>
-        <option value="Label">Label</option>
-        <option value="Tracklist">Tracklist</option>
-        <option value="Credits">Credits</option>
-      </select>
-      <input type="text" id="searchInput" placeholder="search..." />
-      <button id="searchBtn">검색</button>
+    <div class="search-panel">
+      <div class="search-main">
+        <input type="text" id="searchInput" placeholder="아티스트, 타이틀, 레이블, 상품번호 검색..." autocomplete="off" />
+        <button id="searchBtn">검색</button>
+      </div>
+      <div class="filters">
+        <select id="storeFilter">
+          <option value="all">All Stores</option>
+          <option value="WEST">WEST</option>
+          <option value="EAST">EAST</option>
+          <option value="ONLINE">ONLINE</option>
+        </select>
+        <select id="genreFilter"><option value="all">All Genres</option></select>
+        <select id="searchScope">
+          <option value="all">All Fields</option>
+          <option value="Ref">Ref</option>
+          <option value="Artist">Artist</option>
+          <option value="Title">Title</option>
+          <option value="Label">Label</option>
+          <option value="Tracklist">Tracklist</option>
+          <option value="Credits">Credits</option>
+        </select>
+      </div>
     </div>
     <div id="dateFilterBar" class="date-filter-bar"></div>
   </div>
 
+  <div id="resultSummary" class="result-summary"></div>
   <div id="results"></div>
   <div id="pagination" style="text-align:center; margin-bottom: 40px;"></div>
 
@@ -441,6 +586,8 @@
 
   <!-- TOP 버튼 (데스크톱 전용) -->
   <button class="top-button" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">TOP</button>
+
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
 
   <script>
   const SHEET_URL = "./data.json";
@@ -710,8 +857,45 @@
     return `${month}/${day}`;
   }
 
+  function renderConditionBadge(value) {
+    const raw = String(value ?? "").trim();
+    if (!raw) return "";
+
+    const gradeMap = {
+      "GEN": "Gen",
+      "F": "F",
+      "G": "G",
+      "G+": "G+",
+      "VG": "VG",
+      "VG+": "VG+",
+      "EX": "EX",
+      "NM": "NM",
+      "M": "M"
+    };
+
+    const normalized = raw.toUpperCase();
+    const label = gradeMap[normalized];
+
+    if (!label) return escapeHtml(raw);
+    return `<span class="condition-badge">${label}</span>`;
+  }
+
+  function updateResultSummary(total, keyword) {
+    const summary = document.getElementById("resultSummary");
+    if (!summary) return;
+
+    const countText = Number(total || 0).toLocaleString();
+
+    if (keyword) {
+      summary.innerHTML = `<strong>${countText}개</strong> 검색됨 <span class="en">${countText} results</span>`;
+    } else {
+      summary.innerHTML = `<strong>${countText}개</strong> 음반 <span class="en">${countText} records</span>`;
+    }
+  }
+
   function filterAndRenderTable() {
-    const keyword = document.getElementById("searchInput").value.trim().toLowerCase();
+    const rawKeyword = document.getElementById("searchInput").value.trim();
+    const keyword = rawKeyword.toLowerCase();
     const scope = document.getElementById("searchScope").value;
     const selectedStore = document.getElementById("storeFilter").value;
     const selectedGenre = document.getElementById("genreFilter").value;
@@ -763,6 +947,9 @@
       }
     });
 
+    window.currentSearchKeyword = rawKeyword;
+    updateResultSummary(filtered.length, rawKeyword);
+
     currentPage = 1;
     renderTable(filtered);
   }
@@ -772,12 +959,21 @@
     const pagination = document.getElementById("pagination");
 
     if (data.length === 0) {
-      results.innerHTML = `
-        <div style="text-align:center; margin:40px 0; font-size:16px; color:#777;">
-          <span class="ko">검색 결과가 없습니다.</span>
-          <span class="en" lang="en" style="display:block; margin-top:4px;">No results found.</span>
-        </div>`;
+      const searched = String(window.currentSearchKeyword || "").trim();
+      const safeKeyword = escapeHtml(searched);
+
+      results.innerHTML = searched
+        ? `<div style="text-align:center; margin:40px 0; font-size:16px; color:#777;">
+            <span class="ko"><strong style="color:#333;">"${safeKeyword}"</strong>에 대한 검색 결과가 없습니다.</span>
+            <span class="en" lang="en" style="display:block; margin-top:4px;">No results found for "${safeKeyword}".</span>
+          </div>`
+        : `<div style="text-align:center; margin:40px 0; font-size:16px; color:#777;">
+            <span class="ko">선택한 조건에 맞는 검색 결과가 없습니다.</span>
+            <span class="en" lang="en" style="display:block; margin-top:4px;">No results found.</span>
+          </div>`;
+
       pagination.innerHTML = "";
+      removeFloatingTableHeader();
       return;
     }
 
@@ -813,7 +1009,7 @@
               <div style="color:#777; font-size:12px;">${escapeHtml(item.Ref || "")}</div>
               <div><strong>${escapeHtml(item.Artist || "")}</strong> - ${escapeHtml(item.Title || "")}</div>
               <div>${escapeHtml(item.Pressing || "")}</div>
-              <div>${escapeHtml(item["Condition Jacket"] || "")} / ${escapeHtml(item["Condition Media"] || "")}</div>
+              <div>${renderConditionBadge(item["Condition Jacket"] || "")} / ${renderConditionBadge(item["Condition Media"] || "")}</div>
               <div><strong>₩${Number(item["Selling at"] || 0).toLocaleString()}</strong></div>
             </div>
           </div>`;
@@ -847,6 +1043,10 @@
             return;
           }
           let cell = row[key] ?? "";
+          if (key === "Condition Jacket" || key === "Condition Media") {
+            html += `<td>${renderConditionBadge(cell)}</td>`;
+            return;
+          }
           if (key === "Selling at" && !isNaN(cell)) cell = Number(cell).toLocaleString();
           if (key === "Details") cell = `<button onclick="showDetails(${start + idx})">상세</button>`;
           html += `<td>${key === "Details" ? cell : escapeHtml(cell)}</td>`;
@@ -858,6 +1058,107 @@
 
     results.innerHTML = html;
     renderPagination(data.length);
+
+    requestAnimationFrame(() => {
+      if (window.innerWidth > 600) {
+        setupFloatingTableHeader();
+      } else {
+        removeFloatingTableHeader();
+      }
+    });
+  }
+
+  function removeFloatingTableHeader() {
+    if (window._floatingHeaderCleanup) {
+      window._floatingHeaderCleanup();
+      window._floatingHeaderCleanup = null;
+    }
+    document.querySelectorAll(".floating-table-header").forEach(el => el.remove());
+  }
+
+  function setupFloatingTableHeader() {
+    removeFloatingTableHeader();
+
+    const wrapper = document.querySelector(".table-wrapper");
+    const table = wrapper?.querySelector("table");
+    const thead = table?.querySelector("thead");
+    if (!wrapper || !table || !thead) return;
+
+    const floating = document.createElement("div");
+    floating.className = "floating-table-header";
+    floating.setAttribute("aria-hidden", "true");
+
+    const cloneTable = document.createElement("table");
+    const cloneHead = thead.cloneNode(true);
+    cloneTable.appendChild(cloneHead);
+    floating.appendChild(cloneTable);
+    document.body.appendChild(floating);
+
+    const syncSizes = () => {
+      if (!document.body.contains(floating)) return;
+
+      const wrapperRect = wrapper.getBoundingClientRect();
+      const originalThs = thead.querySelectorAll("th");
+      const cloneThs = cloneHead.querySelectorAll("th");
+
+      floating.style.left = `${wrapperRect.left}px`;
+      floating.style.width = `${wrapperRect.width}px`;
+      cloneTable.style.width = `${table.scrollWidth}px`;
+      cloneTable.style.transform = `translateX(${-wrapper.scrollLeft}px)`;
+
+      originalThs.forEach((th, i) => {
+        const width = th.getBoundingClientRect().width;
+        if (cloneThs[i]) {
+          cloneThs[i].style.width = `${width}px`;
+          cloneThs[i].style.minWidth = `${width}px`;
+          cloneThs[i].style.maxWidth = `${width}px`;
+        }
+      });
+    };
+
+    const updateVisibility = () => {
+      if (!document.body.contains(floating)) return;
+
+      const tableRect = table.getBoundingClientRect();
+      const headRect = thead.getBoundingClientRect();
+      const floatingHeight = floating.offsetHeight || headRect.height;
+
+      const shouldShow =
+        headRect.bottom <= 0 &&
+        tableRect.bottom > floatingHeight;
+
+      floating.classList.toggle("visible", shouldShow);
+
+      if (shouldShow) {
+        const wrapperRect = wrapper.getBoundingClientRect();
+        floating.style.left = `${wrapperRect.left}px`;
+        floating.style.width = `${wrapperRect.width}px`;
+        cloneTable.style.transform = `translateX(${-wrapper.scrollLeft}px)`;
+      }
+    };
+
+    const onScroll = () => updateVisibility();
+    const onHorizontalScroll = () => {
+      cloneTable.style.transform = `translateX(${-wrapper.scrollLeft}px)`;
+    };
+    const onResize = () => {
+      syncSizes();
+      updateVisibility();
+    };
+
+    syncSizes();
+    updateVisibility();
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onResize);
+    wrapper.addEventListener("scroll", onHorizontalScroll, { passive: true });
+
+    window._floatingHeaderCleanup = () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+      wrapper.removeEventListener("scroll", onHorizontalScroll);
+      floating.remove();
+    };
   }
 
   /* 상세 모달 */
@@ -925,8 +1226,14 @@
       }
     }
 
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    const alreadyInCart = cart.some(c => String(c.ref) === String(ref));
+
     content += `<div style="text-align: right; margin-top: 20px;">
-      <button onclick="addToCart(${index})" style="background-color: #0071e3; color: white; border: none; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-size: 14px;">🛒 장바구니 담기</button>
+      ${alreadyInCart
+        ? `<button id="modalCartBtn" disabled style="background-color:#d9d9d9; color:#555; border:none; padding:10px 14px; border-radius:6px; cursor:default; font-size:14px;">✓ 장바구니에 담김</button>`
+        : `<button id="modalCartBtn" onclick="addToCart(${index})" style="background-color:#0071e3; color:white; border:none; padding:10px 14px; border-radius:6px; cursor:pointer; font-size:14px;">🛒 장바구니 담기</button>`
+      }
     </div>`;
 
     body.innerHTML = content;
@@ -941,11 +1248,39 @@
       document.getElementById("detailModal").style.display = "none";
   };
 
-  document.getElementById("searchInput").addEventListener("keydown", e => {
-    if (e.key === "Enter") { e.target.blur(); filterAndRenderTable(); }
+  const searchInput = document.getElementById("searchInput");
+  let isSearchComposing = false;
+  let pendingSearchAfterComposition = false;
+
+  searchInput.addEventListener("compositionstart", () => {
+    isSearchComposing = true;
   });
+
+  searchInput.addEventListener("compositionend", () => {
+    isSearchComposing = false;
+
+    if (pendingSearchAfterComposition) {
+      pendingSearchAfterComposition = false;
+      requestAnimationFrame(() => filterAndRenderTable());
+    }
+  });
+
+  searchInput.addEventListener("keydown", e => {
+    if (e.key !== "Enter") return;
+
+    // 한글/일본어/중국어 IME 조합 중 Enter는 먼저 글자 확정에 사용됩니다.
+    // 이때 강제로 blur()하면 마지막 음절이 중복 확정되는 브라우저가 있어 blur를 사용하지 않습니다.
+    if (e.isComposing || isSearchComposing || e.keyCode === 229) {
+      pendingSearchAfterComposition = true;
+      return;
+    }
+
+    e.preventDefault();
+    filterAndRenderTable();
+  });
+
   document.getElementById("searchBtn").addEventListener("click", () => {
-    document.getElementById("searchInput").blur(); filterAndRenderTable();
+    filterAndRenderTable();
   });
 
   document.getElementById("storeFilter").addEventListener("change", () => {
@@ -1004,11 +1339,28 @@
   function goToPage(page) {
     currentPage = page;
     renderTable(window.currentData);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    requestAnimationFrame(() => {
+      const firstItem = window.innerWidth <= 600
+        ? document.querySelector(".card-list .card-item")
+        : document.querySelector(".table-wrapper tbody tr");
+
+      if (!firstItem) return;
+
+      const headerOffset = window.innerWidth <= 600 ? 16 : 72;
+      const targetTop = window.scrollY + firstItem.getBoundingClientRect().top - headerOffset;
+
+      window.scrollTo({
+        top: Math.max(0, targetTop),
+        behavior: "smooth"
+      });
+    });
   }
 
   /* 장바구니 */
   document.addEventListener("DOMContentLoaded", () => {
+    updateCartCount();
+
     document.getElementById("viewCartBtn").onclick = () => {
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
       const cartBody = document.getElementById("cartBody");
@@ -1065,6 +1417,7 @@
   function clearCart() {
     if (confirm("장바구니를 모두 비우시겠습니까?")) {
       localStorage.removeItem("cart");
+      updateCartCount();
       document.getElementById("cartModal").style.display = "none";
       alert("장바구니가 비워졌습니다.");
     }
@@ -1106,8 +1459,12 @@ ${lines.join('\n\n')}
     const item = window.currentData[index];
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
 
-    const exists = cart.some(c => c.ref === item.Ref);
-    if (exists) { alert("이미 장바구니에 담긴 상품입니다."); return; }
+    const exists = cart.some(c => String(c.ref) === String(item.Ref));
+    if (exists) {
+      showToast("이미 장바구니에 담긴 상품입니다.");
+      setModalCartButtonAdded();
+      return;
+    }
 
     const price = Number(item["Selling at"] || 0);
     const newItem = {
@@ -1123,7 +1480,51 @@ ${lines.join('\n\n')}
 
     cart.push(newItem);
     localStorage.setItem("cart", JSON.stringify(cart));
-    alert("장바구니에 추가되었습니다.");
+
+    updateCartCount();
+    setModalCartButtonAdded();
+    showToast("장바구니에 추가되었습니다.");
+  }
+
+  function setModalCartButtonAdded() {
+    const btn = document.getElementById("modalCartBtn");
+    if (!btn) return;
+
+    btn.disabled = true;
+    btn.textContent = "✓ 장바구니에 담김";
+    btn.style.backgroundColor = "#d9d9d9";
+    btn.style.color = "#555";
+    btn.style.cursor = "default";
+    btn.onclick = null;
+  }
+
+  function updateCartCount() {
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    document.querySelectorAll(".cart-count").forEach(el => {
+      el.textContent = cart.length;
+    });
+  }
+
+  let toastTimer = null;
+  function showToast(message) {
+    const container = document.getElementById("toastContainer");
+    if (!container) return;
+
+    if (toastTimer) clearTimeout(toastTimer);
+
+    container.innerHTML = `<div class="toast">${escapeHtml(message)}</div>`;
+    const toast = container.firstElementChild;
+
+    requestAnimationFrame(() => {
+      toast.classList.add("show");
+    });
+
+    toastTimer = setTimeout(() => {
+      toast.classList.remove("show");
+      setTimeout(() => {
+        if (container.contains(toast)) toast.remove();
+      }, 220);
+    }, 1800);
   }
 
   function deleteSelectedCartItems() {
@@ -1137,6 +1538,7 @@ ${lines.join('\n\n')}
     });
 
     localStorage.setItem("cart", JSON.stringify(updatedCart));
+    updateCartCount();
     alert("선택한 항목이 삭제되었습니다.");
     document.getElementById("viewCartBtn").click(); // 장바구니 다시 로드
   }
@@ -1283,7 +1685,7 @@ hr { border: 0; border-top: 1px dashed #999; margin: 8px 0; }
     border-radius: 6px;
     cursor: pointer;
     box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-  ">🛒 장바구니</button>
+  ">CART <span class="cart-count">0</span></button>
 
   <!-- 장바구니 모달 -->
   <div id="cartModal" class="modal">
@@ -1298,7 +1700,7 @@ hr { border: 0; border-top: 1px dashed #999; margin: 8px 0; }
     <button class="fab-main" onclick="toggleFab()" aria-label="FAB 메뉴 열기">＋</button>
     <div class="fab-actions">
       <button class="fab-action" onclick="window.scrollTo({ top: 0, behavior: 'smooth' }); closeFab()">TOP</button>
-      <button class="fab-action" onclick="document.getElementById('viewCartBtn').click(); closeFab()">🛒 장바구니</button>
+      <button class="fab-action" onclick="document.getElementById('viewCartBtn').click(); closeFab()">CART <span class="cart-count">0</span></button>
     </div>
   </div>
 </body>
