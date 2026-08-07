@@ -3038,7 +3038,7 @@
       <div class="cart-actions">
         <div class="cart-actions-group">
           <button onclick="printCart()">${escapeHtml(t("print"))}</button>
-          <button onclick="window.open('https://pf.kakao.com/_xxx/chat', '_blank')">${escapeHtml(t("kakao"))}</button>
+          <button onclick="window.open('https://pf.kakao.com/_xfFwBn', '_blank')">${escapeHtml(t("kakao"))}</button>
         </div>
         <div class="cart-actions-group">
           <button
@@ -3250,19 +3250,25 @@ ${lines.join('\n\n')}
     let total = 0;
     const itemsHtml = cart.map((c, i) => {
       total += c.price || 0;
+
       const full = findFullByRef(c.ref);
-      const subcat = full["Subcategory"] || "";
-      const comment = full["Condition Comment"] || "";
+      const store = String(full.OriginSheet ?? c.store ?? "").trim();
+      const pressing = String(full.Pressing ?? c.pressing ?? "").trim();
+      const jacket = full["Condition Jacket"] ?? c.jacket ?? "";
+      const media = full["Condition Media"] ?? c.media ?? "";
+
+      // ONLINE은 실제 Subcategory와 관계없이 고정 안내 문구 사용
+      const shelfLocation = store.toUpperCase() === "ONLINE"
+        ? "신당점 창고 보관 (직원에게 요청)"
+        : String(full["Subcategory"] ?? c.subcategory ?? "").trim();
 
       return `
 <div class="item">
-  <div class="title"><strong>${i + 1}. [${escapeHtml(c.ref)}] ${escapeHtml(c.artist)} – ${escapeHtml(c.title)}</strong></div>
-  <div>${escapeHtml(t("store"))} : ${escapeHtml(c.store || "")}</div>
-  <div>${escapeHtml(t("pressing"))} : ${escapeHtml(c.pressing || "")}</div>
-  <div>${escapeHtml(t("jacket"))}: ${escapeHtml(c.jacket || "-")} / ${escapeHtml(t("media"))}: ${escapeHtml(c.media || "-")}</div>
-  ${normalizeConditionComment(comment) ? `<div>● ${escapeHtml(normalizeConditionComment(comment))}</div>` : ""}
-  ${subcat ? `<div>Subcategory : ${escapeHtml(subcat)}</div>` : ""}
-  <div>${escapeHtml(t("price"))} : ₩${numberText(c.price || 0)}</div>
+  <div class="title"><strong>[${escapeHtml(c.ref)}] ${escapeHtml(c.artist)} - ${escapeHtml(c.title)}</strong></div>
+  <div><strong>매장 :</strong> ${escapeHtml(store || "-")}${shelfLocation ? ` / <strong>진열 위치 :</strong> ${escapeHtml(shelfLocation)}` : ""}</div>
+  <div><strong>프레싱 :</strong> ${escapeHtml(pressing || "-")}</div>
+  <div><strong>자켓 :</strong> ${escapeHtml(conditionShortLabel(jacket) || "-")} / <strong>미디어 :</strong> ${escapeHtml(conditionShortLabel(media) || "-")}</div>
+  <div><strong>가격 :</strong> ₩${(c.price || 0).toLocaleString()}</div>
 </div>
 <hr/>`;
     }).join("");
@@ -3280,7 +3286,8 @@ body {
 h1 { font-size: 14px; text-align:center; margin: 0 0 8px; }
 hr { border: 0; border-top: 1px dashed #999; margin: 8px 0; }
 .item { margin-bottom: 6px; }
-.title { margin-bottom: 3px; }
+.title { margin-bottom: 5px; line-height: 1.4; }
+.item > div:not(.title) { margin: 2px 0; }
 .footer { margin-top: 10px; border-top: 1px solid #000; padding-top: 8px; }
 @media print { body { margin: 0; } }
 </style></head>
