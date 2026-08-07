@@ -658,6 +658,24 @@
       font-weight: 600;
       color: #111;
     }
+    .store-shelf-row .store-info-part,
+    .store-shelf-row .shelf-info-part {
+      display: inline;
+    }
+
+    /* 모바일에서는 매장 / 진열 위치를 의도적으로 두 줄로 분리 */
+    @media (max-width: 600px) {
+      .store-shelf-row .store-info-part,
+      .store-shelf-row .shelf-info-part {
+        display: block;
+      }
+      .store-shelf-row .shelf-info-part {
+        margin-top: 3px;
+      }
+      .store-shelf-row .info-inline-divider {
+        display: none;
+      }
+    }
 
     /* 비디오 영역 */
     .video-wrapper {
@@ -763,16 +781,19 @@
         display: none !important;
       }
 
-      /* 이미지 크기도 태블릿에서만 살짝 줄여 정보 영역 확보 */
+      /* 태블릿 이미지: 데스크톱 기본 크기(90px)에 가깝게 복원 */
       .table-wrapper td.image-cell {
-        min-width: 0;
+        width: 100px;
+        min-width: 100px;
+        padding-left: 5px;
+        padding-right: 5px;
       }
       .table-wrapper .table-image {
-        width: 100%;
-        max-width: 62px;
-        height: auto;
+        width: 90px;
+        height: 90px;
+        max-width: none;
         aspect-ratio: 1 / 1;
-        border-radius: 7px;
+        border-radius: 8px;
       }
 
       /* 고정 헤더도 본문과 같은 줄바꿈/여백 사용 */
@@ -789,7 +810,7 @@
       }
 
       /* 컬럼별 비율: 합계 100%로 맞춰 가로 overflow 방지 */
-      .table-wrapper [data-col="Image"] { width: 7%; }
+      .table-wrapper [data-col="Image"] { width: 100px; }
       .table-wrapper [data-col="Artist"] { width: 12%; }
       .table-wrapper [data-col="Title"] { width: 14%; }
       .table-wrapper [data-col="Label"] { width: 9%; }
@@ -815,7 +836,7 @@
         display: none !important;
       }
 
-      .table-wrapper [data-col="Image"] { width: 8%; }
+      .table-wrapper [data-col="Image"] { width: 100px; }
       .table-wrapper [data-col="Artist"] { width: 14%; }
       .table-wrapper [data-col="Title"] { width: 16%; }
       .table-wrapper [data-col="Pressing"] { width: 10%; }
@@ -2398,9 +2419,9 @@
 
     let info = `<div class="info-block">`;
     if (store) {
-      info += `<p><strong>${escapeHtml(t("store"))} :</strong> ${escapeHtml(store)}`;
+      info += `<p class="store-shelf-row"><span class="store-info-part"><strong>${escapeHtml(t("store"))} :</strong> ${escapeHtml(store)}</span>`;
       if (shelfLocation) {
-        info += ` <span class="info-inline-divider">/</span> <strong>${escapeHtml(t("shelfLocation"))} :</strong> <span class="shelf-location-value">${escapeHtml(shelfLocation)}</span>`;
+        info += `<span class="shelf-info-part"> <span class="info-inline-divider">/</span> <strong>${escapeHtml(t("shelfLocation"))} :</strong> <span class="shelf-location-value">${escapeHtml(shelfLocation)}</span></span>`;
       }
       info += `</p>`;
     }
