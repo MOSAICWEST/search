@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MOSAIC 재고 검색</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Noto+Sans+JP:wght@400;600&display=swap" rel="stylesheet">
   <style>
     /* 공통 스타일 */
     * { box-sizing: border-box; }
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: 'Inter', 'Noto Sans JP', sans-serif;
       margin: 0;
       padding: 0;
       background-color: #fafafa;
@@ -22,28 +22,42 @@
       font-weight: 600;
     }
 
-    /* 헤더: 한글/영문 2줄 + 짧은 설명 */
-    h1 .ko { display:block; }
-    h1 .en {
-      display:block;
-      margin-top: 4px;
-      font-size: 16px;
-      font-weight: 400;
-      color: #666;
-      letter-spacing: .2px;
+    /* 페이지 제목 + 언어 전환 */
+    .language-switch {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+      margin: 0 0 18px;
     }
-    h1 .desc {
-      display:block;
-      margin-top: 6px;
-      font-size: 13px;
-      color: #888;
+    .language-switch button {
+      border: 0;
+      background: transparent;
+      color: #999;
+      padding: 4px 7px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .5px;
+      cursor: pointer;
+    }
+    .language-switch button:hover {
+      background: #f0f0f0;
+      color: #333;
+    }
+    .language-switch button.active {
+      color: #111;
+      background: #ececec;
+    }
+    .language-switch .divider {
+      color: #d0d0d0;
+      font-size: 11px;
+      user-select: none;
     }
 
-    /* 모바일에서 살짝 축소 */
     @media (max-width: 600px) {
       h1 { font-size: 24px; }
-      h1 .en { font-size: 13px; }
-      h1 .desc { font-size: 12px; }
+      .language-switch { margin-bottom: 14px; }
     }
 
     select, input[type="text"], button {
@@ -124,10 +138,6 @@
       color: #111;
       font-weight: 600;
     }
-    .result-summary .en {
-      margin-left: 8px;
-      color: #999;
-    }
 
     /* 테이블 영역 */
     .table-wrapper {
@@ -178,16 +188,6 @@
     }
     .floating-table-header th {
       background: #f7f7f7;
-    }
-
-    /* ✅ 테이블 헤더: 한글/영문 2줄 */
-    th .ko { display:block; }
-    th .en {
-      display:block;
-      margin-top: 2px;
-      font-size: 12px;
-      color: #666;
-      letter-spacing: .2px;
     }
 
     tbody tr:nth-child(odd) { background-color: #fcfcfc; }
@@ -539,10 +539,14 @@
     />
   </div>
   
-  <h1>
-    <span class="ko">MOSAIC 재고 검색</span>
-    <span class="en" lang="en">MOSAIC Inventory Search</span>
-  </h1>
+  <h1 id="pageTitle">MOSAIC 재고 검색</h1>
+  <div class="language-switch" aria-label="Language">
+    <button type="button" data-lang="ko" class="active" aria-pressed="true">KR</button>
+    <span class="divider">/</span>
+    <button type="button" data-lang="en" aria-pressed="false">EN</button>
+    <span class="divider">/</span>
+    <button type="button" data-lang="ja" aria-pressed="false">JP</button>
+  </div>
 
   <div class="search-wrapper">
     <div class="search-panel">
@@ -552,14 +556,14 @@
       </div>
       <div class="filters">
         <select id="storeFilter">
-          <option value="all">All Stores</option>
+          <option value="all">전체 매장</option>
           <option value="WEST">WEST</option>
           <option value="EAST">EAST</option>
           <option value="ONLINE">ONLINE</option>
         </select>
-        <select id="genreFilter"><option value="all">All Genres</option></select>
+        <select id="genreFilter"><option value="all">전체 장르</option></select>
         <select id="searchScope">
-          <option value="all">All Fields</option>
+          <option value="all">전체 항목</option>
           <option value="Ref">Ref</option>
           <option value="Artist">Artist</option>
           <option value="Title">Title</option>
@@ -585,12 +589,269 @@
   </div>
 
   <!-- TOP 버튼 (데스크톱 전용) -->
-  <button class="top-button" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">TOP</button>
+  <button id="topButton" class="top-button" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">TOP</button>
 
   <div id="toastContainer" class="toast-container" aria-live="polite"></div>
 
   <script>
   const SHEET_URL = "./data.json";
+
+
+  /* =========================
+     KR / EN / JP UI 언어
+     - 실제 음반 데이터는 번역하지 않음
+     - 선택 언어는 localStorage에 저장
+     ========================= */
+  const I18N = {
+    ko: {
+      htmlLang: "ko",
+      locale: "ko-KR",
+      documentTitle: "MOSAIC 재고 검색",
+      pageTitle: "MOSAIC 재고 검색",
+      searchPlaceholder: "아티스트, 타이틀, 레이블, 상품번호 검색...",
+      searchButton: "검색",
+      allStores: "전체 매장",
+      allGenres: "전체 장르",
+      allFields: "전체 항목",
+      dateAll: "전체",
+      loading: "데이터 불러오는 중입니다...",
+      loadError: "데이터를 불러오지 못했습니다.",
+      resultSearched: "{count}개 검색됨",
+      resultRecords: "{count}개 음반",
+      noResultsFor: "\"{keyword}\"에 대한 검색 결과가 없습니다.",
+      noResultsFiltered: "선택한 조건에 맞는 검색 결과가 없습니다.",
+      details: "상세",
+      imageAlt: "앨범 이미지",
+      image: "이미지",
+      store: "매장",
+      pressing: "프레싱",
+      jacket: "자켓",
+      media: "미디어",
+      price: "가격",
+      tracklist: "트랙리스트",
+      credits: "크레딧",
+      addToCart: "🛒 장바구니 담기",
+      inCart: "✓ 장바구니에 담김",
+      addedToCart: "장바구니에 추가되었습니다.",
+      alreadyInCart: "이미 장바구니에 담긴 상품입니다.",
+      cartEmpty: "장바구니가 비어 있습니다.",
+      totalCart: "총 {count}개 (합계: ₩{total})",
+      print: "🖨 인쇄하기",
+      kakao: "💬 카카오톡 문의",
+      deleteSelected: "🗑 선택 항목 삭제",
+      clearAll: "❌ 전체 비우기",
+      confirmClear: "장바구니를 모두 비우시겠습니까?",
+      cartCleared: "장바구니가 비워졌습니다.",
+      selectDelete: "삭제할 항목을 선택해주세요.",
+      confirmDelete: "선택한 항목을 장바구니에서 삭제할까요?",
+      deleted: "선택한 항목이 삭제되었습니다.",
+      prev: "« 이전",
+      next: "다음 »",
+      popupBlocked: "팝업이 차단되었습니다. 팝업 허용 후 다시 시도하세요.",
+      printTotal: "총 {count}개 / 합계: ₩{total}",
+      copyDone: "장바구니 정보가 복사되었습니다. 카카오톡 채널로 이동해 붙여넣어 주세요!",
+      fabMenu: "빠른 메뉴 열기",
+      scope: {
+        Ref: "상품번호",
+        Artist: "아티스트",
+        Title: "타이틀",
+        Label: "레이블",
+        Tracklist: "트랙리스트",
+        Credits: "크레딧"
+      },
+      headers: {
+        Image: "이미지",
+        Ref: "상품번호",
+        Artist: "아티스트",
+        Title: "타이틀",
+        Label: "레이블",
+        Pressing: "프레싱",
+        Genre: "장르",
+        Style: "스타일",
+        Subcategory: "진열 위치",
+        "Condition Jacket": "자켓",
+        "Condition Media": "미디어",
+        "Selling at": "가격",
+        Details: "상세",
+        Youtube: "YouTube"
+      }
+    },
+    en: {
+      htmlLang: "en",
+      locale: "en-US",
+      documentTitle: "MOSAIC Inventory Search",
+      pageTitle: "MOSAIC Inventory Search",
+      searchPlaceholder: "Search artist, title, label, or Ref...",
+      searchButton: "Search",
+      allStores: "All Stores",
+      allGenres: "All Genres",
+      allFields: "All Fields",
+      dateAll: "All",
+      loading: "Loading inventory...",
+      loadError: "Unable to load inventory data.",
+      resultSearched: "{count} results",
+      resultRecords: "{count} records",
+      noResultsFor: "No results found for \"{keyword}\".",
+      noResultsFiltered: "No results match the selected filters.",
+      details: "Details",
+      imageAlt: "Album image",
+      image: "Image",
+      store: "Store",
+      pressing: "Pressing",
+      jacket: "Jacket",
+      media: "Media",
+      price: "Price",
+      tracklist: "Tracklist",
+      credits: "Credits",
+      addToCart: "🛒 Add to Cart",
+      inCart: "✓ In Cart",
+      addedToCart: "Added to cart.",
+      alreadyInCart: "This item is already in your cart.",
+      cartEmpty: "Your cart is empty.",
+      totalCart: "{count} items (Total: ₩{total})",
+      print: "🖨 Print",
+      kakao: "💬 KakaoTalk Inquiry",
+      deleteSelected: "🗑 Delete Selected",
+      clearAll: "❌ Clear All",
+      confirmClear: "Clear all items from your cart?",
+      cartCleared: "Your cart has been cleared.",
+      selectDelete: "Select the items you want to delete.",
+      confirmDelete: "Delete the selected items from your cart?",
+      deleted: "Selected items have been deleted.",
+      prev: "« Previous",
+      next: "Next »",
+      popupBlocked: "The popup was blocked. Please allow popups and try again.",
+      printTotal: "{count} items / Total: ₩{total}",
+      copyDone: "Cart information copied. Paste it into the KakaoTalk channel.",
+      fabMenu: "Open quick menu",
+      scope: {
+        Ref: "Ref",
+        Artist: "Artist",
+        Title: "Title",
+        Label: "Label",
+        Tracklist: "Tracklist",
+        Credits: "Credits"
+      },
+      headers: {
+        Image: "Image",
+        Ref: "Ref",
+        Artist: "Artist",
+        Title: "Title",
+        Label: "Label",
+        Pressing: "Pressing",
+        Genre: "Genre",
+        Style: "Style",
+        Subcategory: "Filed under",
+        "Condition Jacket": "Jacket",
+        "Condition Media": "Media",
+        "Selling at": "Price",
+        Details: "Details",
+        Youtube: "YouTube"
+      }
+    },
+    ja: {
+      htmlLang: "ja",
+      locale: "ja-JP",
+      documentTitle: "MOSAIC 在庫検索",
+      pageTitle: "MOSAIC 在庫検索",
+      searchPlaceholder: "アーティスト、タイトル、レーベル、商品番号を検索...",
+      searchButton: "検索",
+      allStores: "全店舗",
+      allGenres: "全ジャンル",
+      allFields: "すべての項目",
+      dateAll: "すべて",
+      loading: "在庫データを読み込んでいます...",
+      loadError: "在庫データを読み込めませんでした。",
+      resultSearched: "検索結果 {count}件",
+      resultRecords: "レコード {count}件",
+      noResultsFor: "「{keyword}」の検索結果はありません。",
+      noResultsFiltered: "選択した条件に一致する検索結果はありません。",
+      details: "詳細",
+      imageAlt: "アルバム画像",
+      image: "画像",
+      store: "店舗",
+      pressing: "プレス",
+      jacket: "ジャケット",
+      media: "メディア",
+      price: "価格",
+      tracklist: "トラックリスト",
+      credits: "クレジット",
+      addToCart: "🛒 カートに追加",
+      inCart: "✓ カートに追加済み",
+      addedToCart: "カートに追加しました。",
+      alreadyInCart: "この商品はすでにカートに入っています。",
+      cartEmpty: "カートは空です。",
+      totalCart: "合計 {count}点（₩{total}）",
+      print: "🖨 印刷",
+      kakao: "💬 KakaoTalkで問い合わせ",
+      deleteSelected: "🗑 選択項目を削除",
+      clearAll: "❌ すべて削除",
+      confirmClear: "カートをすべて空にしますか？",
+      cartCleared: "カートを空にしました。",
+      selectDelete: "削除する項目を選択してください。",
+      confirmDelete: "選択した項目をカートから削除しますか？",
+      deleted: "選択した項目を削除しました。",
+      prev: "« 前へ",
+      next: "次へ »",
+      popupBlocked: "ポップアップがブロックされました。許可してからもう一度お試しください。",
+      printTotal: "合計 {count}点 / ₩{total}",
+      copyDone: "カート情報をコピーしました。KakaoTalkチャンネルに貼り付けてください。",
+      fabMenu: "クイックメニューを開く",
+      scope: {
+        Ref: "商品番号",
+        Artist: "アーティスト",
+        Title: "タイトル",
+        Label: "レーベル",
+        Tracklist: "トラックリスト",
+        Credits: "クレジット"
+      },
+      headers: {
+        Image: "画像",
+        Ref: "商品番号",
+        Artist: "アーティスト",
+        Title: "タイトル",
+        Label: "レーベル",
+        Pressing: "プレス",
+        Genre: "ジャンル",
+        Style: "スタイル",
+        Subcategory: "陳列位置",
+        "Condition Jacket": "ジャケット",
+        "Condition Media": "メディア",
+        "Selling at": "価格",
+        Details: "詳細",
+        Youtube: "YouTube"
+      }
+    }
+  };
+
+  const savedLanguage = localStorage.getItem("mosaicInventoryLanguage");
+  let currentLanguage = ["ko", "en", "ja"].includes(savedLanguage) ? savedLanguage : "ko";
+
+  function t(key, replacements = {}) {
+    const parts = key.split(".");
+    let value = I18N[currentLanguage];
+    for (const part of parts) value = value?.[part];
+    if (value == null) return key;
+    let text = String(value);
+    Object.entries(replacements).forEach(([name, replacement]) => {
+      text = text.replaceAll(`{${name}}`, String(replacement));
+    });
+    return text;
+  }
+
+  function numberText(value) {
+    return Number(value || 0).toLocaleString(I18N[currentLanguage].locale);
+  }
+
+  function normalizeSearchText(value) {
+    return String(value ?? "")
+      .normalize("NFKC")
+      .toLocaleLowerCase(I18N[currentLanguage].locale);
+  }
+
+  function getHeaderLabel(key) {
+    return I18N[currentLanguage].headers[key] || key;
+  }
 
   /* 데스크톱: 이미지 컬럼 포함 */
   const displayOrder = [
@@ -600,24 +861,78 @@
     "Selling at", "Details"
   ];
 
-  /* ✅ 테이블 헤더 라벨(한/영 2줄) */
-  const th2 = (ko, en) => `<span class="ko">${ko}</span><span class="en" lang="en">${en}</span>`;
-  const allDisplayNames = {
-    "Image": th2("이미지", "Image"),
-    "Ref": th2("상품번호", "Ref"),
-    "Artist": th2("아티스트", "Artist"),
-    "Title": th2("타이틀", "Title"),
-    "Label": th2("레이블", "Label"),
-    "Pressing": th2("프레싱", "Pressing"),
-    "Genre": th2("장르", "Genre"),
-    "Style": th2("스타일", "Style"),
-    "Subcategory": th2("진열 위치", "Filed under"),
-    "Condition Jacket": th2("자켓", "Jacket"),
-    "Condition Media": th2("미디어", "Media"),
-    "Selling at": th2("가격", "Price"),
-    "Details": th2("상세", "Details"),
-    "Youtube": th2("YouTube", "YouTube")
-  };
+  /* 테이블 헤더는 현재 선택된 언어만 표시 */
+  const allDisplayNames = new Proxy({}, {
+    get: (_, key) => getHeaderLabel(String(key))
+  });
+
+  function applyLanguageUI(shouldRerender = true) {
+    const dict = I18N[currentLanguage];
+    document.documentElement.lang = dict.htmlLang;
+    document.title = dict.documentTitle;
+
+    const pageTitle = document.getElementById("pageTitle");
+    if (pageTitle) pageTitle.textContent = dict.pageTitle;
+
+    const searchInputEl = document.getElementById("searchInput");
+    if (searchInputEl) searchInputEl.placeholder = dict.searchPlaceholder;
+
+    const searchBtnEl = document.getElementById("searchBtn");
+    if (searchBtnEl) searchBtnEl.textContent = dict.searchButton;
+
+    const storeAll = document.querySelector('#storeFilter option[value="all"]');
+    if (storeAll) storeAll.textContent = dict.allStores;
+
+    const scopeAll = document.querySelector('#searchScope option[value="all"]');
+    if (scopeAll) scopeAll.textContent = dict.allFields;
+
+    ["Ref", "Artist", "Title", "Label", "Tracklist", "Credits"].forEach(value => {
+      const option = document.querySelector(`#searchScope option[value="${value}"]`);
+      if (option) option.textContent = dict.scope[value] || value;
+    });
+
+    document.querySelectorAll(".language-switch button[data-lang]").forEach(btn => {
+      const active = btn.dataset.lang === currentLanguage;
+      btn.classList.toggle("active", active);
+      btn.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+
+    const fabMain = document.querySelector(".fab-main");
+    if (fabMain) fabMain.setAttribute("aria-label", dict.fabMenu);
+
+    if (allData.length) {
+      populateGenreFilter(allData);
+      populateDateFilter(allData);
+    } else {
+      const genreAll = document.querySelector('#genreFilter option[value="all"]');
+      if (genreAll) genreAll.textContent = dict.allGenres;
+    }
+
+    if (shouldRerender && allData.length) {
+      filterAndRenderTable();
+    }
+
+    const detailModal = document.getElementById("detailModal");
+    if (detailModal?.style.display === "flex" && Number.isInteger(window.currentDetailIndex)) {
+      showDetails(window.currentDetailIndex);
+    }
+
+    const cartModal = document.getElementById("cartModal");
+    if (cartModal?.style.display === "flex") {
+      renderCartModalBody();
+    }
+  }
+
+  function setLanguage(lang) {
+    if (!["ko", "en", "ja"].includes(lang)) return;
+    currentLanguage = lang;
+    localStorage.setItem("mosaicInventoryLanguage", lang);
+    applyLanguageUI(true);
+  }
+
+  document.querySelectorAll(".language-switch button[data-lang]").forEach(btn => {
+    btn.addEventListener("click", () => setLanguage(btn.dataset.lang));
+  });
 
   function getMainImageUrl(urlField) {
     if (!urlField) return "";
@@ -699,12 +1014,12 @@
   }
 
   function prepareItem(item) {
-    const ref = String(item["Ref"] ?? "").toLowerCase();
-    const artist = String(item["Artist"] ?? "").toLowerCase();
-    const title = String(item["Title"] ?? "").toLowerCase();
-    const label = String(item["Label"] ?? "").toLowerCase();
-    const tracklist = String(item["Tracklist"] ?? "").toLowerCase();
-    const credits = String(item["Credits"] ?? "").toLowerCase();
+    const ref = normalizeSearchText(item["Ref"]);
+    const artist = normalizeSearchText(item["Artist"]);
+    const title = normalizeSearchText(item["Title"]);
+    const label = normalizeSearchText(item["Label"]);
+    const tracklist = normalizeSearchText(item["Tracklist"]);
+    const credits = normalizeSearchText(item["Credits"]);
 
     return {
       ...item,
@@ -751,8 +1066,10 @@
   const itemsPerPage = 30;
   let selectedDateValue = "all";
 
+  applyLanguageUI(false);
+
   const results = document.getElementById("results");
-  results.innerHTML = `<div style="text-align:center; margin:40px 0; color:#555; font-size:16px;">데이터 불러오는 중입니다...</div>`;
+  results.innerHTML = `<div style="text-align:center; margin:40px 0; color:#555; font-size:16px;">${escapeHtml(t("loading"))}</div>`;
   document.getElementById("searchBtn").disabled = true;
 
   fetch(SHEET_URL)
@@ -768,7 +1085,7 @@
       filterAndRenderTable();
     })
     .catch(err => {
-      results.innerHTML = `<div style="text-align:center; margin:40px 0; color:#c00;">데이터를 불러오지 못했습니다.</div>`;
+      results.innerHTML = `<div style="text-align:center; margin:40px 0; color:#c00;">${escapeHtml(t("loadError"))}</div>`;
       console.error("데이터 로드 오류:", err);
     })
     .finally(() => {
@@ -777,18 +1094,20 @@
 
   function populateGenreFilter(data) {
     const genreSelect = document.getElementById("genreFilter");
+    const previousValue = genreSelect?.value || "all";
     const genreSet = new Set();
     data.forEach(item => {
       const genre = item["Genre"];
       if (genre) genreSet.add(genre.trim());
     });
-    genreSelect.innerHTML = `<option value="all">All Genres</option>`;
+    genreSelect.innerHTML = `<option value="all">${escapeHtml(t("allGenres"))}</option>`;
     [...genreSet].sort().forEach(genre => {
       const option = document.createElement("option");
       option.value = genre;
       option.textContent = genre;
       genreSelect.appendChild(option);
     });
+    genreSelect.value = [...genreSelect.options].some(o => o.value === previousValue) ? previousValue : "all";
   }
 
   function populateDateFilter(data) {
@@ -828,7 +1147,7 @@
       selectedDateValue = "all";
     }
 
-    let html = `<button type="button" data-date="all" class="${selectedDateValue === "all" ? "active" : ""}">전체</button>`;
+    let html = `<button type="button" data-date="all" class="${selectedDateValue === "all" ? "active" : ""}">${escapeHtml(t("dateAll"))}</button>`;
 
     dates.forEach(([dateValue, dateString]) => {
       const label = formatDateButtonLabel(dateString);
@@ -884,18 +1203,17 @@
     const summary = document.getElementById("resultSummary");
     if (!summary) return;
 
-    const countText = Number(total || 0).toLocaleString();
+    const countText = numberText(total);
+    const label = keyword
+      ? t("resultSearched", { count: countText })
+      : t("resultRecords", { count: countText });
 
-    if (keyword) {
-      summary.innerHTML = `<strong>${countText}개</strong> 검색됨 <span class="en">${countText} results</span>`;
-    } else {
-      summary.innerHTML = `<strong>${countText}개</strong> 음반 <span class="en">${countText} records</span>`;
-    }
+    summary.innerHTML = `<strong>${escapeHtml(label)}</strong>`;
   }
 
   function filterAndRenderTable() {
     const rawKeyword = document.getElementById("searchInput").value.trim();
-    const keyword = rawKeyword.toLowerCase();
+    const keyword = normalizeSearchText(rawKeyword);
     const scope = document.getElementById("searchScope").value;
     const selectedStore = document.getElementById("storeFilter").value;
     const selectedGenre = document.getElementById("genreFilter").value;
@@ -919,19 +1237,19 @@
       }
 
       const s = item._search || {
-        ref: String(item["Ref"] ?? "").toLowerCase(),
-        artist: String(item["Artist"] ?? "").toLowerCase(),
-        title: String(item["Title"] ?? "").toLowerCase(),
-        label: String(item["Label"] ?? "").toLowerCase(),
-        tracklist: String(item["Tracklist"] ?? "").toLowerCase(),
-        credits: String(item["Credits"] ?? "").toLowerCase(),
+        ref: normalizeSearchText(item["Ref"]),
+        artist: normalizeSearchText(item["Artist"]),
+        title: normalizeSearchText(item["Title"]),
+        label: normalizeSearchText(item["Label"]),
+        tracklist: normalizeSearchText(item["Tracklist"]),
+        credits: normalizeSearchText(item["Credits"]),
         all: [
-          String(item["Ref"] ?? "").toLowerCase(),
-          String(item["Artist"] ?? "").toLowerCase(),
-          String(item["Title"] ?? "").toLowerCase(),
-          String(item["Label"] ?? "").toLowerCase(),
-          String(item["Tracklist"] ?? "").toLowerCase(),
-          String(item["Credits"] ?? "").toLowerCase()
+          normalizeSearchText(item["Ref"]),
+          normalizeSearchText(item["Artist"]),
+          normalizeSearchText(item["Title"]),
+          normalizeSearchText(item["Label"]),
+          normalizeSearchText(item["Tracklist"]),
+          normalizeSearchText(item["Credits"])
         ].join(" ")
       };
 
@@ -962,15 +1280,13 @@
       const searched = String(window.currentSearchKeyword || "").trim();
       const safeKeyword = escapeHtml(searched);
 
-      results.innerHTML = searched
-        ? `<div style="text-align:center; margin:40px 0; font-size:16px; color:#777;">
-            <span class="ko"><strong style="color:#333;">"${safeKeyword}"</strong>에 대한 검색 결과가 없습니다.</span>
-            <span class="en" lang="en" style="display:block; margin-top:4px;">No results found for "${safeKeyword}".</span>
-          </div>`
-        : `<div style="text-align:center; margin:40px 0; font-size:16px; color:#777;">
-            <span class="ko">선택한 조건에 맞는 검색 결과가 없습니다.</span>
-            <span class="en" lang="en" style="display:block; margin-top:4px;">No results found.</span>
-          </div>`;
+      const message = searched
+        ? t("noResultsFor", { keyword: searched })
+        : t("noResultsFiltered");
+
+      results.innerHTML = `<div style="text-align:center; margin:40px 0; font-size:16px; color:#777;">
+        ${escapeHtml(message)}
+      </div>`;
 
       pagination.innerHTML = "";
       removeFloatingTableHeader();
@@ -995,7 +1311,7 @@
         const imageBlock = imageURL
           ? `<div class="card-image image-badge-wrap" onclick="showDetails(${start + idx})">
               ${badgeHtml}
-              <img src="${imageURL}" alt="앨범 이미지" loading="lazy">
+              <img src="${imageURL}" alt="${escapeHtml(t("imageAlt"))}" loading="lazy">
             </div>`
           : `<div class="card-image image-badge-wrap" onclick="showDetails(${start + idx})">
               ${badgeHtml}
@@ -1032,7 +1348,7 @@
             const imgHtml = imageURL
               ? `<div class="table-image image-badge-wrap" onclick="showDetails(${start + idx})">
                   ${badgeHtml}
-                  <img src="${imageURL}" alt="이미지" loading="lazy">
+                  <img src="${imageURL}" alt="${escapeHtml(t("imageAlt"))}" loading="lazy">
                 </div>`
               : `<div class="table-image image-badge-wrap" onclick="showDetails(${start + idx})">
                   ${badgeHtml}
@@ -1048,7 +1364,7 @@
             return;
           }
           if (key === "Selling at" && !isNaN(cell)) cell = Number(cell).toLocaleString();
-          if (key === "Details") cell = `<button onclick="showDetails(${start + idx})">상세</button>`;
+          if (key === "Details") cell = `<button onclick="showDetails(${start + idx})">${escapeHtml(t("details"))}</button>`;
           html += `<td>${key === "Details" ? cell : escapeHtml(cell)}</td>`;
         });
         html += `</tr>`;
@@ -1164,6 +1480,10 @@
   /* 상세 모달 */
   window.showDetails = function(index) {
     const item = window.currentData[index];
+    if (!item) return;
+
+    window.currentDetailIndex = index;
+
     const modal = document.getElementById("detailModal");
     const body = document.getElementById("modalBody");
 
@@ -1172,31 +1492,28 @@
 
     let content = `<h4 style="margin-top: 0;">${escapeHtml(title)}</h4><p style="margin-top: -8px;">${escapeHtml(ref)}</p>`;
 
-    /* 이미지 */
     const mainImg = getMainImageUrl(item["Image URL"]);
     if (mainImg) {
-      content += `<p><strong>이미지:</strong><br><img src="${mainImg}" alt="이미지" style="max-width: 100%; margin: 10px 0;" loading="lazy"></p>`;
+      content += `<p><strong>${escapeHtml(t("image"))}:</strong><br><img src="${mainImg}" alt="${escapeHtml(t("imageAlt"))}" style="max-width: 100%; margin: 10px 0;" loading="lazy"></p>`;
     }
 
-    /* ✅ 정보 블록 (예시 형식에 맞춤) */
-    const store   = item.OriginSheet || "";
+    const store = item.OriginSheet || "";
     const pressing = item.Pressing || "";
-    const jacket  = item["Condition Jacket"] || "";
-    const media   = item["Condition Media"] || "";
+    const jacket = item["Condition Jacket"] || "";
+    const media = item["Condition Media"] || "";
     const comment = item["Condition Comment"] || "";
-    const priceN  = Number(item["Selling at"] || 0);
-    const price   = isNaN(priceN) ? "" : priceN.toLocaleString();
+    const priceN = Number(item["Selling at"] || 0);
+    const price = isNaN(priceN) ? "" : priceN.toLocaleString(I18N[currentLanguage].locale);
 
     let info = `<div class="info-block">`;
-    if (store)   info += `<p><strong>Store :</strong> ${escapeHtml(store)}</p>`;
-    if (pressing)info += `<p><strong>Pressing :</strong> ${escapeHtml(pressing)}</p>`;
-    if (jacket || media) info += `<p><strong>Jacket:</strong> ${escapeHtml(jacket || "-")} <strong>/ Media:</strong> ${escapeHtml(media || "-")}</p>`;
+    if (store) info += `<p><strong>${escapeHtml(t("store"))} :</strong> ${escapeHtml(store)}</p>`;
+    if (pressing) info += `<p><strong>${escapeHtml(t("pressing"))} :</strong> ${escapeHtml(pressing)}</p>`;
+    if (jacket || media) info += `<p><strong>${escapeHtml(t("jacket"))}:</strong> ${renderConditionBadge(jacket || "-")} <strong>/ ${escapeHtml(t("media"))}:</strong> ${renderConditionBadge(media || "-")}</p>`;
     if (comment) info += `<p>●${escapeHtml(comment)}</p>`;
-    if (price)   info += `<p><strong>Price :</strong> ${price}</p>`;
+    if (price) info += `<p><strong>${escapeHtml(t("price"))} :</strong> ₩${price}</p>`;
     info += `</div>`;
     content += info;
 
-    /* YouTube */
     if (item.Youtube?.trim()) {
       const url = item.Youtube.trim();
       let embedUrl = "";
@@ -1210,19 +1527,17 @@
       }
     }
 
-    /* Tracklist */
     if (item.Tracklist?.trim()) {
       const list = item.Tracklist.split("•").map(s => s.trim()).filter(Boolean);
       if (list.length) {
-        content += `<p><strong>Tracklist:</strong><ul>${list.map(track => `<li>${escapeHtml(track)}</li>`).join('')}</ul></p>`;
+        content += `<p><strong>${escapeHtml(t("tracklist"))}:</strong><ul>${list.map(track => `<li>${escapeHtml(track)}</li>`).join('')}</ul></p>`;
       }
     }
 
-    /* Credits */
     if (item.Credits?.trim()) {
       const credits = item.Credits.split("•").map(s => s.trim()).filter(Boolean);
       if (credits.length) {
-        content += `<p><strong>Credits:</strong><br>${credits.map(escapeHtml).join("<br>")}</p>`;
+        content += `<p><strong>${escapeHtml(t("credits"))}:</strong><br>${credits.map(escapeHtml).join("<br>")}</p>`;
       }
     }
 
@@ -1231,8 +1546,8 @@
 
     content += `<div style="text-align: right; margin-top: 20px;">
       ${alreadyInCart
-        ? `<button id="modalCartBtn" disabled style="background-color:#d9d9d9; color:#555; border:none; padding:10px 14px; border-radius:6px; cursor:default; font-size:14px;">✓ 장바구니에 담김</button>`
-        : `<button id="modalCartBtn" onclick="addToCart(${index})" style="background-color:#0071e3; color:white; border:none; padding:10px 14px; border-radius:6px; cursor:pointer; font-size:14px;">🛒 장바구니 담기</button>`
+        ? `<button id="modalCartBtn" disabled style="background-color:#d9d9d9; color:#555; border:none; padding:10px 14px; border-radius:6px; cursor:default; font-size:14px;">${escapeHtml(t("inCart"))}</button>`
+        : `<button id="modalCartBtn" onclick="addToCart(${index})" style="background-color:#0071e3; color:white; border:none; padding:10px 14px; border-radius:6px; cursor:pointer; font-size:14px;">${escapeHtml(t("addToCart"))}</button>`
       }
     </div>`;
 
@@ -1324,7 +1639,7 @@
 
     if (totalPages <= 1) { pagination.innerHTML = ""; return; }
 
-    html += `<button onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>« 이전</button>`;
+    html += `<button onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>${escapeHtml(t("prev"))}</button>`;
     for (let i = 1; i <= totalPages; i++) {
       if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 2) {
         html += `<button onclick="goToPage(${i})" ${i === currentPage ? 'disabled' : ''}>${i}</button>`;
@@ -1332,7 +1647,7 @@
         html += `<span style="margin:0 4px;">...</span>`;
       }
     }
-    html += `<button onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>다음 »</button>`;
+    html += `<button onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>${escapeHtml(t("next"))}</button>`;
     pagination.innerHTML = html;
   }
 
@@ -1358,51 +1673,58 @@
   }
 
   /* 장바구니 */
+  function renderCartModalBody() {
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    const cartBody = document.getElementById("cartBody");
+    if (!cartBody) return;
+
+    if (cart.length === 0) {
+      cartBody.innerHTML = `<p>${escapeHtml(t("cartEmpty"))}</p>`;
+      return;
+    }
+
+    let total = 0;
+    const itemsHtml = cart.map((item, idx) => {
+      total += item.price || 0;
+      return `<div style="margin-bottom: 12px;">
+        <input type="checkbox" class="cart-item-checkbox" data-index="${idx}" style="margin-right: 6px;">
+        <strong>${idx + 1}. [${escapeHtml(item.ref)}] ${escapeHtml(item.artist)} – ${escapeHtml(item.title)}</strong><br>
+        <span style="font-size: 14px;">
+          ${escapeHtml(item.jacket)} / ${escapeHtml(item.media)} / ${escapeHtml(item.pressing)}<br>
+          ${escapeHtml(t("store"))}: ${escapeHtml(item.store)}<br>
+          ${escapeHtml(t("price"))}: ₩${numberText(item.price || 0)}
+        </span>
+      </div>`;
+    }).join('');
+
+    cartBody.innerHTML = `
+      ${itemsHtml}
+      <hr>
+      <p><strong>${escapeHtml(t("totalCart", { count: numberText(cart.length), total: numberText(total) }))}</strong></p>
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 16px;">
+        <div>
+          <button onclick="printCart()" style="margin-right: 10px;">${escapeHtml(t("print"))}</button>
+          <button onclick="window.open('https://pf.kakao.com/_xxx/chat', '_blank')">${escapeHtml(t("kakao"))}</button>
+        </div>
+        <div>
+          <button id="deleteSelectedBtn" onclick="deleteSelectedCartItems()" style="background:#ccc; color:#000; margin-right: 10px;" disabled>${escapeHtml(t("deleteSelected"))}</button>
+          <button onclick="clearCart()" style="background:#ccc; color:#000;">${escapeHtml(t("clearAll"))}</button>
+        </div>
+      </div>`;
+
+    monitorCartCheckboxes();
+  }
+
+  function openCartModal() {
+    renderCartModalBody();
+    document.getElementById("cartModal").style.display = "flex";
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
     updateCartCount();
+    applyLanguageUI(false);
 
-    document.getElementById("viewCartBtn").onclick = () => {
-      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      const cartBody = document.getElementById("cartBody");
-
-      if (cart.length === 0) {
-        cartBody.innerHTML = `<p>장바구니가 비어 있습니다.</p>`;
-      } else {
-        let total = 0;
-        const itemsHtml = cart.map((item, idx) => {
-          total += item.price;
-          return `<div style="margin-bottom: 12px;">
-    <input type="checkbox" class="cart-item-checkbox" data-index="${idx}" style="margin-right: 6px;">
-    <strong>${idx + 1}. [${item.ref}] ${escapeHtml(item.artist)} – ${escapeHtml(item.title)}</strong><br>
-    <span style="font-size: 14px;">
-      ${escapeHtml(item.jacket)} / ${escapeHtml(item.media)} / ${escapeHtml(item.pressing)}<br>
-      매장: ${escapeHtml(item.store)}<br>
-      가격: ₩${(item.price||0).toLocaleString()}
-    </span>
-  </div>`;
-        }).join('');
-
-        /* 👉 버튼 영역: '텍스트 복사' → '인쇄하기'로 교체 */
-        cartBody.innerHTML = `
-  ${itemsHtml}
-  <hr>
-  <p><strong>총 ${cart.length}개 (합계: ₩${total.toLocaleString()})</strong></p>
-<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 16px;">
-  <div>
-    <button onclick="printCart()" style="margin-right: 10px;">🖨 인쇄하기</button>
-    <button onclick="window.open('https://pf.kakao.com/_xxx/chat', '_blank')">💬 카카오톡 문의</button>
-  </div>
-  <div>
-    <button id="deleteSelectedBtn" onclick="deleteSelectedCartItems()" style="background:#ccc; color:#000; margin-right: 10px;" disabled>🗑 선택 항목 삭제</button>
-    <button onclick="clearCart()" style="background:#ccc; color:#000;">❌ 전체 비우기</button>
-  </div>
-</div>
-`;
-        monitorCartCheckboxes();
-      }
-
-      document.getElementById("cartModal").style.display = "flex";
-    };
+    document.getElementById("viewCartBtn").onclick = openCartModal;
 
     document.getElementById("cartModalClose").onclick = () => {
       document.getElementById("cartModal").style.display = "none";
@@ -1415,11 +1737,11 @@
   });
 
   function clearCart() {
-    if (confirm("장바구니를 모두 비우시겠습니까?")) {
+    if (confirm(t("confirmClear"))) {
       localStorage.removeItem("cart");
       updateCartCount();
       document.getElementById("cartModal").style.display = "none";
-      alert("장바구니가 비워졌습니다.");
+      showToast(t("cartCleared"));
     }
   }
 
@@ -1451,7 +1773,7 @@ ${lines.join('\n\n')}
 👉 배송지(선택사항): 직접 입력`;
 
     navigator.clipboard.writeText(message).then(() => {
-      alert("장바구니 정보가 복사되었습니다. 카카오톡 채널로 이동해 붙여넣어 주세요!");
+      alert(t("copyDone"));
     });
   }
 
@@ -1461,7 +1783,7 @@ ${lines.join('\n\n')}
 
     const exists = cart.some(c => String(c.ref) === String(item.Ref));
     if (exists) {
-      showToast("이미 장바구니에 담긴 상품입니다.");
+      showToast(t("alreadyInCart"));
       setModalCartButtonAdded();
       return;
     }
@@ -1483,7 +1805,7 @@ ${lines.join('\n\n')}
 
     updateCartCount();
     setModalCartButtonAdded();
-    showToast("장바구니에 추가되었습니다.");
+    showToast(t("addedToCart"));
   }
 
   function setModalCartButtonAdded() {
@@ -1491,7 +1813,7 @@ ${lines.join('\n\n')}
     if (!btn) return;
 
     btn.disabled = true;
-    btn.textContent = "✓ 장바구니에 담김";
+    btn.textContent = t("inCart");
     btn.style.backgroundColor = "#d9d9d9";
     btn.style.color = "#555";
     btn.style.cursor = "default";
@@ -1529,8 +1851,8 @@ ${lines.join('\n\n')}
 
   function deleteSelectedCartItems() {
     const checkboxes = document.querySelectorAll(".cart-item-checkbox:checked");
-    if (checkboxes.length === 0) { alert("삭제할 항목을 선택해주세요."); return; }
-    if (!confirm("선택한 항목을 장바구니에서 삭제할까요?")) return;
+    if (checkboxes.length === 0) { alert(t("selectDelete")); return; }
+    if (!confirm(t("confirmDelete"))) return;
 
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
     const updatedCart = cart.filter((_, idx) => {
@@ -1539,8 +1861,8 @@ ${lines.join('\n\n')}
 
     localStorage.setItem("cart", JSON.stringify(updatedCart));
     updateCartCount();
-    alert("선택한 항목이 삭제되었습니다.");
-    document.getElementById("viewCartBtn").click(); // 장바구니 다시 로드
+    showToast(t("deleted"));
+    renderCartModalBody();
   }
 
   function monitorCartCheckboxes() {
@@ -1574,7 +1896,7 @@ ${lines.join('\n\n')}
      ========================= */
   function printCart() {
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    if (cart.length === 0) { alert("장바구니가 비어 있습니다."); return; }
+    if (cart.length === 0) { alert(t("cartEmpty")); return; }
 
     /* 용지 폭(mm) — 필요 시 값만 변경 */
     const RECEIPT_WIDTH_MM = 58;
@@ -1591,18 +1913,18 @@ ${lines.join('\n\n')}
       return `
 <div class="item">
   <div class="title"><strong>${i + 1}. [${escapeHtml(c.ref)}] ${escapeHtml(c.artist)} – ${escapeHtml(c.title)}</strong></div>
-  <div>Store : ${escapeHtml(c.store || "")}</div>
-  <div>Pressing : ${escapeHtml(c.pressing || "")}</div>
-  <div>Jacket: ${escapeHtml(c.jacket || "-")} / Media: ${escapeHtml(c.media || "-")}</div>
+  <div>${escapeHtml(t("store"))} : ${escapeHtml(c.store || "")}</div>
+  <div>${escapeHtml(t("pressing"))} : ${escapeHtml(c.pressing || "")}</div>
+  <div>${escapeHtml(t("jacket"))}: ${escapeHtml(c.jacket || "-")} / ${escapeHtml(t("media"))}: ${escapeHtml(c.media || "-")}</div>
   ${comment ? `<div>●${escapeHtml(comment)}</div>` : ""}
   ${subcat ? `<div>Subcategory : ${escapeHtml(subcat)}</div>` : ""}
-  <div>Price : ₩${(c.price || 0).toLocaleString()}</div>
+  <div>${escapeHtml(t("price"))} : ₩${numberText(c.price || 0)}</div>
 </div>
 <hr/>`;
     }).join("");
 
     const html = `<!DOCTYPE html>
-<html lang="ko"><head><meta charset="utf-8">
+<html lang="${I18N[currentLanguage].htmlLang}"><head><meta charset="utf-8">
 <title>MOSAIC PICK LIST</title>
 <style>
 @page { size: ${RECEIPT_WIDTH_MM}mm auto; margin: 5mm; }
@@ -1621,11 +1943,11 @@ hr { border: 0; border-top: 1px dashed #999; margin: 8px 0; }
 <body>
   <h1>MOSAIC PICK LIST</h1>
   ${itemsHtml}
-  <div class="footer">총 ${cart.length}개 / 합계: ₩${total.toLocaleString()}</div>
+  <div class="footer">${escapeHtml(t("printTotal", { count: numberText(cart.length), total: numberText(total) }))}</div>
 </body></html>`;
 
     const w = window.open("", "_blank", "width=480,height=640");
-    if (!w) { alert("팝업이 차단되었습니다. 팝업 허용 후 다시 시도하세요."); return; }
+    if (!w) { alert(t("popupBlocked")); return; }
     w.document.open();
     w.document.write(html);
     w.document.close();
@@ -1697,7 +2019,7 @@ hr { border: 0; border-top: 1px dashed #999; margin: 8px 0; }
 
   <!-- FAB 버튼 메뉴 (모바일 전용) -->
   <div class="fab-menu">
-    <button class="fab-main" onclick="toggleFab()" aria-label="FAB 메뉴 열기">＋</button>
+    <button class="fab-main" onclick="toggleFab()" aria-label="빠른 메뉴 열기">＋</button>
     <div class="fab-actions">
       <button class="fab-action" onclick="window.scrollTo({ top: 0, behavior: 'smooth' }); closeFab()">TOP</button>
       <button class="fab-action" onclick="document.getElementById('viewCartBtn').click(); closeFab()">CART <span class="cart-count">0</span></button>
