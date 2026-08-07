@@ -963,6 +963,108 @@
       white-space: nowrap;
       vertical-align: middle;
     }
+    .condition-badge.has-condition-guide {
+      cursor: help;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition:
+        background-color .16s ease,
+        border-color .16s ease,
+        box-shadow .16s ease,
+        transform .12s ease;
+    }
+    .condition-badge.has-condition-guide:hover,
+    .condition-badge.has-condition-guide:focus-visible,
+    .condition-badge.has-condition-guide.is-guide-active {
+      background: #fff;
+      border-color: #aeb3ba;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+      outline: none;
+    }
+    .condition-badge.has-condition-guide:active {
+      transform: scale(.96);
+    }
+
+    /* Condition 설명 팝오버 */
+    .condition-guide-popover {
+      position: fixed;
+      z-index: 6000;
+      width: min(360px, calc(100vw - 24px));
+      padding: 13px 14px 14px;
+      border: 1px solid rgba(0,0,0,.10);
+      border-radius: 12px;
+      background: rgba(255,255,255,.97);
+      color: #252525;
+      box-shadow:
+        0 12px 30px rgba(0,0,0,.14),
+        0 2px 6px rgba(0,0,0,.06);
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(4px) scale(.985);
+      transform-origin: center top;
+      transition:
+        opacity .14s ease,
+        transform .14s ease,
+        visibility .14s ease;
+    }
+    .condition-guide-popover.is-open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+    }
+    .condition-guide-popover[data-placement="top"] {
+      transform-origin: center bottom;
+    }
+    .condition-guide-meta {
+      margin-bottom: 5px;
+      color: #777;
+      font-size: 11px;
+      font-weight: 650;
+      letter-spacing: .02em;
+    }
+    .condition-guide-title {
+      margin-bottom: 5px;
+      color: #111;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+    .condition-guide-description {
+      color: #555;
+      font-size: 13px;
+      font-weight: 400;
+      line-height: 1.6;
+      word-break: keep-all;
+      overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 1024px) {
+      .condition-badge.has-condition-guide {
+        cursor: pointer;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .condition-guide-popover {
+        width: calc(100vw - 24px);
+        max-width: 360px;
+        padding: 13px 14px;
+        border-radius: 12px;
+      }
+      .condition-guide-meta {
+        font-size: 10px;
+      }
+      .condition-guide-title {
+        font-size: 14px;
+      }
+      .condition-guide-description {
+        font-size: 12.5px;
+        line-height: 1.58;
+      }
+    }
 
     /* 상세 모달 앨범 이미지 */
     .detail-main-image-wrap {
@@ -1802,6 +1904,18 @@
   <div id="resultSummary" class="result-summary"></div>
   <div id="results"></div>
   <div id="pagination" style="text-align:center; margin-bottom: 40px;"></div>
+
+  <!-- Condition Grade Guide Popover -->
+  <div
+    id="conditionGuidePopover"
+    class="condition-guide-popover"
+    role="tooltip"
+    aria-hidden="true"
+  >
+    <div id="conditionGuideMeta" class="condition-guide-meta"></div>
+    <div id="conditionGuideTitle" class="condition-guide-title"></div>
+    <div id="conditionGuideDescription" class="condition-guide-description"></div>
+  </div>
 
   <!-- 상세 모달 -->
   <div id="detailModal" class="modal">
@@ -2686,7 +2800,112 @@
     return label || raw;
   }
 
-  function renderConditionBadge(value) {
+  /*
+    MOSAIC CONDITION GUIDE
+    현재 제공된 설명 원문이 한국어이므로 팝오버 설명은 한국어로 표시.
+    Generic은 Jacket에만 가이드가 존재함.
+  */
+  const CONDITION_GUIDE_KO = {
+    "GENERIC": {
+      jacket: {
+        title: "범용 또는 무지 커버",
+        description: "오리지널 자켓이 아닌 범용 커버 또는 무지 커버가 제공되는 상태입니다."
+      }
+    },
+    "M": {
+      jacket: {
+        title: "완벽한 상태",
+        description: "사용 흔적이 없는 최상급 상태의 자켓입니다."
+      },
+      media: {
+        title: "완벽한 상태",
+        description: "사용 흔적이 없는 최상급 상태의 음반입니다."
+      }
+    },
+    "NM": {
+      jacket: {
+        title: "완벽한 상태, 방금 개봉한 듯한 상태",
+        description: "눈에 띄는 보관 흔적이나 사용감이 거의 없는 매우 깨끗한 자켓입니다."
+      },
+      media: {
+        title: "완벽한 상태, 방금 개봉한 듯한 상태",
+        description: "눈에 띄는 사용 흔적이 거의 없으며 매우 깨끗한 상태의 음반입니다."
+      }
+    },
+    "EX": {
+      jacket: {
+        title: "전반적으로 매우 깨끗한 상태",
+        description: "매우 미세한 엣지웨어, 얼룩, 까짐, 컷아웃, 펀치, 드릴 또는 발매 당시 스티커가 있을 수 있습니다. 단, 낙서나 임의로 붙인 스티커 등은 없습니다."
+      },
+      media: {
+        title: "전반적으로 매우 깨끗한 상태",
+        description: "음질에 영향이 없는 몇몇 연흔, 미세한 헤어라인, 화학반응으로 인한 보관 얼룩, 미세한 휨 또는 프레싱 흔적이 있을 수 있습니다."
+      }
+    },
+    "VG+": {
+      jacket: {
+        title: "전반적으로 깨끗한 상태",
+        description: "약간의 링웨어, 엣지웨어, 얼룩, 낙서, 테이핑, 변색, 1cm 이하의 찢김 또는 각 테두리 3cm 이하의 벌어짐 중 하나 이상이 있을 수 있습니다. 컷아웃, 펀치, 드릴이 존재할 수 있습니다."
+      },
+      media: {
+        title: "전반적으로 깨끗한 상태",
+        description: "음질에 큰 영향을 주지 않는 다수의 연흔, 헤어라인, 화학반응으로 인한 보관 얼룩, 약간의 휨 또는 프레싱 시 생긴 흔적이 있을 수 있습니다."
+      }
+    },
+    "VG": {
+      jacket: {
+        title: "사용감 있음",
+        description: "눈에 띄는 링웨어, 엣지웨어, 얼룩, 낙서, 테이핑, 변색, 1~5cm의 찢김 또는 3cm를 초과하는 테두리 벌어짐·한 곳 이상의 벌어짐 등이 있을 수 있습니다."
+      },
+      media: {
+        title: "사용감 있음",
+        description: "음질에 영향을 줄 수 있는 다수의 연흔, 헤어라인, 손으로 느껴지는 작은 스크래치 또는 마크가 있을 수 있습니다."
+      }
+    },
+    "G+": {
+      jacket: {
+        title: "사용감 많음",
+        description: "테두리 두 곳 이상 또는 전체 벌어짐, 일부 찢김, 심한 얼룩, 낙서, 변색, 5cm 이상의 찢김 등으로 자켓 본래의 역할이 어려울 수 있는 상태입니다."
+      },
+      media: {
+        title: "사용감 많음",
+        description: "다수의 연흔과 헤어라인이 가득하고 길거나 넓은 범위에 손으로 느껴지는 스크래치·마크가 있으며, 이로 인해 잡음·튐·스킵 등이 발생할 수 있습니다."
+      }
+    },
+    "G": {
+      jacket: {
+        title: "손상 심함",
+        description: "보관용 자켓으로 사용하기 부적합하거나 자켓 본래의 역할을 제대로 하기 어려운 상태입니다."
+      },
+      media: {
+        title: "손상 심함",
+        description: "다수의 연흔과 헤어라인, 길고 넓은 범위의 스크래치·마크가 상당수 존재하며 잡음·튐·스킵이 발생하거나 일부 구간의 재생이 어려울 수 있습니다."
+      }
+    },
+    "F": {
+      jacket: {
+        title: "심한 손상",
+        description: "심한 마모, 찢어짐, 오염 또는 구조적인 손상이 있어 보관용 자켓으로 사용하기 어려운 상태입니다."
+      },
+      media: {
+        title: "재생 상태 좋지 않음",
+        description: "심한 마모와 스크래치로 인해 지속적인 잡음, 튐 또는 스킵이 발생하며 정상적인 감상이 어려울 수 있습니다."
+      }
+    }
+  };
+
+  function getConditionGuideGrade(label) {
+    if (label === "Gen") return "GENERIC";
+    return label;
+  }
+
+  function getConditionGuide(grade, kind) {
+    const group = CONDITION_GUIDE_KO[grade];
+    if (!group) return null;
+    return group[kind] || null;
+  }
+
+  function renderConditionBadge(value, kind = "") {
     const raw = String(value ?? "").trim();
     if (!raw) return "";
 
@@ -2743,7 +2962,26 @@
     }
 
     if (!label) return escapeHtml(raw);
-    return `<span class="condition-badge">${label}</span>`;
+
+    const grade = getConditionGuideGrade(label);
+    const validKind = kind === "jacket" || kind === "media" ? kind : "";
+    const guide = validKind ? getConditionGuide(grade, validKind) : null;
+
+    if (!guide) {
+      return `<span class="condition-badge">${escapeHtml(label)}</span>`;
+    }
+
+    const ariaKind = validKind === "jacket" ? "자켓" : "미디어";
+    const ariaLabel = `${grade} ${ariaKind} 컨디션 설명`;
+
+    return `<span
+      class="condition-badge has-condition-guide"
+      tabindex="0"
+      role="button"
+      aria-label="${escapeHtml(ariaLabel)}"
+      data-condition-grade="${escapeHtml(grade)}"
+      data-condition-kind="${escapeHtml(validKind)}"
+    >${escapeHtml(label)}</span>`;
   }
 
   function updateResultSummary(total, keyword) {
@@ -2872,7 +3110,7 @@
               <div style="color:#777; font-size:12px;">${escapeHtml(item.Ref || "")}</div>
               <div><strong>${escapeHtml(item.Artist || "")}</strong> - ${escapeHtml(item.Title || "")}</div>
               <div>${escapeHtml(item.Pressing || "")}</div>
-              <div>${renderConditionBadge(item["Condition Jacket"] || "")} / ${renderConditionBadge(item["Condition Media"] || "")}</div>
+              <div>${renderConditionBadge(item["Condition Jacket"] || "", "jacket")} / ${renderConditionBadge(item["Condition Media"] || "", "media")}</div>
               <div><strong>₩${Number(item["Selling at"] || 0).toLocaleString()}</strong></div>
             </div>
           </div>`;
@@ -2907,7 +3145,8 @@
           }
           let cell = row[key] ?? "";
           if (key === "Condition Jacket" || key === "Condition Media") {
-            html += `<td data-col="${escapeHtml(key)}">${renderConditionBadge(cell)}</td>`;
+            const conditionKind = key === "Condition Jacket" ? "jacket" : "media";
+            html += `<td data-col="${escapeHtml(key)}">${renderConditionBadge(cell, conditionKind)}</td>`;
             return;
           }
           if (key === "Selling at" && !isNaN(cell)) cell = Number(cell).toLocaleString();
@@ -3032,6 +3271,198 @@
       .trim();
   }
 
+  /* =========================
+     Condition Grade Guide Popover
+     Desktop: hover/focus
+     Mobile/Tablet: tap
+     ========================= */
+  let activeConditionGuideBadge = null;
+  let conditionGuideHideTimer = null;
+
+  function getConditionGuidePopoverElements() {
+    return {
+      popover: document.getElementById("conditionGuidePopover"),
+      meta: document.getElementById("conditionGuideMeta"),
+      title: document.getElementById("conditionGuideTitle"),
+      description: document.getElementById("conditionGuideDescription")
+    };
+  }
+
+  function positionConditionGuidePopover(anchor) {
+    const { popover } = getConditionGuidePopoverElements();
+    if (!popover || !anchor) return;
+
+    const anchorRect = anchor.getBoundingClientRect();
+    const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+    const edge = 12;
+    const gap = 8;
+
+    /*
+      크기를 측정하기 위해 visibility는 유지한 채 is-open 상태에서 계산.
+      fixed 배치이므로 테이블/모달 overflow에 잘리지 않음.
+    */
+    const popRect = popover.getBoundingClientRect();
+
+    let left = anchorRect.left + (anchorRect.width / 2) - (popRect.width / 2);
+    left = Math.max(edge, Math.min(left, viewportWidth - popRect.width - edge));
+
+    let top = anchorRect.bottom + gap;
+    let placement = "bottom";
+
+    if (top + popRect.height > viewportHeight - edge) {
+      top = anchorRect.top - popRect.height - gap;
+      placement = "top";
+    }
+
+    /*
+      위/아래 모두 부족한 작은 모바일 화면에서는
+      viewport 안에 강제로 들어오도록 위치 제한.
+    */
+    top = Math.max(edge, Math.min(top, viewportHeight - popRect.height - edge));
+
+    popover.style.left = `${Math.round(left)}px`;
+    popover.style.top = `${Math.round(top)}px`;
+    popover.dataset.placement = placement;
+  }
+
+  function showConditionGuidePopover(badge) {
+    if (!badge) return;
+
+    const grade = badge.dataset.conditionGrade || "";
+    const kind = badge.dataset.conditionKind || "";
+    const guide = getConditionGuide(grade, kind);
+    if (!guide) return;
+
+    if (conditionGuideHideTimer) {
+      clearTimeout(conditionGuideHideTimer);
+      conditionGuideHideTimer = null;
+    }
+
+    if (activeConditionGuideBadge && activeConditionGuideBadge !== badge) {
+      activeConditionGuideBadge.classList.remove("is-guide-active");
+      activeConditionGuideBadge.setAttribute("aria-expanded", "false");
+    }
+
+    const { popover, meta, title, description } = getConditionGuidePopoverElements();
+    if (!popover || !meta || !title || !description) return;
+
+    const kindLabel = kind === "jacket" ? "자켓" : "미디어";
+
+    meta.textContent = `${grade} · ${kindLabel}`;
+    title.textContent = guide.title;
+    description.textContent = guide.description;
+
+    activeConditionGuideBadge = badge;
+    badge.classList.add("is-guide-active");
+    badge.setAttribute("aria-expanded", "true");
+
+    popover.classList.add("is-open");
+    popover.setAttribute("aria-hidden", "false");
+
+    requestAnimationFrame(() => {
+      positionConditionGuidePopover(badge);
+    });
+  }
+
+  function hideConditionGuidePopover() {
+    if (conditionGuideHideTimer) {
+      clearTimeout(conditionGuideHideTimer);
+      conditionGuideHideTimer = null;
+    }
+
+    const { popover } = getConditionGuidePopoverElements();
+
+    if (activeConditionGuideBadge) {
+      activeConditionGuideBadge.classList.remove("is-guide-active");
+      activeConditionGuideBadge.setAttribute("aria-expanded", "false");
+      activeConditionGuideBadge = null;
+    }
+
+    if (popover) {
+      popover.classList.remove("is-open");
+      popover.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  function scheduleConditionGuideHide(delay = 80) {
+    if (conditionGuideHideTimer) clearTimeout(conditionGuideHideTimer);
+
+    conditionGuideHideTimer = window.setTimeout(() => {
+      hideConditionGuidePopover();
+    }, delay);
+  }
+
+  /* 데스크톱 마우스 hover */
+  document.addEventListener("mouseover", event => {
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+
+    const badge = event.target.closest(".condition-badge.has-condition-guide");
+    if (!badge) return;
+
+    showConditionGuidePopover(badge);
+  });
+
+  document.addEventListener("mouseout", event => {
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+
+    const badge = event.target.closest(".condition-badge.has-condition-guide");
+    if (!badge) return;
+
+    scheduleConditionGuideHide(90);
+  });
+
+  /* 키보드 접근 */
+  document.addEventListener("focusin", event => {
+    const badge = event.target.closest?.(".condition-badge.has-condition-guide");
+    if (badge) showConditionGuidePopover(badge);
+  });
+
+  document.addEventListener("focusout", event => {
+    const badge = event.target.closest?.(".condition-badge.has-condition-guide");
+    if (badge) scheduleConditionGuideHide(80);
+  });
+
+  /*
+    모바일/태블릿 tap.
+    같은 뱃지를 다시 누르면 닫히고 다른 곳을 누르면 닫힘.
+  */
+  document.addEventListener("click", event => {
+    const badge = event.target.closest?.(".condition-badge.has-condition-guide");
+
+    if (badge) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (activeConditionGuideBadge === badge) {
+        hideConditionGuidePopover();
+      } else {
+        showConditionGuidePopover(badge);
+      }
+      return;
+    }
+
+    if (activeConditionGuideBadge) {
+      hideConditionGuidePopover();
+    }
+  });
+
+  /*
+    스크롤 중 팝오버가 원래 뱃지 위치와 분리되어 떠 있지 않도록 닫음.
+    detailModal 내부 스크롤도 capture=true로 감지.
+  */
+  window.addEventListener("scroll", hideConditionGuidePopover, {
+    passive: true,
+    capture: true
+  });
+  window.addEventListener("resize", hideConditionGuidePopover);
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && activeConditionGuideBadge) {
+      hideConditionGuidePopover();
+    }
+  });
+
   function syncModalPageLock() {
     const detailOpen = document.getElementById("detailModal")?.style.display === "flex";
     const cartOpen = document.getElementById("cartModal")?.style.display === "flex";
@@ -3089,7 +3520,7 @@
       info += `</p>`;
     }
     if (pressing) info += `<p><strong>${escapeHtml(t("pressing"))} :</strong> ${escapeHtml(pressing)}</p>`;
-    if (jacket || media) info += `<p><strong>${escapeHtml(t("jacket"))}:</strong> ${renderConditionBadge(jacket || "-")} <strong>/ ${escapeHtml(t("media"))}:</strong> ${renderConditionBadge(media || "-")}</p>`;
+    if (jacket || media) info += `<p><strong>${escapeHtml(t("jacket"))}:</strong> ${renderConditionBadge(jacket || "-", "jacket")} <strong>/ ${escapeHtml(t("media"))}:</strong> ${renderConditionBadge(media || "-", "media")}</p>`;
     const cleanComment = normalizeConditionComment(comment);
     if (cleanComment) info += `<p>● ${escapeHtml(cleanComment)}</p>`;
     if (price) info += `<p><strong>${escapeHtml(t("price"))} :</strong> ₩${price}</p>`;
@@ -3391,9 +3822,9 @@
 
             <div class="cart-card-bottom">
               <div class="cart-card-condition">
-                ${renderConditionBadge(jacket || "-")}
+                ${renderConditionBadge(jacket || "-", "jacket")}
                 <span class="cart-card-condition-separator">/</span>
-                ${renderConditionBadge(media || "-")}
+                ${renderConditionBadge(media || "-", "media")}
               </div>
               <div class="cart-card-price">₩${numberText(item.price || 0)}</div>
             </div>
