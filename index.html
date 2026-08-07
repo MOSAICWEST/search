@@ -2348,6 +2348,61 @@
     return `${month}/${day}`;
   }
 
+  function conditionShortLabel(value) {
+    const raw = String(value ?? "").trim();
+    if (!raw) return "";
+
+    const normalized = raw
+      .normalize("NFKC")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toUpperCase();
+
+    const exactMap = {
+      "GEN": "Gen",
+      "GENERIC": "Gen",
+      "M": "M",
+      "MINT": "M",
+      "MINT (M)": "M",
+      "NM": "NM",
+      "NM OR M-": "NM",
+      "NEAR MINT": "NM",
+      "NEAR MINT (NM OR M-)": "NM",
+      "EX": "EX",
+      "EXCELLENT": "EX",
+      "EXCELLENT (EX)": "EX",
+      "VG+": "VG+",
+      "VERY GOOD PLUS": "VG+",
+      "VERY GOOD PLUS (VG+)": "VG+",
+      "VG": "VG",
+      "VERY GOOD": "VG",
+      "VERY GOOD (VG)": "VG",
+      "G+": "G+",
+      "GOOD PLUS": "G+",
+      "GOOD PLUS (G+)": "G+",
+      "G": "G",
+      "GOOD": "G",
+      "GOOD (G)": "G",
+      "F": "F",
+      "FAIR": "F",
+      "FAIR (F)": "F"
+    };
+
+    let label = exactMap[normalized] || "";
+
+    if (!label) {
+      const parenMatch = normalized.match(/\((GEN|M|NM|M-|EX|VG\+|VG|G\+|G|F)(?:\s+OR\s+M-)?\)/);
+      if (parenMatch) {
+        const token = parenMatch[1];
+        if (token === "M-") label = "NM";
+        else label = token === "GEN" ? "Gen" : token;
+      }
+    }
+
+    /* 알 수 없는 표기는 원문 유지 */
+    return label || raw;
+  }
+
   function renderConditionBadge(value) {
     const raw = String(value ?? "").trim();
     if (!raw) return "";
@@ -3038,7 +3093,7 @@
       <div class="cart-actions">
         <div class="cart-actions-group">
           <button onclick="printCart()">${escapeHtml(t("print"))}</button>
-          <button onclick="window.open('https://pf.kakao.com/_xfFwBn', '_blank')">${escapeHtml(t("kakao"))}</button>
+          <button onclick="window.open('https://pf.kakao.com/_xxx/chat', '_blank')">${escapeHtml(t("kakao"))}</button>
         </div>
         <div class="cart-actions-group">
           <button
