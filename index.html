@@ -1811,6 +1811,152 @@
     @media (max-width: 600px) {
       .logo-bar img { height: 140px; }
     }
+
+    /* =========================
+       Main page switcher
+       - Inventory / Sell Records
+       ========================= */
+    .app-nav {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin: -2px auto 18px;
+      padding: 0 16px;
+    }
+
+    .app-nav button {
+      min-width: 0;
+      padding: 8px 13px;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: #8e8e93;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1;
+      box-shadow: none;
+    }
+
+    .app-nav button:hover,
+    .app-nav button:focus-visible {
+      background: rgba(0,0,0,.045);
+      color: #1d1d1f;
+      outline: none;
+    }
+
+    .app-nav button.active {
+      background: #ececee;
+      color: #1d1d1f;
+    }
+
+    .app-view[hidden] { display: none !important; }
+
+    /* Sell / Consignment inquiry view */
+    .sell-page {
+      width: min(920px, calc(100% - 32px));
+      margin: 0 auto 80px;
+    }
+
+    .sell-page h1 {
+      margin-bottom: 10px;
+    }
+
+    .sell-intro {
+      width: min(720px, 100%);
+      margin: 0 auto 28px;
+      color: #555;
+      font-size: 14px;
+      line-height: 1.75;
+      text-align: center;
+      word-break: keep-all;
+    }
+
+    .sell-form-shell {
+      width: 100%;
+      overflow: hidden;
+      border: 1px solid rgba(0,0,0,.08);
+      border-radius: 18px;
+      background: #fff;
+      box-shadow: 0 8px 28px rgba(0,0,0,.055);
+    }
+
+    .sell-form-frame {
+      display: block;
+      width: 100%;
+      height: 2215px;
+      border: 0;
+      background: #fff;
+    }
+
+    .sell-form-placeholder {
+      display: none;
+      padding: 44px 24px;
+      color: #666;
+      font-size: 14px;
+      line-height: 1.7;
+      text-align: center;
+    }
+
+    .sell-form-placeholder strong {
+      display: block;
+      margin-bottom: 8px;
+      color: #1d1d1f;
+      font-size: 15px;
+    }
+
+    .sell-form-footer {
+      display: none;
+      justify-content: center;
+      padding: 14px 18px 16px;
+      border-top: 1px solid rgba(0,0,0,.06);
+      background: #fafafa;
+    }
+
+    .sell-form-footer a {
+      color: #555;
+      font-size: 12px;
+      text-decoration: none;
+    }
+
+    .sell-form-footer a:hover { text-decoration: underline; }
+
+    body.sell-view-active .utility-bar,
+    body.sell-view-active .floating-table-header {
+      display: none !important;
+    }
+
+    @media (max-width: 600px) {
+      .app-nav {
+        margin-bottom: 14px;
+      }
+
+      .app-nav button {
+        padding: 8px 11px;
+        font-size: 12px;
+      }
+
+      .sell-page {
+        width: calc(100% - 20px);
+        margin-bottom: 50px;
+      }
+
+      .sell-intro {
+        width: calc(100% - 12px);
+        margin-bottom: 20px;
+        font-size: 13px;
+        line-height: 1.7;
+      }
+
+      .sell-form-shell {
+        border-radius: 14px;
+      }
+
+      .sell-form-frame {
+        height: 2400px;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -1823,7 +1969,13 @@
       decoding="async"
     />
   </div>
-  
+
+  <nav class="app-nav" aria-label="Main pages">
+    <button id="inventoryTabBtn" type="button" class="active" aria-pressed="true">재고 검색</button>
+    <button id="sellTabBtn" type="button" aria-pressed="false">매입 문의</button>
+  </nav>
+
+  <main id="inventoryView" class="app-view">
   <h1 id="pageTitle">MOSAIC 재고 검색</h1>
   <div class="language-switch" aria-label="Language">
     <button type="button" data-lang="ko" class="active" aria-pressed="true">KR</button>
@@ -1926,9 +2078,47 @@
   </div>
 
   <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+  </main>
+
+  <main id="sellView" class="app-view sell-page" hidden>
+    <h1 id="sellPageTitle">MOSAIC 매입 문의</h1>
+    <div class="language-switch" aria-label="Language">
+      <button type="button" data-lang="ko" class="active" aria-pressed="true">KR</button>
+      <span class="divider">/</span>
+      <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      <span class="divider">/</span>
+      <button type="button" data-lang="ja" aria-pressed="false">JP</button>
+    </div>
+
+    <div id="sellIntro" class="sell-intro">
+      소장하고 계신 음반의 판매를 원하시면 아래 양식을 작성해 주세요. 확인 후 순차적으로 연락드리겠습니다.
+    </div>
+
+    <div class="sell-form-shell">
+      <iframe
+        id="sellFormFrame"
+        class="sell-form-frame"
+        src="about:blank"
+        title="MOSAIC 음반 매입 문의 양식"
+        loading="lazy"
+        referrerpolicy="strict-origin-when-cross-origin"
+      ></iframe>
+      <div id="sellFormPlaceholder" class="sell-form-placeholder">
+        <strong id="sellFormPlaceholderTitle">Google Form 주소를 연결해 주세요.</strong>
+        <span id="sellFormPlaceholderText">HTML 코드의 GOOGLE_FORM_EMBED_URL에 Google Form 주소를 넣으면 이 위치에 폼이 표시됩니다.</span>
+      </div>
+      <div id="sellFormFooter" class="sell-form-footer">
+        <a id="sellFormOpenLink" href="#" target="_blank" rel="noopener noreferrer">폼을 새 창에서 열기</a>
+      </div>
+    </div>
+  </main>
 
   <script>
   const SHEET_URL = "./data.json";
+
+  // MOSAIC 매입 문의 Google Form. 응답용 embed URL만 사용합니다.
+  // 편집(/edit) 주소는 공개 페이지에 사용하지 않습니다.
+  const GOOGLE_FORM_EMBED_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfUWoDnfgEMvHTwEWzo4jF15SNH5_FUVM9HB9X2JA8AYOORfQ/viewform?embedded=true";
 
 
   /* =========================
@@ -1942,6 +2132,15 @@
       locale: "ko-KR",
       documentTitle: "MOSAIC 재고 검색",
       pageTitle: "MOSAIC 재고 검색",
+      inventoryTab: "재고 검색",
+      sellTab: "매입 문의",
+      sellDocumentTitle: "MOSAIC 매입 문의",
+      sellPageTitle: "MOSAIC 매입 문의",
+      sellIntro: "소장하고 계신 음반의 판매를 원하시면 아래 양식을 작성해 주세요. 확인 후 순차적으로 연락드리겠습니다.",
+      sellFormTitle: "MOSAIC 음반 매입 문의 양식",
+      sellFormOpen: "폼을 새 창에서 열기",
+      sellFormMissingTitle: "Google Form 주소를 연결해 주세요.",
+      sellFormMissingText: "HTML 코드의 GOOGLE_FORM_EMBED_URL에 Google Form 주소를 넣으면 이 위치에 폼이 표시됩니다.",
       searchPlaceholder: "아티스트, 타이틀, 레이블, 상품번호 검색...",
       searchButton: "검색",
       allStores: "전체 매장",
@@ -2025,6 +2224,15 @@
       locale: "en-US",
       documentTitle: "MOSAIC Inventory Search",
       pageTitle: "MOSAIC Inventory Search",
+      inventoryTab: "Inventory",
+      sellTab: "Sell Records",
+      sellDocumentTitle: "MOSAIC Sell Your Records",
+      sellPageTitle: "Sell Your Records",
+      sellIntro: "If you would like to sell your records to MOSAIC, please complete the form below. We will review your submission and contact you in order.",
+      sellFormTitle: "MOSAIC record selling inquiry form",
+      sellFormOpen: "Open form in a new window",
+      sellFormMissingTitle: "Connect your Google Form.",
+      sellFormMissingText: "Paste your Google Form URL into GOOGLE_FORM_EMBED_URL in the HTML file and the form will appear here.",
       searchPlaceholder: "Search artist, title, label, or Ref...",
       searchButton: "Search",
       allStores: "All Stores",
@@ -2108,6 +2316,15 @@
       locale: "ja-JP",
       documentTitle: "MOSAIC 在庫検索",
       pageTitle: "MOSAIC 在庫検索",
+      inventoryTab: "在庫検索",
+      sellTab: "買取お問い合わせ",
+      sellDocumentTitle: "MOSAIC 買取お問い合わせ",
+      sellPageTitle: "レコード買取お問い合わせ",
+      sellIntro: "お持ちのレコードの売却をご希望の場合は、下記フォームにご記入ください。内容を確認のうえ、順次ご連絡いたします。",
+      sellFormTitle: "MOSAIC レコード買取お問い合わせフォーム",
+      sellFormOpen: "フォームを新しいウィンドウで開く",
+      sellFormMissingTitle: "Google Form のURLを設定してください。",
+      sellFormMissingText: "HTML内の GOOGLE_FORM_EMBED_URL にGoogle FormのURLを貼り付けると、ここにフォームが表示されます。",
       searchPlaceholder: "アーティスト、タイトル、レーベル、商品番号を検索...",
       searchButton: "検索",
       allStores: "全店舗",
@@ -2190,6 +2407,7 @@
 
   const savedLanguage = localStorage.getItem("mosaicInventoryLanguage");
   let currentLanguage = ["ko", "en", "ja"].includes(savedLanguage) ? savedLanguage : "ko";
+  let currentView = window.location.hash === "#sell" ? "sell" : "inventory";
 
   function t(key, replacements = {}) {
     const parts = key.split(".");
@@ -2412,10 +2630,34 @@
   function applyLanguageUI(shouldRerender = true) {
     const dict = I18N[currentLanguage];
     document.documentElement.lang = dict.htmlLang;
-    document.title = dict.documentTitle;
+    document.title = currentView === "sell" ? dict.sellDocumentTitle : dict.documentTitle;
 
     const pageTitle = document.getElementById("pageTitle");
     if (pageTitle) pageTitle.textContent = dict.pageTitle;
+
+    const inventoryTabBtn = document.getElementById("inventoryTabBtn");
+    if (inventoryTabBtn) inventoryTabBtn.textContent = dict.inventoryTab;
+
+    const sellTabBtn = document.getElementById("sellTabBtn");
+    if (sellTabBtn) sellTabBtn.textContent = dict.sellTab;
+
+    const sellPageTitle = document.getElementById("sellPageTitle");
+    if (sellPageTitle) sellPageTitle.textContent = dict.sellPageTitle;
+
+    const sellIntro = document.getElementById("sellIntro");
+    if (sellIntro) sellIntro.textContent = dict.sellIntro;
+
+    const sellFormFrame = document.getElementById("sellFormFrame");
+    if (sellFormFrame) sellFormFrame.title = dict.sellFormTitle;
+
+    const sellFormOpenLink = document.getElementById("sellFormOpenLink");
+    if (sellFormOpenLink) sellFormOpenLink.textContent = dict.sellFormOpen;
+
+    const sellFormPlaceholderTitle = document.getElementById("sellFormPlaceholderTitle");
+    if (sellFormPlaceholderTitle) sellFormPlaceholderTitle.textContent = dict.sellFormMissingTitle;
+
+    const sellFormPlaceholderText = document.getElementById("sellFormPlaceholderText");
+    if (sellFormPlaceholderText) sellFormPlaceholderText.textContent = dict.sellFormMissingText;
 
     const searchInputEl = document.getElementById("searchInput");
     if (searchInputEl) searchInputEl.placeholder = dict.searchPlaceholder;
@@ -2500,6 +2742,113 @@
 
   document.querySelectorAll(".language-switch button[data-lang]").forEach(btn => {
     btn.addEventListener("click", () => setLanguage(btn.dataset.lang));
+  });
+
+  function normalizeGoogleFormEmbedUrl(rawUrl) {
+    const url = String(rawUrl || "").trim();
+    if (!url || url === "PASTE_GOOGLE_FORM_URL_HERE") return "";
+
+    try {
+      const parsed = new URL(url, window.location.href);
+      if (parsed.hostname !== "docs.google.com") return "";
+      if (!parsed.pathname.includes("/forms/")) return "";
+      parsed.searchParams.set("embedded", "true");
+      return parsed.toString();
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function googleFormPublicUrl(embedUrl) {
+    if (!embedUrl) return "#";
+    try {
+      const parsed = new URL(embedUrl);
+      parsed.searchParams.delete("embedded");
+      return parsed.toString();
+    } catch (e) {
+      return embedUrl;
+    }
+  }
+
+  function initSellForm() {
+    const frame = document.getElementById("sellFormFrame");
+    const placeholder = document.getElementById("sellFormPlaceholder");
+    const footer = document.getElementById("sellFormFooter");
+    const openLink = document.getElementById("sellFormOpenLink");
+    if (!frame || !placeholder) return;
+
+    const embedUrl = normalizeGoogleFormEmbedUrl(GOOGLE_FORM_EMBED_URL);
+    if (!embedUrl) {
+      frame.style.display = "none";
+      placeholder.style.display = "block";
+      if (footer) footer.style.display = "none";
+      return;
+    }
+
+    frame.src = embedUrl;
+    frame.style.display = "block";
+    placeholder.style.display = "none";
+
+    if (openLink) openLink.href = googleFormPublicUrl(embedUrl);
+    if (footer) footer.style.display = "flex";
+  }
+
+  function switchAppView(view, options = {}) {
+    const nextView = view === "sell" ? "sell" : "inventory";
+    const updateHash = options.updateHash !== false;
+    const shouldScroll = options.scroll !== false;
+
+    currentView = nextView;
+
+    const inventoryView = document.getElementById("inventoryView");
+    const sellView = document.getElementById("sellView");
+    const inventoryTabBtn = document.getElementById("inventoryTabBtn");
+    const sellTabBtn = document.getElementById("sellTabBtn");
+
+    if (inventoryView) inventoryView.hidden = nextView !== "inventory";
+    if (sellView) sellView.hidden = nextView !== "sell";
+
+    inventoryTabBtn?.classList.toggle("active", nextView === "inventory");
+    sellTabBtn?.classList.toggle("active", nextView === "sell");
+    inventoryTabBtn?.setAttribute("aria-pressed", nextView === "inventory" ? "true" : "false");
+    sellTabBtn?.setAttribute("aria-pressed", nextView === "sell" ? "true" : "false");
+
+    document.body.classList.toggle("sell-view-active", nextView === "sell");
+
+    if (nextView === "sell") {
+      closeFilterMenus();
+      document.getElementById("detailModal")?.style && (document.getElementById("detailModal").style.display = "none");
+      document.getElementById("cartModal")?.style && (document.getElementById("cartModal").style.display = "none");
+      document.body.classList.remove("modal-open");
+      if (typeof removeFloatingTableHeader === "function") removeFloatingTableHeader();
+      if (typeof hideConditionGuidePopover === "function") hideConditionGuidePopover();
+    } else {
+      requestAnimationFrame(() => {
+        if (window.innerWidth > 600 && document.querySelector(".table-wrapper table")) {
+          setupFloatingTableHeader();
+        }
+      });
+    }
+
+    if (updateHash) {
+      const targetHash = nextView === "sell" ? "#sell" : "#inventory";
+      if (window.location.hash !== targetHash) history.pushState(null, "", targetHash);
+    }
+
+    applyLanguageUI(false);
+    scheduleUtilityBarUpdate();
+
+    if (shouldScroll) window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  document.getElementById("inventoryTabBtn")?.addEventListener("click", () => switchAppView("inventory"));
+  document.getElementById("sellTabBtn")?.addEventListener("click", () => switchAppView("sell"));
+
+  window.addEventListener("hashchange", () => {
+    switchAppView(window.location.hash === "#sell" ? "sell" : "inventory", {
+      updateHash: false,
+      scroll: false
+    });
   });
 
   function getMainImageUrl(urlField) {
@@ -2635,7 +2984,9 @@
   let selectedDateValue = "all";
 
   initFilterNav();
+  initSellForm();
   applyLanguageUI(false);
+  switchAppView(currentView, { updateHash: false, scroll: false });
 
   const results = document.getElementById("results");
   results.innerHTML = `<div style="text-align:center; margin:40px 0; color:#555; font-size:16px;">${escapeHtml(t("loading"))}</div>`;
@@ -4583,6 +4934,8 @@ hr { border: 0; border-top: 1px dashed #999; margin: 8px 0; }
 
   /* 홈(초기화) 이동: 로고 클릭 시 실행 */
   function goHome() {
+    switchAppView("inventory", { updateHash: true, scroll: false });
+
     // 1) 검색어/필터 초기화
     const storeSel  = document.getElementById("storeFilter");
     const genreSel  = document.getElementById("genreFilter");
