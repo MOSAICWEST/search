@@ -2986,7 +2986,16 @@
   initFilterNav();
   initSellForm();
   applyLanguageUI(false);
-  switchAppView(currentView, { updateHash: false, scroll: false });
+
+  /*
+    View 초기화는 문서 전체의 스크립트 선언이 끝난 뒤 실행한다.
+    utility bar / condition guide의 let 상태값보다 먼저 switchAppView()가
+    실행되면 Temporal Dead Zone ReferenceError가 발생하여 이후 JS 전체가
+    중단될 수 있으므로 DOMContentLoaded 시점으로 지연한다.
+  */
+  document.addEventListener("DOMContentLoaded", () => {
+    switchAppView(currentView, { updateHash: false, scroll: false });
+  });
 
   const results = document.getElementById("results");
   results.innerHTML = `<div style="text-align:center; margin:40px 0; color:#555; font-size:16px;">${escapeHtml(t("loading"))}</div>`;
