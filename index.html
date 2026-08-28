@@ -1854,7 +1854,7 @@
 
     /* Sell / Consignment inquiry view */
     .sell-page {
-      width: min(1040px, calc(100% - 48px));
+      width: min(820px, calc(100% - 48px));
       margin: 0 auto 80px;
     }
 
@@ -1884,9 +1884,11 @@
     .sell-form-frame {
       display: block;
       width: 100%;
-      height: 2215px;
+      height: 2400px;
       border: 0;
       background: #fff;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
     }
 
     .sell-form-placeholder {
@@ -1926,6 +1928,17 @@
       display: none !important;
     }
 
+    /* 매입 문의 Google Form - 태블릿 */
+    @media (min-width: 601px) and (max-width: 900px) {
+      .sell-page {
+        width: calc(100% - 32px);
+      }
+
+      .sell-form-frame {
+        height: 2600px;
+      }
+    }
+
     @media (max-width: 600px) {
       .app-nav {
         margin-bottom: 14px;
@@ -1953,11 +1966,17 @@
       }
 
       /* Google Forms는 cross-origin iframe이라 부모가 내부 높이를 자동 계산할 수 없음.
-         모바일에서는 폼 전체가 iframe 안에서 스크롤되지 않도록 충분한 높이를 확보해
-         페이지(외부) 스크롤 하나만 사용하도록 한다. */
+         모바일에서는 줄바꿈으로 폼이 더 길어질 수 있으므로 충분한 높이를 확보한다.
+         iframe 자체 스크롤도 비상용으로 허용해 하단 제출 영역이 잘리지 않도록 한다. */
       .sell-form-frame {
-        height: 2600px;
-        overflow: hidden;
+        height: 2900px;
+      }
+    }
+
+    /* 폭이 매우 좁은 모바일 */
+    @media (max-width: 390px) {
+      .sell-form-frame {
+        height: 3050px;
       }
     }
 
@@ -2105,7 +2124,6 @@
         src="about:blank"
         title="MOSAIC 음반 매입 문의 양식"
         loading="lazy"
-        scrolling="no"
         referrerpolicy="strict-origin-when-cross-origin"
       ></iframe>
       <div id="sellFormPlaceholder" class="sell-form-placeholder">
